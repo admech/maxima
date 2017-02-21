@@ -21,4 +21,11 @@ sum(arr) := block([n, ones],
     ones.arr
 ) $
 
+kill("where") $
+where(expr, equalities) := block([substequality, proxy],
+    substequality(ex, equality) := subst(second(equality), first(equality), ex),
+    second(lreduce(substequality, append([proxy = expr], equalities)))
+) $
+infix("where") $
+
 
