@@ -1,0 +1,24 @@
+derivabbrev: true $
+
+eval_on_array(fun, var, arr) := block([x, f],
+    f(x) := subst(x, var, fun), 
+    map(f, arr)
+) $
+
+as_vec(vec, base) := block([x, coe, line],
+    coe(x) := coeff(vec, x),
+    line: map(coe, base),
+    transpose(line)
+) $
+
+quadr(matr, column_vec) := block(
+    transpose(column_vec).(matr.column_vec)
+) $
+
+sum(arr) := block([n, ones],
+    n: length(arr),
+    ones: makelist(1, i, 1, n),
+    ones.arr
+) $
+
+
