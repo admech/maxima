@@ -22,10 +22,20 @@ sum(arr) := block([n, ones],
 ) $
 
 kill("where") $
-where(expr, equalities) := block([substequality, proxy],
+where(expr, equalities) := block([substequality, apply_fun_to_ex, process, proxy, is_fun],
     substequality(ex, equality) := subst(second(equality), first(equality), ex),
-    second(lreduce(substequality, append([proxy = expr], equalities)))
+    apply_fun_to_ex(ex, fun) := fun(ex),
+    is_fun(item) := atom(item) or not is(op(item) = "="),
+    process(ex, item) := if is_fun(item) then apply_fun_to_ex(ex, item) else substequality(ex, item),
+    second(lreduce(process, append([proxy = expr], equalities)))
 ) $
 infix("where") $
 
+fac(base) := buildq([base], lambda([expr], facsum(expr, base))) $
 
+kill("forall") $
+forall(expr, item_in_expr_and_items) := makelist(
+    subst(item_of_list, first(item_in_expr_and_items), expr), 
+    item_of_list, second(item_in_expr_and_items)
+);
+infix("forall") $

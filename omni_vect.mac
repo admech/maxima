@@ -1,0 +1,25 @@
+load("vect")$
+
+expandcross: true $
+expandplus: true $
+expandprod: true $
+
+declare( n , nonscalar) $
+declare( n_ort , nonscalar) $
+declare( n_z , nonscalar) $
+declare( n_wave , nonscalar) $
+declare( e_z , nonscalar) $
+declare( v_L , nonscalar) $
+declare( v_L_per , nonscalar) $
+declare( v_L_otn , nonscalar) $
+declare( v_S , nonscalar) $
+declare( SL , nonscalar) $
+declare( PL , nonscalar) $
+
+declare( Dtheta , scalar) $
+declare( Dchi , scalar) $
+declare( R , scalar) $
+declare( r , scalar) $
+declare( chi , scalar) $
+declare( w1, scalar ) $
+declare( w2, scalar ) $
