@@ -15,7 +15,7 @@ quadr(matr, column_vec) := block(
     transpose(column_vec).(matr.column_vec)
 ) $
 
-sum(arr) := block([n, ones],
+sum_arr(arr) := block([n, ones],
     n: length(arr),
     ones: makelist(1, i, 1, n),
     ones.arr
@@ -27,11 +27,12 @@ where(expr, equalities) := block([substequality, apply_fun_to_ex, process, proxy
     apply_fun_to_ex(ex, fun) := fun(ex),
     is_fun(item) := atom(item) or not is(op(item) = "="),
     process(ex, item) := if is_fun(item) then apply_fun_to_ex(ex, item) else substequality(ex, item),
-    second(lreduce(process, append([proxy = expr], equalities)))
-) $
+    lreduce(process, append([expr], equalities))) $
 infix("where") $
 
 fac(base) := buildq([base], lambda([expr], facsum(expr, base))) $
+
+coe(base) := buildq([base], lambda([expr], makelist(coeff(expr, var), var, base))) $
 
 kill("forall") $
 forall(expr, item_in_expr_and_items) := makelist(
@@ -39,3 +40,28 @@ forall(expr, item_in_expr_and_items) := makelist(
     item_of_list, second(item_in_expr_and_items)
 );
 infix("forall") $
+
+make_sums(expr_of_i, index, n) := block([target_expr, resulting_equality],
+    define(expr_lambda(i), expr_of_i),
+    kindasum(expr, index, n) := buildq([expr, index, n], 'sum(expr, index, 1, n) / n),
+    target_expr: kindasum(expr_lambda(index), index, n),
+    resulting_equality(eq_index) := expr_lambda(eq_index) = target_expr,
+    makelist(resulting_equality(eq_index), eq_index, 1, n)
+) $
+
+subst_sums(tgt_expr, index, n) := buildq([tgt_expr, index, n], lambda([src_expr], src_expr where make_sums(tgt_expr, index, n))) $
+
+subst_all_sums(index, n, sums) := buildq([index, n, sums], lambda([expr], expr where makelist(subst_sums(sum, index, n), sum, sums))) $
+
+check_symmetric(mat) := if not is(transpose(mat) = mat) then error("NOT SYMMETRIC, SOMETHING BROKE") else "IS SYMMETRIC" $
+
+check_antisymmetric(mat) := if is(transpose(mat) = mat) then error("SYMMETRIC, SOMETHING BROKE") else "IS ANTISYMMETRIC" $
+
+vecdiff(expr, vec) := transpose(makelist(diff(expr, var), var, vec)) $
+
+simpl_ident(n) := mat_unblocker(matrix(
+    [ zeromatrix(n, n), ident(n)         ],
+    [ -ident(n),        zeromatrix(n, n) ]
+)) $
+
+pois(F, G, z) := if oddp(length(z)) then error(sconcat("LENGTH OF Z SHOULD BE EVEN, WAS: ", length(z))) else transpose(vecdiff(F, z)) . simpl_ident(length(z) / 2) . vecdiff(G, z) $
