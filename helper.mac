@@ -32,8 +32,6 @@ infix("where") $
 
 fac(base) := buildq([base], lambda([expr], facsum(expr, base))) $
 
-coe(base) := buildq([base], lambda([expr], makelist(coeff(expr, var), var, base))) $
-
 kill("forall") $
 forall(expr, item_in_expr_and_items) := makelist(
     subst(item_of_list, first(item_in_expr_and_items), expr), 
@@ -59,9 +57,9 @@ check_antisymmetric(mat) := if is(transpose(mat) = mat) then error("SYMMETRIC, S
 
 vecdiff(expr, vec) := transpose(makelist(diff(expr, var), var, vec)) $
 
-simpl_ident(n) := mat_unblocker(matrix(
+sympl_ident(n) := mat_unblocker(matrix(
     [ zeromatrix(n, n), ident(n)         ],
     [ -ident(n),        zeromatrix(n, n) ]
 )) $
 
-pois(F, G, z) := if oddp(length(z)) then error(sconcat("LENGTH OF Z SHOULD BE EVEN, WAS: ", length(z))) else transpose(vecdiff(F, z)) . simpl_ident(length(z) / 2) . vecdiff(G, z) $
+pois(F, G, z) := if oddp(length(z)) then error(sconcat("LENGTH OF Z SHOULD BE EVEN, WAS: ", length(z))) else transpose(vecdiff(F, z)) . sympl_ident(length(z) / 2) . vecdiff(G, z) $
