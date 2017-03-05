@@ -21,7 +21,7 @@ rhs_coords: (submatrix(4, 5, 6, 7, 8, 9, _V) . genmatrix(lambda([i, j], nu[i]), 
 
 /* [wxMaxima: input   start ] */
 _chi_max: %pi/4 $
-_chi_max_adjust: %pi/5 $
+_chi_max_adjust: %pi/4 $
 
 real_params: [
     alpha[1] = 0,

@@ -23,6 +23,14 @@
 load(concat(get_current_dir(), "results/wrench_pi5.lisp")) $
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: comment start ]
+Чтобы получить "пять" роликов, будем переходить на следующий при chi = pi/5:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_chi_max_adjust: %pi/5 $
+/* [wxMaxima: input   end   ] */
+
 /* [wxMaxima: input   start ] */
 /*
 sol_wrench_0__5_pi5: omni_solve(
