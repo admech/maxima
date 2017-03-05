@@ -105,5 +105,9 @@ CHI_MAX - БОЛЬШЕ РОЛИКОВ (8, 9) (и вообще, сойдемся 
 СООБРАЗИТЬ ЧТО ЗНАЧИТ МОМЕНТ ИНЕРЦИИ
    [wxMaxima: comment end   ] */
 
+/* [wxMaxima: input   start ] */
+print() $
+/* [wxMaxima: input   end   ] */
+
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$
