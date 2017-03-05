@@ -63,3 +63,10 @@ sympl_ident(n) := mat_unblocker(matrix(
 )) $
 
 pois(F, G, z) := if oddp(length(z)) then error(sconcat("LENGTH OF Z SHOULD BE EVEN, WAS: ", length(z))) else transpose(vecdiff(F, z)) . sympl_ident(length(z) / 2) . vecdiff(G, z) $
+
+nth(list, n) := list[n] $
+
+/* wxmx won't load for some reason */
+file_type_maxima: cons("wxm", file_type_maxima) $
+
+get_current_dir() := if is(load_pathname = false) then "" else pathname_directory(load_pathname) $

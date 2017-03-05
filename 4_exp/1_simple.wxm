@@ -1,0 +1,143 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: comment start ]
+технические замечания:
+
+! запускать ячейки с численным интегрированием нужно по одной (запустили, закончила, запускаем следующую вручную) - иначе часть результатов не сохраняется
+
+* построение графиков нулевого решения занимает много времени, т.к. нули рисуются для всех девяти переменных (хотя вероятно, это не полное объяснение)
+
+* в ячейки с вызовами построения графиков нельзя писать комментарии (особенно после вызова, а на русском - и до) - тогда Maxima зависает
+
+* результаты записываются в файлы и загружаются при перезапуске
+
+! запуск расчетов закомметирован, чтобы при выполнении блокнота с нуля результаты загружались из файла, а не вычислялись
+
+* запись результатов в файлы тоже отключена, чтобы не затереть существующие данные по ошибке
+
+! ЧТОБЫ ГРАФИКИ СТРОИЛИСЬ, УСТАНОВИТЕ plot_allowed В true !
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: title   start ]
+Простые эксперименты
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: input   start ] */
+load(concat(get_current_dir(), "results/simple.lisp")) ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Нулевое решение
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+все переменные нулевые
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_zero: omni_solve(
+    0, 0, 0, 
+    2, 0.01
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_all(sol_zero) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* plot_kin_en(sol_zero) $ */
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Вращение вокруг своей оси
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+угол поворота экипажа линейно возрастает,
+экипаж стоит на месте,
+все колеса поворачиваются в одну сторону
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_self_rot: omni_solve(
+    0, 0, 1, 
+    2, 0.01
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_theta(sol_self_rot) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(sol_self_rot) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_chi(sol_self_rot) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* plot_kin_en(sol_self_rot) $ */
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Движение по прямой
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+экипаж едет вправо,
+не поворачиваясь,
+переднее колесо неподвижно, задние вращаются в противоположных направлениях
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_straight: omni_solve(
+    1, 0, 0, 
+    2, 0.01
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(sol_straight) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_theta(sol_straight) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_chi(sol_straight) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* plot_kin_en(sol_straight) $ */
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+save(concat(get_current_dir(), "results/simple.lisp",
+    sol_zero,
+    sol_self_rot,
+    sol_straight
+)) ;
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

@@ -1,0 +1,388 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: input   start ] */
+load("helper.mac") $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Уравнения движения
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Здесь не будем учитывать движение свободных роликов.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: subsect start ]
+d/dt(dL* / dnu)
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: comment start ]
+Матрицы _M кинетической энергии и _V связей:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_M: genmatrix(lambda([i,j],  
+    if i = j then
+        if i < 3 then 
+       M 
+        else if i = 3 then
+            I_S
+        else if i > 3 and i < 7 then
+            J
+        else
+            B
+    else if (i = 3 and j > 6) or (j = 3 and i > 6) then
+        B*sin(chi[max(i, j) - 6])
+    else
+        0
+), 9, 9) $
+
+_V: matrix(
+ [ R*cos(theta),           -R*sin(theta),          0             ], 
+ [ R*sin(theta),           R*cos(theta),           0             ], 
+ [ 0,                      0,                      1/Lambda      ], 
+ [ R/l*sin(alpha[1]),      -R/l*cos(alpha[1]),     -R/(l*Lambda) ], 
+ [ R/l*sin(alpha[2]),      -R/l*cos(alpha[2]),     -R/(l*Lambda) ], 
+ [ R/l*sin(alpha[3]),      -R/l*cos(alpha[3]),     -R/(l*Lambda) ], 
+ [ R/rho[1]*cos(alpha[1]), R/rho[1]*sin(alpha[1]), 0             ], 
+ [ R/rho[2]*cos(alpha[2]), R/rho[2]*sin(alpha[2]), 0             ], 
+ [ R/rho[3]*cos(alpha[3]), R/rho[3]*sin(alpha[3]), 0             ]
+) $
+
+/* print("M = ", _M, "              V = ", _V) $ */
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Матрица кинетической энергии, сопряженная матрицей связей:
+
+(сначала несколько технических ячеек, связанных с суммированием по i)
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_M_star : (transpose(_V) . _M . _V) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_M_star_simp: expand(trigsimp(_M_star)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_M_star_simp : _M_star_simp where [
+    subst_all_sums(i, 3, [
+        (cos(alpha[i])*sin(alpha[i])*R^2*B)/rho[i]^2
+        , (cos(alpha[i])*sin(alpha[i])*R^2*J)/l^2
+        , (cos(alpha[i])^2*R^2*B)/rho[i]^2
+        , (sin(chi[i])*cos(alpha[i])*R*B)/(rho[i]*Lambda)
+        , (sin(chi[i])*sin(alpha[i])*R*B)/(rho[i]*Lambda)
+        , (sin(alpha[i])^2*R^2*B)/rho[i]^2
+        , (cos(alpha[i])^2*R^2*J)/l^2
+        , (cos(alpha[i])*R^2*J)/(l^2*Lambda)
+        , (sin(alpha[i])*R^2*J)/(l^2*Lambda)
+        , (sin(alpha[i])^2*R^2*J)/l^2
+    ])
+] $
+
+check_symmetric(_M_star_simp) $
+
+_M_star: _M_star_simp $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Итак, M*:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/* print("M* = ", _M_star) $ */
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Продифференцируем M* по chi.
+
+Для этого потребуются вспомогательные величины - rho,
+а саму производную вычислим сначала средствами Maxima (diff), а затем запишем то же вручную, чтобы убрать знаки суммирования,
+т.к. дифференцирование ведется по конкретной chi[i0], а в суммах - chi[i] для всех i.
+
+В случае сомнений нужно убрать $ с выражений, вычисляемых  Maxima, и сравнить их со введенными вручную, проводя упрощения отдельно, при необходимости.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+rho(k) := l*cos(chi[k]) - r;
+rho_hat(i) := ''(rho(i))^2/(l*sin(chi[i]));
+rho_wave(i) := (cos(chi[i])*l-r)^2/(l-cos(chi[i])*r);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+D_M_star_chi: diff((_M_star where [ rho[i] = rho(i) ]), chi[i]) $
+check_symmetric(D_M_star_chi) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+D_M_star_chi: matrix(
+    [ 2*B*R^2*cos(alpha[i])^2/(rho[i]*rho_hat[i]),             2*B*R^2*sin(alpha[i])*cos(alpha[i])/(rho[i]*rho_hat[i]), B*R*cos(alpha[i])/(Lambda*rho_wave[i]) ],
+    [ 2*B*R^2*sin(alpha[i])*cos(alpha[i])/(rho[i]*rho_hat[i]), 2*B*R^2*sin(alpha[i])^2/(rho[i]*rho_hat[i]),             B*R*sin(alpha[i])/(Lambda*rho_wave[i]) ],
+    [ B*R*cos(alpha[i])/(Lambda*rho_wave[i]),                  B*R*sin(alpha[i])/(Lambda*rho_wave[i]),                  0                                      ]
+) where [
+    rho[i] = rho(i),
+    rho_hat[i] = rho_hat(i),
+    rho_wave[i] = rho_wave(i)
+] $
+check_symmetric(D_M_star_chi) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Итак, dM* / dchi:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/* print("dM* / dchi = ", D_M_star_chi) $ */
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Для вычисления d/dt(dL* / dnu) недостает только подматрицы _V_wave матрицы связей _V, соответствующей chi:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_V_wave: submatrix(1, 2, 3, 7, 8, 9, _V) $
+/* print("V~ = ", _V_wave) $ */
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+Импульсы
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: comment start ]
+MV = M.V (эмвэ)
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_MV: (_M._V) where [
+    subst_all_sums(i, 3, [
+        (sin(chi[i])*cos(alpha[i])*R*B)/rho[i],
+        (sin(chi[i])*sin(alpha[i])*R*B)/rho[i]
+    ])
+]$
+
+/* print("M.V = ", _M, ".", _V, " = ", _MV) $ */
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Определим переменные для скобок Пуассона:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+q: [ x, y, theta, chi[1], chi[2], chi[3], phi[1], phi[2], phi[3] ];
+/* p: makelist(concat("p_", sconcat("", it)), it, q); */
+p: [ p_x, p_y, p_theta, p_chi[1], p_chi[2], p_chi[3], p_phi[1], p_phi[2], p_phi[3] ];
+z: append(q, p);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+{P_alpha, nu_mu * P_mu}
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: comment start ]
+сначала выпишем P для просмотра (заменяя нумерованные слагаемые на суммы), а затем ещё раз (не заменяя) - для вычисления скобок:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+P: (p._V) where [
+    subst_all_sums(i, 3, [
+        (cos(alpha[i])*R*p_phi[i])/rho[i],
+        (p_chi[i]*sin(alpha[i])*R)/l,
+        (p_chi[i]*cos(alpha[i])*R)/l,
+        (p_phi[i]*sin(alpha[i])*R)/rho[i],
+        (p_chi[i]*R)/(l*Lambda)
+    ])
+];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_P: (p._V) where makelist(rho[i] = rho(i), i, 1, 3) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+выпишем попарные скобки Пуассона больших импульсов PI[i, j] = { P_i, P_j }, чтобы посмотреть на их вид:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+PI[1, 2]: pois(_P[1][1], _P[1][2], z) where [
+    subst_all_sums(i, 3, [
+        (p_phi[i]*sin(chi[i])*cos(alpha[i])^2*R^2)/(cos(chi[i])*l-r)^2,
+        (p_phi[i]*sin(chi[i])*sin(alpha[i])^2*R^2)/(cos(chi[i])*l-r)^2
+    ]),
+    sin(alpha[i]) = sin(alpha),
+    cos(alpha[i]) = cos(alpha),
+    ratsimp,
+    trigsimp,
+    factor,
+    cos(chi[i])^2*l^2-2*r*cos(chi[i])*l+r^2 = rho(i)^2
+] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+PI[1, 3]: pois(_P[1][1], _P[1][3], z) where [
+    subst_all_sums(i, 3, [
+        (p_phi[i]*sin(chi[i])*cos(alpha[i])*R^2)/((cos(chi[i])*l-r)^2*Lambda)
+    ]),
+    fac([R/Lambda]),
+    cos(chi[i])^2*l^2-2*r*cos(chi[i])*l+r^2 = rho(i)^2
+] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+PI[2, 3]: pois(_P[1][2], _P[1][3], z) where [
+    subst_all_sums(i, 3, [
+        (p_phi[i]*sin(chi[i])*sin(alpha[i])*R^2)/((cos(chi[i])*l-r)^2*Lambda)
+    ]),
+    fac([R/Lambda]),
+    cos(chi[i])^2*l^2-2*r*cos(chi[i])*l+r^2 = rho(i)^2
+] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+PI[2, 1]: -PI[1, 2] $
+PI[3, 1]: -PI[1, 3] $
+PI[3, 2]: -PI[3, 2] $
+PI[1, 1]: 0 $
+PI[2, 2]: 0 $
+PI[3, 3]: 0 $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* display(PI[1, 2], PI[1, 3], PI[2, 3]) $ */
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+теперь запишем то же в виде тензора pi:
+
+(чтобы по pi восстановить PI, нужно свернуть pi[i, j] с p)
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+coe(_elems) := buildq([_elems], lambda([expr], makelist(coeff(expr, kindavar), kindavar, _elems))) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_pi_gen[i, j] := pois(_P[1][i], _P[1][j], z) where [
+    coe(p),
+    trigsimp,
+    factor
+] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_pi: genmatrix(_pi_gen, 3, 3);
+check_antisymmetric(_pi);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+pau[alpha, k] = dP_alpha/dp_chi_k:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+pau_gen[_alpha, _gamma] := diff(_P[1][_alpha], p_chi[_gamma]) $
+
+pau: genmatrix(pau_gen, 3, 3);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+Уравнения движения
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: comment start ]
+Итого, имеем:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+display(_V) $
+display(pau) $
+display(D_M_star_chi) $
+display(_pi) $
+display(_MV) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+из этого теперь соберем правую часть уравнений:
+
+Omni[alpha][beta][zeta] = 
+    -D_M_star_chi[alpha][beta][gamma] * V[gamma][zeta]
+    + 1/2 * pau[alpha][gamma] * D_M_star_chi[zeta][beta][gamma] 
+    + _pi[alpha][beta][gamma] * _MV[gamma][zeta],
+
+что означает:
+
+1) взять часть столбца матрицы V, соответствующего nu[zeta], соответствующую chi, и просуммировать с её компонентами (V[zeta])[gamma] матрицы D_M_star_chi для i = gamma,
+    затем объединить такие суммы для всех трех столбцов V в объект с тремя индексами omni_V
+
+2) взять строку матрицы pau, соответствующую P[alpha] и просуммировать с её компонентами (pau[alpha])[gamma] матрицы D_M_star_chi для i = gamma,
+    затем объединить такие суммы для всех трех строк pau в объект с тремя индексами omni_pau
+
+3) каждый элемент _pi (т.е. вектор, занумерованный gamma), умножить на столбец zeta матрицы _MV,
+    и полученные произведения объединить в объект с тремя индексами omni_pi
+
+4) результаты 1), 2) и 3) сложить покомпонентно
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_V_chi: submatrix(1, 2, 3, 7, 8, 9, _V) $
+D_M_star_chi_gen[_zeta, _beta, _gamma] := D_M_star_chi[_zeta][_beta] where [ i = _gamma] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+вычислим п. 1), 2) и 3):
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+omni_V_gen[_alpha, _beta, _zeta] := -sum(col(_V_chi, _zeta)[_gamma][1] * D_M_star_chi_gen[_alpha, _beta, _gamma], _gamma, 1, 3) $
+omni_pau_gen[_alpha, _beta, _zeta] := 1/2 * sum(pau[_alpha, _gamma] * D_M_star_chi_gen[_zeta, _beta, _gamma], _gamma, 1, 3) $
+omni_pi_gen[_alpha, _beta, _zeta] := _pi[_alpha, _beta] . col(_MV, _zeta) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+сложим покомпонентно:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+omni_gen[_alpha, _beta, _zeta] := omni_V_gen[_alpha, _beta, _zeta] + omni_pau_gen[_alpha, _beta, _zeta] + omni_pi_gen[_alpha, _beta, _zeta] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Уравнения движения при отсутствии внешних сил имеют вид:
+
+dnu/dt = M*^^(-1) * omni * nu * nu,
+
+где omni и nu означают соответствующие свертки
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_M_star_inverse: invert(transpose(_V) . _M . _V) $
+
+/* conjugating omni with nu twice: */
+rhs_omni_gen[_alpha] := 
+    sum(
+        sum(
+            omni_gen[_alpha, _beta, _zeta] * nu[_beta] * nu[_zeta],
+            _beta, 1, 3), 
+        _zeta, 1, 3
+) $
+
+/* presenting the conjugate as a vector: */
+rhs_omni: transpose(makelist(rhs_omni_gen[_alpha], _alpha, 1, 3)) $
+
+/* finally obtaining RHS       */
+/* (too large to print though) */
+rhs: _M_star_inverse . rhs_omni $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

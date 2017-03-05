@@ -1,0 +1,169 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: title   start ]
+Движение с закруткой с "пятью" роликами
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: comment start ]
+Ролики имеют углы раствора pi/2, но переход на следующий ролик происходит при достижении угла pi/5, а не pi/4,
+т.е. технически ролики должны перекрываться в пространстве.
+
+Зато знаменатель в ноль не обращается.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: comment start ]
+экипаж движется по раскручивающейся спирали,
+вращение вокруг своей оси замедляется,
+переднее на старте колесо переходит на следующий ролик, затем меняет направление вращения незадолго до перехода на следующий, и возвращается на первый ролик,
+остальные два колеса вращаются в одну сторону
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+load(concat(get_current_dir(), "results/wrench_pi5.lisp")) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_wrench_0__5_pi5: omni_solve(
+    1, 0, 1, 
+    5, 0.01
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_wrench_5__10_pi5: omni_solve_next(sol_wrench_0__5_pi5, 10) $
+*/
+print()$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+sol_wrench_0_10_pi5: append(
+    sol_wrench_0__5_pi5,
+    sol_wrench_5__10_pi5
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+save(concat(get_current_dir(), "results/wrench_pi5.lisp", 
+    sol_wrench_0__5_pi5 
+    , sol_wrench_5__10_pi5 
+    , sol_wrench_0_10_pi5
+)) ;
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(sol_wrench_0_10_pi5) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_theta(sol_wrench_0_10_pi5) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_chi(sol_wrench_0_10_pi5) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_xy(sol_wrench_0_10_pi5) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en(sol_wrench_0_10_pi5) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en_no_adjust(sol_wrench_0_10_pi5) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+kin_energy_no_adjust(Dnu_list, chi_list) := (Dnu_list . real_M_star . transpose(Dnu_list)) where [
+    chi[1] = (chi_list[1]),
+    chi[2] = (chi_list[2]),
+    chi[3] = (chi_list[3])
+] $
+
+kin_en_no_adjust(sol_pt_0, sol_pt_1) := kin_energy_no_adjust(
+    [ 
+        (sol_pt_1[2] - sol_pt_0[2])/(sol_pt_1[1] - sol_pt_0[1]), 
+        (sol_pt_1[3] - sol_pt_0[3])/(sol_pt_1[1] - sol_pt_0[1]), 
+        (sol_pt_1[4] - sol_pt_0[4])/(sol_pt_1[1] - sol_pt_0[1])
+    ], 
+    [ sol_pt_1[5], sol_pt_1[6], sol_pt_1[7] ]
+) $
+
+plot_kin_en_no_adjust(sol) := plot2d (
+    [
+        [discrete,makelist( [ sol[i][1], kin_en_no_adjust(sol[i-1], sol[i]) ], i, 2, length(sol))]
+    ]
+    , [gnuplot_preamble, concat("set terminal qt ", next_qt_term(), " title 'kin energy no adjust chi';")]
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+kin_energy_new(Dnu_list, chi_list) := (Dnu_list . real_M_star . transpose(Dnu_list)) where [
+    chi[1] = (chi_list[1]),
+    chi[2] = (chi_list[2]),
+    chi[3] = (chi_list[3])
+] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+num_der(x1, x0, delta_t) := (x1 - x0) / delta_t $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+kin_en_new(sol_pt_0, sol_pt_1) := kin_energy_new(
+    [ 
+        num_der(sol_pt_1[2], sol_pt_0[2], 0.01), 
+        num_der(sol_pt_1[3], sol_pt_0[3], 0.01), 
+        num_der(sol_pt_1[4], sol_pt_0[4], 0.01)
+    ], 
+    [ sol_pt_1[5], sol_pt_1[6], sol_pt_1[7] ]
+) $
+
+plot_kin_en_new(sol) := plot (
+    [
+        [discrete,makelist( [ sol[i][1], min(50, kin_en_new(sol[i-1], sol[i])) ], i, 2, length(sol))]
+    ]
+    , "kin energy no adjust chi"
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_allowed: true;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+ratprint: false;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en_new(sol_straight) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp: makelist(num_der(sol_wrench_0_10_pi5[i][2], sol_wrench_0_10_pi5[i-1][2], 0.01), i, 2, length(sol_wrench_0_10_pi5)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot(
+    [   discrete,
+        makelist((sol_wrench[i][4] - sol_wrench[i-1][4]), i, 2, length(sol_wrench))
+    ]
+    , "tmp"
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_nu3(sol_straight);
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

@@ -1,0 +1,161 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: comment start ]
+1) Чтобы каждый график строился в новом окне, нужно вписать
+set terminal qt n
+в gnuplot_preamble, где n - номер нового окна.
+
+2) Чтобы все графики сразу не появлялись при перезапуске всех ячеек, заведем флаг plot_allowed.
+
+3) Чтобы у окон были заголовки, в преамбулу нужно добавить "set terminal qt title 'my_title'"
+
+4) Чтобы эти пункты работали, заведем свою функцию plot и будем везде пользоваться ей
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+qt_term_counter: 0 $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+next_qt_term() := qt_term_counter: qt_term_counter + 1 $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_allowed: false $
+print("Remember to set plot_allowed: true prior to plotitng") $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot(what, title) := if plot_allowed then plot2d (
+    what
+    , [gnuplot_preamble, concat("set terminal qt ", next_qt_term(), " title '", title, "';")]
+) else print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+заведем отдельные функции для построения графиков величин
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_chi(sol) := plot (
+    [
+        [discrete,makelist([p[1],adjust(p[5])],p,sol)],
+        [discrete,makelist([p[1],adjust(p[6])],p,sol)],
+        [discrete,makelist([p[1],adjust(p[7])],p,sol)],
+        [discrete,makelist([p[1],%pi/4],p,sol)],
+        [discrete,makelist([p[1],-%pi/4],p,sol)]
+    ]
+    , "chi"
+) $
+
+plot_coords(sol) := plot (
+    [
+        [discrete,makelist([p[1],p[8]],p,sol)],
+        [discrete,makelist([p[1],p[9]],p,sol)],
+        [discrete,makelist([p[1],p[10]],p,sol)]
+    ]
+    , "X, Y and theta"
+) $
+
+plot_trajectory(sol) := plot (
+    [
+        [discrete,makelist([p[8],p[9]],p,sol)]
+    ]
+    , "trajectory"
+) $
+
+plot_xy(sol) := plot (
+    [
+        [discrete,makelist([p[1],p[8]],p,sol)],
+        [discrete,makelist([p[1],p[9]],p,sol)]
+    ]
+    , "X and Y"
+) $
+
+plot_theta(sol) := plot (
+    [
+        [discrete,makelist([p[1],p[10]],p,sol)]
+    ]
+    , "theta"
+) $
+
+plot_nu12(sol) := plot (
+    [
+        [discrete,makelist([p[1],p[2]],p,sol)],
+        [discrete,makelist([p[1],p[3]],p,sol)]
+    ]
+    , "nu1 and nu2"
+) $
+
+plot_nu3(sol) := plot (
+    [
+        [discrete,makelist([p[1],p[4]],p,sol)]
+    ]
+    , "nu3"
+) $
+
+plot_all(sol) := plot (
+    makelist(
+        [discrete,makelist([p[1],p[i]],p,sol)],
+        i, 2, 10
+    )
+    , "all vars"
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+для проверки нам также будет полезно строить графики кинетической энергии от времени:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+real_M_star: (transpose(_V) . _M . _V) where [
+    subst_stuff
+] $
+
+kin_energy(nu_list, chi_list) := (nu_list . real_M_star . transpose(nu_list)) where [
+    chi[1] = adjust(chi_list[1]),
+    chi[2] = adjust(chi_list[2]),
+    chi[3] = adjust(chi_list[3])
+] $
+
+kin_en(sol_pt) := kin_energy([ sol_pt[2], sol_pt[3], sol_pt[4] ], [ sol_pt[5], sol_pt[6], sol_pt[7] ]) $
+
+plot_kin_en(sol) := plot (
+    [
+        [discrete,makelist([p[1],kin_en(p)],p,sol)]
+    ]
+    , "kin energy"
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+примеры для отладки интегрирования и построения графиков:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/* uncomment this cell for neat examples */
+/*
+do_plot(sol) := plot2d (
+    makelist(
+        [discrete,makelist([p[1],p[i]],p,sol)],
+        i, 2, 3
+    ),
+    [xlabel,"t"],[ylabel,"y"]
+) $
+do_plot_xy(sol) := plot2d (
+    [
+        [discrete,makelist([p[2],p[3]],p,sol)]
+    ],
+    [xlabel,"t"],[ylabel,"y"]
+) $
+
+sol: rk([4-x^2-4*y^2,y^2-x^2+1],[x,y],[-1.25,0.75],[t,0,4,0.02])$
+do_plot(sol) $
+do_plot_xy(sol) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

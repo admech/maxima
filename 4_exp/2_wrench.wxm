@@ -1,0 +1,124 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: title   start ]
+Движение с закруткой с 4 роликами
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: comment start ]
+экипаж сначала делает резкий поворот, затем движется по круговой траектории с плавными изломами,
+при этом быстро выходя на режим почти равномерного вращения вокруг своей оси, 
+колеса неравномерно поворачиваются в одну сторону
+
+(решение разбито на участки для лучшего контроля)
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+load(concat(get_current_dir(), "results/wrench.lisp"));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_wrench_0__5: omni_solve(
+    1, 0, 1, 
+    5, 0.01
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_wrench_5__10: omni_solve_next(sol_wrench_0__5, 10) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_wrench_10__15: omni_solve_next(sol_wrench_5__10, 15) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_wrench_15__20: omni_solve_next(sol_wrench_10__15, 20) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_wrench_20__30: omni_solve_next(sol_wrench_15__20, 30) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_wrench_30__40: omni_solve_next(sol_wrench_20__30, 40) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_wrench_40__60: omni_solve_next(sol_wrench_30__40, 60) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_wrench: append(
+    sol_wrench_0__5 
+    , sol_wrench_5__10 
+    , sol_wrench_10__15
+    , sol_wrench_15__20 
+    , sol_wrench_20__30 
+    , sol_wrench_30__40 
+    , sol_wrench_40__60
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(sol_wrench) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_theta(sol_wrench) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_chi(sol_wrench) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_xy(sol_wrench) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* plot_kin_en(sol_wrench) $ */
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+save(concat(get_current_dir(), "results/wrench.lisp", 
+    sol_wrench_0__5 
+    , sol_wrench_5__10 
+    , sol_wrench_10__15
+    , sol_wrench_15__20 
+    , sol_wrench_20__30 
+    , sol_wrench_30__40 
+    , sol_wrench_40__60
+    , sol_wrench
+)) ;
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$
