@@ -2,7 +2,7 @@
 /* [ Created with wxMaxima version 15.04.0 ] */
 
 /* [wxMaxima: input   start ] */
-load("helper.mac") $
+if is(load_pathname = false) then load("helper.mac") else print("REQUIRES helper.mac") $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]

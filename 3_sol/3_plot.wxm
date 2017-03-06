@@ -27,9 +27,12 @@ print("Remember to set plot_allowed: true prior to plotitng") $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-plot(what, title) := if plot_allowed then plot2d (
-    what
-    , [gnuplot_preamble, concat("set terminal qt ", next_qt_term(), " title '", title, "';")]
+plot(what, title) := if plot_allowed then block([term_id],
+    term_id: next_qt_term(),
+    plot2d (
+        what
+        , [gnuplot_preamble, concat("set terminal qt ", term_id, " title '", term_id, " - ", title, "';")]
+    )
 ) else print() $
 /* [wxMaxima: input   end   ] */
 
@@ -109,23 +112,26 @@ plot_all(sol) := plot (
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-real_M_star: (transpose(_V) . _M . _V) where [
+real_M_star() := ((transpose(_V) . _M . _V) where [
     subst_stuff
-] $
+]) $
 
-kin_energy(nu_list, chi_list) := (nu_list . real_M_star . transpose(nu_list)) where [
+kin_energy(nu_list, chi_list, real_M_star) := (nu_list . real_M_star . transpose(nu_list)) where [
     chi[1] = adjust(chi_list[1]),
     chi[2] = adjust(chi_list[2]),
     chi[3] = adjust(chi_list[3])
 ] $
 
-kin_en(sol_pt) := kin_energy([ sol_pt[2], sol_pt[3], sol_pt[4] ], [ sol_pt[5], sol_pt[6], sol_pt[7] ]) $
+kin_en(sol_pt, real_M_star) := kin_energy([ sol_pt[2], sol_pt[3], sol_pt[4] ], [ sol_pt[5], sol_pt[6], sol_pt[7] ], real_M_star) $
 
-plot_kin_en(sol) := plot (
-    [
-        [discrete,makelist([p[1],kin_en(p)],p,sol)]
-    ]
-    , "kin energy"
+plot_kin_en(sol) := block([_real_M_star],
+        _real_M_star: real_M_star(),
+        plot (
+        [
+            [discrete,makelist([p[1],kin_en(p, _real_M_star)],p,sol)]
+        ]
+        , "kin energy"
+    )
 ) $
 /* [wxMaxima: input   end   ] */
 

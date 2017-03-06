@@ -109,5 +109,109 @@ CHI_MAX - БОЛЬШЕ РОЛИКОВ (8, 9) (и вообще, сойдемся 
 print() $
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: subsect start ]
+Реалистичные параметры
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_allowed: true $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_chi_max: %pi/4 $
+_chi_max_adjust: %pi/5 $
+
+real_params: [
+    alpha[1] = 0,
+    alpha[2] = 2*%pi/3,
+    alpha[3] = 4*%pi/3,
+    R = 0.15,
+    B = 6.25*1e-7,
+    Lambda = 1, /* should not matter as it is a helper parameter */
+
+    /* wheel geometry */
+    chi_max = _chi_max,
+    l = 0.05*sqrt(2),
+    
+    /* mass */
+    M = 2.05,
+    J = 8.0391*1e-4,
+    I_S = 0.02567,
+
+    theta = 0 /* looks like theta only appears as part of sin^2(theta) + cos^2(theta)
+                 (ONLY IN EQUATIONS FOR nu[i] and chi[i])
+                 which Maxima fails to replace with 1 without trigsimp */
+];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+sol_wrench_0__2_realistic: omni_solve(
+    1, 0, 1, 
+    2, 0.01
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+sol_wrench_2__10_realistic: omni_solve_next(sol_wrench_0__2_realistic, 10) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+sol_wrench_0__10_realistic: append(sol_wrench_0__2_realistic, sol_wrench_2__10_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(sol_wrench_0__10_realistic) $
+plot_theta(sol_wrench_0__10_realistic) $
+plot_chi(sol_wrench_0__10_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en(sol_wrench_0__10_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(sol_wrench_0__10_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en_no_adjust(sol_wrench_0__10_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_chi(sol_wrench_0__10_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+kin_energy_no_adjust(nu_list, chi_list) := (nu_list . real_M_star . transpose(nu_list)) where [
+    chi[1] = (chi_list[1]),
+    chi[2] = (chi_list[2]),
+    chi[3] = (chi_list[3])
+] $
+
+kin_en_no_adjust(sol_pt) := kin_energy_no_adjust([ sol_pt[2], sol_pt[3], sol_pt[4] ], [ sol_pt[5], sol_pt[6], sol_pt[7] ]) $
+
+plot_kin_en_no_adjust(sol) := plot (
+    [
+        [discrete,makelist([p[1],min(0.1, kin_en_no_adjust(p))],p,sol)]
+    ]
+    , "kin energy no adjust"
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+kin_en_vals: makelist(kin_en(p), p, sol_wrench_0__5_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot(
+    [ discrete, kin_en_vals ]
+    , "kin_en_vals"
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+float(real_M_star);
+/* [wxMaxima: input   end   ] */
+
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$
