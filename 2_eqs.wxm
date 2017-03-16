@@ -384,5 +384,15 @@ rhs_omni: transpose(makelist(rhs_omni_gen[_alpha], _alpha, 1, 3)) $
 rhs: _M_star_inverse . rhs_omni $
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: input   start ] */
+_M_star where 
+    ((rho[i] = rho(i)) forall [i, makelist(i, i, 1, 3)])
+;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    ((rho[i] = rho(i)) forall [i, makelist(i, i, 1, 3)]);
+/* [wxMaxima: input   end   ] */
+
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$

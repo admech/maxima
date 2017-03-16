@@ -144,19 +144,83 @@ real_params: [
 ];
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: subsect start ]
+Кинетическая энергия и линейный интеграл
+   [wxMaxima: subsect end   ] */
+
 /* [wxMaxima: input   start ] */
-sol_wrench_0__2_realistic: omni_solve(
-    1, 0, 1, 
-    2, 0.01
+kin_energy_no_adjust(nu_list, chi_list) := (nu_list . real_M_star . transpose(nu_list)) where [
+    chi[1] = (chi_list[1]),
+    chi[2] = (chi_list[2]),
+    chi[3] = (chi_list[3])
+] $
+kin_en_no_adjust(sol_pt) := kin_energy_no_adjust([ sol_pt[2], sol_pt[3], sol_pt[4] ], [ sol_pt[5], sol_pt[6], sol_pt[7] ]) $
+plot_kin_en_no_adjust(sol) := plot (
+    [
+        [discrete,makelist([p[1],min(0.1, kin_en_no_adjust(p))],p,sol)]
+    ]
+    , "kin energy no adjust"
 ) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-sol_wrench_2__10_realistic: omni_solve_next(sol_wrench_0__2_realistic, 10) $
+kinda_lin_integral(nu_list, chi_list) := diff([nu1, nu2, nu3] . real_M_star . transpose([nu1, nu2, nu3]), nu3) where [
+    nu1 = nu_list[1],
+    nu2 = nu_list[2],
+    nu3 = nu_list[3],
+    chi[1] = adjust(chi_list[1]),
+    chi[2] = adjust(chi_list[2]),
+    chi[3] = adjust(chi_list[3])
+] $
+kinda_lin_int(sol_pt) := kinda_lin_integral([ sol_pt[2], sol_pt[3], sol_pt[4] ], [ sol_pt[5], sol_pt[6], sol_pt[7] ]) $
+plot_kinda_lin_int(sol) := plot (
+    [
+        [discrete,makelist([p[1],kinda_lin_int(p)],p,sol)]
+    ]
+    , "linear integral ?"
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+С закруткой
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+load("wrench_realistic.lisp") ;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
+/*
+sol_wrench_0__2_realistic: omni_solve(
+    1, 0, 1, 
+    2, 0.01
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_wrench_2__10_realistic: omni_solve_next(sol_wrench_0__2_realistic, 10) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
 sol_wrench_0__10_realistic: append(sol_wrench_0__2_realistic, sol_wrench_2__10_realistic) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+save(
+    "wrench_realistic.lisp",
+    sol_wrench_0__10_realistic
+);
+*/
+print() $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -174,6 +238,10 @@ plot_trajectory(sol_wrench_0__10_realistic) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
+plot_theta(sol_wrench_0__10_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
 plot_xy(sol_wrench_0__10_realistic) $
 /* [wxMaxima: input   end   ] */
 
@@ -186,27 +254,7 @@ plot_chi(sol_wrench_0__10_realistic) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-save(
-    "wrench_realistic.lisp",
-    sol_wrench_0__10_realistic
-);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-kin_energy_no_adjust(nu_list, chi_list) := (nu_list . real_M_star . transpose(nu_list)) where [
-    chi[1] = (chi_list[1]),
-    chi[2] = (chi_list[2]),
-    chi[3] = (chi_list[3])
-] $
-
-kin_en_no_adjust(sol_pt) := kin_energy_no_adjust([ sol_pt[2], sol_pt[3], sol_pt[4] ], [ sol_pt[5], sol_pt[6], sol_pt[7] ]) $
-
-plot_kin_en_no_adjust(sol) := plot (
-    [
-        [discrete,makelist([p[1],min(0.1, kin_en_no_adjust(p))],p,sol)]
-    ]
-    , "kin energy no adjust"
-) $
+plot_kinda_lin_int(sol_wrench_0__10_realistic) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -220,19 +268,173 @@ plot(
 ) $
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: subsect start ]
+С сильной закруткой
+   [wxMaxima: subsect end   ] */
+
 /* [wxMaxima: input   start ] */
-float(real_M_star);
+load("hard_wrench_realistic.lisp") ;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-kinda_en: [nu1, nu2, nu3] . real_M_star . transpose([nu1, nu2, nu3]);
+/*
+sol_hard_wrench_0__2_realistic: omni_solve(
+    1, 0, -2, 
+    2, 0.01
+) $
+*/
+print() $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-kinda_en where [
-    expand,
-    fac([nu1, nu2, nu3])
-];
+/*
+sol_hard_wrench_2__10_realistic: omni_solve_next(sol_hard_wrench_0__2_realistic, 10) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+sol_hard_wrench_realistic: append(
+    sol_hard_wrench_0__2_realistic
+/*
+    , sol_hard_wrench_2__10_realistic
+*/
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+save(
+    "hard_wrench_realistic.lisp",
+    sol_hard_wrench_realistic
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(sol_hard_wrench_realistic) $
+plot_theta(sol_hard_wrench_realistic) $
+plot_chi(sol_hard_wrench_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en(sol_hard_wrench_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(sol_hard_wrench_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_theta(sol_hard_wrench_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_xy(sol_hard_wrench_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en_no_adjust(sol_hard_wrench_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_chi(sol_hard_wrench_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kinda_lin_int(sol_hard_wrench_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+С сильной закруткой и движением по двум координатам
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+load("hard_wrench_realistic_diag.lisp") ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_hard_wrench_0__2_realistic_diag: omni_solve(
+    1, 1, -2, 
+    2, 0.01
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_hard_wrench_2__10_realistic_diag: omni_solve_next(sol_hard_wrench_0__2_realistic_diag, 10) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+sol_hard_wrench_realistic_diag: append(
+    sol_hard_wrench_0__2_realistic_diag
+/*
+    , sol_hard_wrench_2__10_realistic_diag
+*/
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+save(
+    "hard_wrench_realistic_diag.lisp",
+    sol_hard_wrench_realistic_diag
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(sol_hard_wrench_realistic_diag) $
+plot_theta(sol_hard_wrench_realistic_diag) $
+plot_chi(sol_hard_wrench_realistic_diag) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en(sol_hard_wrench_realistic_diag) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(sol_hard_wrench_realistic_diag) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_theta(sol_hard_wrench_realistic_diag) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_xy(sol_hard_wrench_realistic_diag) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en_no_adjust(sol_hard_wrench_realistic_diag) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_chi(sol_hard_wrench_realistic_diag) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kinda_lin_int(sol_hard_wrench_realistic_diag) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+почему-то если закручивать как (1, 0, 1), энергия с пиками, а если иначе - const
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp: omni_solve(
+    1, 0, 1, 
+    2, 0.01
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(tmp) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en_no_adjust(tmp) $
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
