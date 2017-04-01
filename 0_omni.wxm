@@ -148,6 +148,20 @@ real_params: [
 Кинетическая энергия и линейный интеграл
    [wxMaxima: subsect end   ] */
 
+/* [wxMaxima: comment start ]
+Кинетическая энергия, вычисленная на adjust(chi) (агрегат из chi, как в уравнениях),
+получается ступенчатая из-за нашего способа перехода между роликами.
+Для интереса заведём функцию, вычисляющую к.э. без adjust.
+
+ВАЖНО! 
+
+Такая энергия может обращаться в бесконечность, судя по всему, поэтому в неё ещё добавим min(?, en), где ? - волшебное число.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+real_M_star : subst_stuff(transpose(_V) . _M . _V) $
+/* [wxMaxima: input   end   ] */
+
 /* [wxMaxima: input   start ] */
 kin_energy_no_adjust(nu_list, chi_list) := (nu_list . real_M_star . transpose(nu_list)) where [
     chi[1] = (chi_list[1]),
@@ -157,7 +171,7 @@ kin_energy_no_adjust(nu_list, chi_list) := (nu_list . real_M_star . transpose(nu
 kin_en_no_adjust(sol_pt) := kin_energy_no_adjust([ sol_pt[2], sol_pt[3], sol_pt[4] ], [ sol_pt[5], sol_pt[6], sol_pt[7] ]) $
 plot_kin_en_no_adjust(sol) := plot (
     [
-        [discrete,makelist([p[1],min(0.1, kin_en_no_adjust(p))],p,sol)]
+        [discrete,makelist([p[1],min(1, kin_en_no_adjust(p))],p,sol)]
     ]
     , "kin energy no adjust"
 ) $
@@ -187,16 +201,6 @@ plot_kinda_lin_int(sol) := plot (
 
 /* [wxMaxima: input   start ] */
 load("wrench_realistic.lisp") ;
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-/*
-sol_wrench_0__2_realistic: omni_solve(
-    1, 0, 1, 
-    2, 0.01
-) $
-*/
-print() $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -294,19 +298,25 @@ print() $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
+/*
 sol_hard_wrench_realistic: append(
     sol_hard_wrench_0__2_realistic
 /*
     , sol_hard_wrench_2__10_realistic
 */
 ) $
+*/
+print() $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
+/*
 save(
     "hard_wrench_realistic.lisp",
     sol_hard_wrench_realistic
 );
+*/
+print() $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -369,19 +379,25 @@ print() $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
+/*
 sol_hard_wrench_realistic_diag: append(
     sol_hard_wrench_0__2_realistic_diag
 /*
     , sol_hard_wrench_2__10_realistic_diag
 */
 ) $
+*/
+print() $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
+/*
 save(
     "hard_wrench_realistic_diag.lisp",
     sol_hard_wrench_realistic_diag
 );
+*/
+print() $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -416,25 +432,6 @@ plot_chi(sol_hard_wrench_realistic_diag) $
 
 /* [wxMaxima: input   start ] */
 plot_kinda_lin_int(sol_hard_wrench_realistic_diag) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: comment start ]
-почему-то если закручивать как (1, 0, 1), энергия с пиками, а если иначе - const
-   [wxMaxima: comment end   ] */
-
-/* [wxMaxima: input   start ] */
-tmp: omni_solve(
-    1, 0, 1, 
-    2, 0.01
-) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_trajectory(tmp) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_kin_en_no_adjust(tmp) $
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
