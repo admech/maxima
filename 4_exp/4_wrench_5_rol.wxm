@@ -145,10 +145,6 @@ plot_kin_en_new(sol) := plot (
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-plot_allowed: true;
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
 ratprint: false;
 /* [wxMaxima: input   end   ] */
 

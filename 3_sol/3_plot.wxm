@@ -36,6 +36,28 @@ plot(what, title) := if plot_allowed then block([term_id],
 ) else print() $
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: input   start ] */
+_t(p) := p[1] $
+_nu1(p) := p[2] $
+_nu2(p) := p[3] $
+_nu3(p) := p[4] $
+_chi1(p) := p[5] $
+_chi2(p) := p[6] $
+_chi3(p) := p[7] $
+_x(p) := p[8] $
+_y(p) := p[9] $
+_theta(p) := p[10] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot(title, vals, sol) := plot(
+    makelist(
+        [discrete, makelist([p[1], val(p)], p, sol)]
+    , val, vals)
+    , title
+) $
+/* [wxMaxima: input   end   ] */
+
 /* [wxMaxima: comment start ]
 заведем отдельные функции для построения графиков величин
    [wxMaxima: comment end   ] */
@@ -132,6 +154,25 @@ plot_kin_en(sol) := block([_real_M_star],
         ]
         , "kin energy"
     )
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+для более внимательного изучения графиков полезно отнормировать их так,
+чтобы максимальное значение переместилось в 1, а минимальное - в -1:
+
+ЗАМЕЧАНИЕ: normed - это функция, и если поместить её вызов (например, normed(kin_en, sol)) внутрь makelist,
+то она (normed) будет вызываться для каждого элемента (и заново проводить нормировку),
+поэтому лучше записать значение normed в отдельную функцию и дальше использовать уже её.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+normed(fun, set) := block([_min, _max, _mid, _delta],
+    _min: float(lmin(makelist(fun(p), p, set))),
+    _max: float(lmax(makelist(fun(p), p, set))),
+    _mid: (_max + _min)/2,
+    _delta: _max - _min,
+    buildq([fun, _mid, _delta], lambda([p], 2 * (fun(p) - _mid) / _delta))
 ) $
 /* [wxMaxima: input   end   ] */
 

@@ -105,16 +105,15 @@ CHI_MAX - БОЛЬШЕ РОЛИКОВ (8, 9) (и вообще, сойдемся 
 СООБРАЗИТЬ ЧТО ЗНАЧИТ МОМЕНТ ИНЕРЦИИ
    [wxMaxima: comment end   ] */
 
-/* [wxMaxima: input   start ] */
-print() $
-/* [wxMaxima: input   end   ] */
-
 /* [wxMaxima: subsect start ]
 Реалистичные параметры
    [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: input   start ] */
+/*
 plot_allowed: true $
+*/
+print() $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -261,17 +260,6 @@ plot_chi(sol_wrench_0__10_realistic) $
 plot_kinda_lin_int(sol_wrench_0__10_realistic) $
 /* [wxMaxima: input   end   ] */
 
-/* [wxMaxima: input   start ] */
-kin_en_vals: makelist(kin_en(p), p, sol_wrench_0__5_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot(
-    [ discrete, kin_en_vals ]
-    , "kin_en_vals"
-) $
-/* [wxMaxima: input   end   ] */
-
 /* [wxMaxima: subsect start ]
 С сильной закруткой
    [wxMaxima: subsect end   ] */
@@ -301,9 +289,7 @@ print() $
 /*
 sol_hard_wrench_realistic: append(
     sol_hard_wrench_0__2_realistic
-/*
-    , sol_hard_wrench_2__10_realistic
-*/
+/////////    , sol_hard_wrench_2__10_realistic
 ) $
 */
 print() $
@@ -382,9 +368,7 @@ print() $
 /*
 sol_hard_wrench_realistic_diag: append(
     sol_hard_wrench_0__2_realistic_diag
-/*
-    , sol_hard_wrench_2__10_realistic_diag
-*/
+/////////    , sol_hard_wrench_2__10_realistic_diag
 ) $
 */
 print() $
@@ -432,6 +416,182 @@ plot_chi(sol_hard_wrench_realistic_diag) $
 
 /* [wxMaxima: input   start ] */
 plot_kinda_lin_int(sol_hard_wrench_realistic_diag) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+Что там с энергией ?
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: comment start ]
+матрица кин. энергии в псевдоскоростях:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+real_M_star;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+псевдоскорости:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+nus: transpose([ nu[1], nu[2], nu[3] ]) ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+сама энергия:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+T: 1/2 * (transpose(nus) . real_M_star . nus) ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+рассмотрим движение по прямой на длительном промежутке времени:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+sol_straight_long.lisp") ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_straight_long: omni_solve(
+    1, 0, 0, 
+    10, 0.01
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+save(
+    "sol_straight_long.lisp",
+    sol_straight_long
+);
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en(sol_straight_long) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_xy(sol_straight_long) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+неправильная энергия (не учитывающая, что nu != const)
+обратим внимание на плавный характер изменения этой величины между пиками
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+T_straight(_chi) := T where [
+    nu[1] = 1,
+    nu[2] = 0,
+    nu[3] = 0,
+    chi[1] = 0,
+    chi[2] = _chi,
+    chi[3] = -_chi
+], numer;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("energy assuming nu=const", [
+    lambda([p], T_straight(adjust(_chi2(p))))
+], sol_straight_long) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+отнормируем графики энергии, nu1 и chi3, чтобы сопоставить
+переход между роликами, ступеньку на графике энергии и "угол" на графике скорости:
+
+заметим, как поведение nu похоже на поведение неправильной энергии:
+поведение nu компенсирует наличие cos(chi) в выражении для энергии
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+T_tmp(p) := T where [
+    nu[1] = _nu1(p),
+    nu[2] = _nu2(p),
+    nu[3] = _nu3(p),
+    chi[1] = adjust(_chi1(p)),
+    chi[2] = adjust(_chi2(p)),
+    chi[3] = adjust(_chi3(p))
+] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+sol: makelist(sol_straight_long[i], i, 1, 100) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot(
+   "T normed",
+    [ normed(T_tmp, sol) ],
+    sol
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("normed vals for straight movement", [
+    normed(T_tmp, sol),
+    normed(_nu1, sol),
+    normed(lambda([p], adjust(_chi3(p))), sol)
+], sol) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+похоже, скачок энергии связан со сменой направления изменения nu1, т.е. знака правой части,
+которая, в свою очередь, происходит, т.к. правая часть стремится к бесконечности
+с противоположными знаками при подходе к острию ролика с разных сторон
+(что, при укороченных роликах, ограничивается просто сменой знака)
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_rhs_nu1(p) := float(subst_stuff(rhs_nu[1][1]) where [
+    nu[1] = _nu1(p),
+    nu[2] = _nu2(p),
+    nu[3] = _nu3(p),
+    chi[1] = adjust(_chi1(p)),
+    chi[2] = adjust(_chi2(p)),
+    chi[3] = adjust(_chi3(p))
+]) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("rhs for nu1", [
+    _rhs_nu1
+], sol) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("rhs for nu1", [
+    _rhs_nu1
+], sol_straight_long) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+про бесконечность:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_rhs_nu1_noadjust(p) := float(subst_stuff(rhs_nu[1][1]) where [
+    nu[1] = _nu1(p),
+    nu[2] = _nu2(p),
+    nu[3] = _nu3(p),
+    chi[1] = _chi1(p),
+    chi[2] = _chi2(p),
+    chi[3] = _chi3(p)
+]) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("rhs for nu1 noadjust", [
+    _rhs_nu1_noadjust
+], sol) $
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
