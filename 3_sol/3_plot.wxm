@@ -27,13 +27,24 @@ print("Remember to set plot_allowed: true prior to plotitng") $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-plot(what, title) := if plot_allowed then block([term_id],
+/* makes gnuplot use same scale on both axes */
+plot_same_ratio: false $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_with_postamble(what, title, postamble) := if plot_allowed then block([term_id],
     term_id: next_qt_term(),
     plot2d (
         what
-        , [gnuplot_preamble, concat("set terminal qt ", term_id, " title '", term_id, " - ", title, "';")]
+        , [gnuplot_preamble, concat(
+            "set terminal qt ", term_id, " title '", term_id, " - ", title, "';")]
+        , [gnuplot_postamble, postamble ]
     )
 ) else print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot(what, title) := plot_with_postamble(what, title, "") $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -50,12 +61,12 @@ _theta(p) := p[10] $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-doPlot(title, vals, sol) := plot(
+doPlot(title, vals, sol) := if plot_allowed then plot(
     makelist(
         [discrete, makelist([p[1], val(p)], p, sol)]
     , val, vals)
     , title
-) $
+) else print() $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
@@ -83,11 +94,12 @@ plot_coords(sol) := plot (
     , "X, Y and theta"
 ) $
 
-plot_trajectory(sol) := plot (
+plot_trajectory(sol) := plot_with_postamble (
     [
         [discrete,makelist([p[8],p[9]],p,sol)]
     ]
     , "trajectory"
+    , "set size ratio -1;"
 ) $
 
 plot_xy(sol) := plot (
@@ -146,7 +158,7 @@ kin_energy(nu_list, chi_list, real_M_star) := (nu_list . real_M_star . transpose
 
 kin_en(sol_pt, real_M_star) := kin_energy([ sol_pt[2], sol_pt[3], sol_pt[4] ], [ sol_pt[5], sol_pt[6], sol_pt[7] ], real_M_star) $
 
-plot_kin_en(sol) := block([_real_M_star],
+plot_kin_en(sol) := if plot_allowed then block([_real_M_star],
         _real_M_star: real_M_star(),
         plot (
         [
@@ -154,7 +166,51 @@ plot_kin_en(sol) := block([_real_M_star],
         ]
         , "kin energy"
     )
-) $
+) else print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Кинетическая энергия, вычисленная на adjust(chi) (агрегат из chi, как в уравнениях),
+получается ступенчатая из-за нашего способа перехода между роликами.
+Для интереса заведём функцию, вычисляющую к.э. без adjust.
+
+ВАЖНО!
+
+Такая энергия может обращаться в бесконечность, судя по всему,
+поэтому в неё ещё добавим min(?, en), где ? - волшебное число.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+kin_energy_no_adjust(nu_list, chi_list) := (nu_list . real_M_star() . transpose(nu_list)) where [
+    chi[1] = (chi_list[1]),
+    chi[2] = (chi_list[2]),
+    chi[3] = (chi_list[3])
+] $
+kin_en_no_adjust(sol_pt) := kin_energy_no_adjust([ sol_pt[2], sol_pt[3], sol_pt[4] ], [ sol_pt[5], sol_pt[6], sol_pt[7] ]) $
+plot_kin_en_no_adjust(sol) := if plot_allowed then plot (
+    [
+        [discrete,makelist([p[1],min(1, kin_en_no_adjust(p))],p,sol)]
+    ]
+    , "kin energy no adjust"
+) else print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+kinda_lin_integral(nu_list, chi_list) := diff([nu1, nu2, nu3] . real_M_star() . transpose([nu1, nu2, nu3]), nu3) where [
+    nu1 = nu_list[1],
+    nu2 = nu_list[2],
+    nu3 = nu_list[3],
+    chi[1] = adjust(chi_list[1]),
+    chi[2] = adjust(chi_list[2]),
+    chi[3] = adjust(chi_list[3])
+] $
+kinda_lin_int(sol_pt) := kinda_lin_integral([ sol_pt[2], sol_pt[3], sol_pt[4] ], [ sol_pt[5], sol_pt[6], sol_pt[7] ]) $
+plot_kinda_lin_int(sol) := if plot_allowed then plot (
+    [
+        [discrete,makelist([p[1],kinda_lin_int(p)],p,sol)]
+    ]
+    , "linear integral ?"
+) else print() $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]

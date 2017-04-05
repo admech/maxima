@@ -1,0 +1,85 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: title   start ]
+С закруткой
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: comment start ]
+Экипаж движется по эллипсу.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+load(concat(get_current_dir(), "results/wrench_realistic.lisp"));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_wrench_0__2_realistic: omni_solve(
+    1, 0, 1, 
+    2, 0.01
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_wrench_2__10_realistic: omni_solve_next(sol_wrench_0__2_realistic, 10) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_wrench_0__10_realistic: append(sol_wrench_0__2_realistic, sol_wrench_2__10_realistic) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+save(
+    "wrench_realistic.lisp",
+    sol_wrench_0__10_realistic
+);
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(sol_wrench_0__10_realistic) $
+plot_theta(sol_wrench_0__10_realistic) $
+plot_chi(sol_wrench_0__10_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en(sol_wrench_0__10_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(sol_wrench_0__10_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_theta(sol_wrench_0__10_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_xy(sol_wrench_0__10_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en_no_adjust(sol_wrench_0__10_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_chi(sol_wrench_0__10_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kinda_lin_int(sol_wrench_0__10_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

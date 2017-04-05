@@ -6,12 +6,8 @@
    [wxMaxima: title   end   ] */
 
 /* [wxMaxima: section start ]
-Полученные результаты
-   [wxMaxima: section end   ] */
-
-/* [wxMaxima: subsect start ]
 Вспомогательные файлы
-   [wxMaxima: subsect end   ] */
+   [wxMaxima: section end   ] */
 
 /* [wxMaxima: input   start ] */
 batchload("helper.mac") $
@@ -58,8 +54,25 @@ batchload("3_sol/2_num_int.wxm") $
 batchload("3_sol/3_plot.wxm") $
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: section start ]
+Полученные результаты
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Чтобы строить графики, нужно установить флаг plot_allowed в true.
+НО!!! Лучше это делать после того, как все эксперименты загрузятся,
+иначе будут построены сразу все графики из всех файлов.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+plot_allowed: true $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
 /* [wxMaxima: subsect start ]
-Эксперименты
+Первые эксперименты
    [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: comment start ]
@@ -94,328 +107,52 @@ batchload("4_exp/3_hard_wrench.wxm") $
 batchload("4_exp/4_wrench_5_rol.wxm") $
 /* [wxMaxima: input   end   ] */
 
-/* [wxMaxima: section start ]
-Следующие шаги
-   [wxMaxima: section end   ] */
-
-/* [wxMaxima: comment start ]
-ПОСЧИТАТЬ ЭНЕРГИЮ РЯДОМ !!! ДОЛЖНА БЫТЬ CONST
-И ЛИНЕЙНЫЙ ИНТЕГРАЛ ИЗ НЕГОЛОНОМНОЙ СИСТЕМЫ
-CHI_MAX - БОЛЬШЕ РОЛИКОВ (8, 9) (и вообще, сойдемся ли к неголоном???)
-СООБРАЗИТЬ ЧТО ЗНАЧИТ МОМЕНТ ИНЕРЦИИ
-   [wxMaxima: comment end   ] */
-
 /* [wxMaxima: subsect start ]
-Реалистичные параметры
+Эксперименты с реалистичными параметрами
    [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: input   start ] */
-/*
-plot_allowed: true $
-*/
-print() $
+batchload("4_exp/5_0_realistic_params.wxm") $
 /* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-_chi_max: %pi/4 $
-_chi_max_adjust: %pi/5 $
-
-real_params: [
-    alpha[1] = 0,
-    alpha[2] = 2*%pi/3,
-    alpha[3] = 4*%pi/3,
-    R = 0.15,
-    B = 6.25*1e-7,
-    Lambda = 1, /* should not matter as it is a helper parameter */
-
-    /* wheel geometry */
-    chi_max = _chi_max,
-    l = 0.05*sqrt(2),
-    
-    /* mass */
-    M = 2.05,
-    J = 8.0391*1e-4,
-    I_S = 0.02567,
-
-    theta = 0 /* looks like theta only appears as part of sin^2(theta) + cos^2(theta)
-                 (ONLY IN EQUATIONS FOR nu[i] and chi[i])
-                 which Maxima fails to replace with 1 without trigsimp */
-];
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: subsect start ]
-Кинетическая энергия и линейный интеграл
-   [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: comment start ]
-Кинетическая энергия, вычисленная на adjust(chi) (агрегат из chi, как в уравнениях),
-получается ступенчатая из-за нашего способа перехода между роликами.
-Для интереса заведём функцию, вычисляющую к.э. без adjust.
-
-ВАЖНО! 
-
-Такая энергия может обращаться в бесконечность, судя по всему, поэтому в неё ещё добавим min(?, en), где ? - волшебное число.
+с закруткой
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-real_M_star : subst_stuff(transpose(_V) . _M . _V) $
+batchload("4_exp/5_wrench_realistic.wxm") $
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: comment start ]
+с сильной закруткой
+   [wxMaxima: comment end   ] */
+
 /* [wxMaxima: input   start ] */
-kin_energy_no_adjust(nu_list, chi_list) := (nu_list . real_M_star . transpose(nu_list)) where [
-    chi[1] = (chi_list[1]),
-    chi[2] = (chi_list[2]),
-    chi[3] = (chi_list[3])
-] $
-kin_en_no_adjust(sol_pt) := kin_energy_no_adjust([ sol_pt[2], sol_pt[3], sol_pt[4] ], [ sol_pt[5], sol_pt[6], sol_pt[7] ]) $
-plot_kin_en_no_adjust(sol) := plot (
-    [
-        [discrete,makelist([p[1],min(1, kin_en_no_adjust(p))],p,sol)]
-    ]
-    , "kin energy no adjust"
-) $
+batchload("4_exp/6_hard_wrench_realistic.wxm") $
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: comment start ]
+с сильной закруткой и движением по двум координатам
+   [wxMaxima: comment end   ] */
+
 /* [wxMaxima: input   start ] */
-kinda_lin_integral(nu_list, chi_list) := diff([nu1, nu2, nu3] . real_M_star . transpose([nu1, nu2, nu3]), nu3) where [
-    nu1 = nu_list[1],
-    nu2 = nu_list[2],
-    nu3 = nu_list[3],
-    chi[1] = adjust(chi_list[1]),
-    chi[2] = adjust(chi_list[2]),
-    chi[3] = adjust(chi_list[3])
-] $
-kinda_lin_int(sol_pt) := kinda_lin_integral([ sol_pt[2], sol_pt[3], sol_pt[4] ], [ sol_pt[5], sol_pt[6], sol_pt[7] ]) $
-plot_kinda_lin_int(sol) := plot (
-    [
-        [discrete,makelist([p[1],kinda_lin_int(p)],p,sol)]
-    ]
-    , "linear integral ?"
-) $
+batchload("4_exp/7_hard_wrench_realistic_diag.wxm") $
 /* [wxMaxima: input   end   ] */
 
-/* [wxMaxima: subsect start ]
-С закруткой
-   [wxMaxima: subsect end   ] */
+/* [wxMaxima: comment start ]
+движение по прямой на длительном промежутке времени
+   [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-load("wrench_realistic.lisp") ;
+batchload("4_exp/8_straight_long.wxm") $
 /* [wxMaxima: input   end   ] */
 
-/* [wxMaxima: input   start ] */
-/*
-sol_wrench_2__10_realistic: omni_solve_next(sol_wrench_0__2_realistic, 10) $
-*/
-print() $
-/* [wxMaxima: input   end   ] */
+/* [wxMaxima: comment start ]
+вращение вокруг своей оси
+   [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-/*
-sol_wrench_0__10_realistic: append(sol_wrench_0__2_realistic, sol_wrench_2__10_realistic) $
-*/
-print() $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-/*
-save(
-    "wrench_realistic.lisp",
-    sol_wrench_0__10_realistic
-);
-*/
-print() $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_trajectory(sol_wrench_0__10_realistic) $
-plot_theta(sol_wrench_0__10_realistic) $
-plot_chi(sol_wrench_0__10_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_kin_en(sol_wrench_0__10_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_trajectory(sol_wrench_0__10_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_theta(sol_wrench_0__10_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_xy(sol_wrench_0__10_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_kin_en_no_adjust(sol_wrench_0__10_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_chi(sol_wrench_0__10_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_kinda_lin_int(sol_wrench_0__10_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: subsect start ]
-С сильной закруткой
-   [wxMaxima: subsect end   ] */
-
-/* [wxMaxima: input   start ] */
-load("hard_wrench_realistic.lisp") ;
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-/*
-sol_hard_wrench_0__2_realistic: omni_solve(
-    1, 0, -2, 
-    2, 0.01
-) $
-*/
-print() $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-/*
-sol_hard_wrench_2__10_realistic: omni_solve_next(sol_hard_wrench_0__2_realistic, 10) $
-*/
-print() $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-/*
-sol_hard_wrench_realistic: append(
-    sol_hard_wrench_0__2_realistic
-/////////    , sol_hard_wrench_2__10_realistic
-) $
-*/
-print() $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-/*
-save(
-    "hard_wrench_realistic.lisp",
-    sol_hard_wrench_realistic
-);
-*/
-print() $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_trajectory(sol_hard_wrench_realistic) $
-plot_theta(sol_hard_wrench_realistic) $
-plot_chi(sol_hard_wrench_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_kin_en(sol_hard_wrench_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_trajectory(sol_hard_wrench_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_theta(sol_hard_wrench_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_xy(sol_hard_wrench_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_kin_en_no_adjust(sol_hard_wrench_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_chi(sol_hard_wrench_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_kinda_lin_int(sol_hard_wrench_realistic) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: subsect start ]
-С сильной закруткой и движением по двум координатам
-   [wxMaxima: subsect end   ] */
-
-/* [wxMaxima: input   start ] */
-load("hard_wrench_realistic_diag.lisp") ;
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-/*
-sol_hard_wrench_0__2_realistic_diag: omni_solve(
-    1, 1, -2, 
-    2, 0.01
-) $
-*/
-print() $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-/*
-sol_hard_wrench_2__10_realistic_diag: omni_solve_next(sol_hard_wrench_0__2_realistic_diag, 10) $
-*/
-print() $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-/*
-sol_hard_wrench_realistic_diag: append(
-    sol_hard_wrench_0__2_realistic_diag
-/////////    , sol_hard_wrench_2__10_realistic_diag
-) $
-*/
-print() $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-/*
-save(
-    "hard_wrench_realistic_diag.lisp",
-    sol_hard_wrench_realistic_diag
-);
-*/
-print() $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_trajectory(sol_hard_wrench_realistic_diag) $
-plot_theta(sol_hard_wrench_realistic_diag) $
-plot_chi(sol_hard_wrench_realistic_diag) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_kin_en(sol_hard_wrench_realistic_diag) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_trajectory(sol_hard_wrench_realistic_diag) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_theta(sol_hard_wrench_realistic_diag) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_xy(sol_hard_wrench_realistic_diag) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_kin_en_no_adjust(sol_hard_wrench_realistic_diag) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_chi(sol_hard_wrench_realistic_diag) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_kinda_lin_int(sol_hard_wrench_realistic_diag) $
+batchload("4_exp/9_self_rot_realistic.wxm") $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: subsect start ]
@@ -427,7 +164,7 @@ plot_kinda_lin_int(sol_hard_wrench_realistic_diag) $
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-real_M_star;
+real_M_star();
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
@@ -443,52 +180,16 @@ nus: transpose([ nu[1], nu[2], nu[3] ]) ;
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-T: 1/2 * (transpose(nus) . real_M_star . nus) ;
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: comment start ]
-рассмотрим движение по прямой на длительном промежутке времени:
-   [wxMaxima: comment end   ] */
-
-/* [wxMaxima: input   start ] */
-sol_straight_long.lisp") ;
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-/*
-sol_straight_long: omni_solve(
-    1, 0, 0, 
-    10, 0.01
-) $
-*/
-print() $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-/*
-save(
-    "sol_straight_long.lisp",
-    sol_straight_long
-);
-*/
-print() $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_kin_en(sol_straight_long) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_xy(sol_straight_long) $
+T: 1/2 * (transpose(nus) . real_M_star() . nus) ;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
 неправильная энергия (не учитывающая, что nu != const)
-обратим внимание на плавный характер изменения этой величины между пиками
+обратим внимание на плавный характер изменения этой величины между пиками...
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-T_straight(_chi) := T where [
+T_straight_wrong(_chi) := T where [
     nu[1] = 1,
     nu[2] = 0,
     nu[3] = 0,
@@ -498,10 +199,12 @@ T_straight(_chi) := T where [
 ], numer;
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: comment start ]
+... на примере длительного движения по прямой
+   [wxMaxima: comment end   ] */
+
 /* [wxMaxima: input   start ] */
-doPlot("energy assuming nu=const", [
-    lambda([p], T_straight(adjust(_chi2(p))))
-], sol_straight_long) $
+T_straight
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]

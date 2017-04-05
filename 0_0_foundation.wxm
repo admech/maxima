@@ -1,0 +1,54 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: title   start ]
+Вспомогательные файлы
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("../helper.mac") $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Формула для кинетической энергии (не используется нигде, только для проверки человеком):
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/* batchload("../1_kin_en.wxm") $ */
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Вывод уравнений движения
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("../2_eqs.wxm") $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Реальные параметры
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("../3_sol/1_params.wxm") $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Функции для численного решения
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("../3_sol/2_num_int.wxm") $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Функции для построения графиков
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("../3_sol/3_plot.wxm") $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

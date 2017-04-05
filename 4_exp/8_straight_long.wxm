@@ -1,0 +1,41 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: title   start ]
+Длительное движение по прямой
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: input   start ] */
+load(concat(get_current_dir(), "results/sol_straight_long.lisp")) ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_straight_long: omni_solve(
+    1, 0, 0, 
+    10, 0.01
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+save(
+    "sol_straight_long.lisp",
+    sol_straight_long
+);
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en(sol_straight_long) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_xy(sol_straight_long) $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

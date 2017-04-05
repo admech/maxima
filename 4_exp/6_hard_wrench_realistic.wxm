@@ -1,0 +1,88 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: title   start ]
+С сильной закруткой
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: comment start ]
+Экипаж движется по окружности в два раза меньшего радиуса.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+load(concat(get_current_dir(), "results/hard_wrench_realistic.lisp")) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_hard_wrench_0__2_realistic: omni_solve(
+    1, 0, -2, 
+    2, 0.01
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_hard_wrench_2__10_realistic: omni_solve_next(sol_hard_wrench_0__2_realistic, 10) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_hard_wrench_realistic: append(
+    sol_hard_wrench_0__2_realistic
+/////////    , sol_hard_wrench_2__10_realistic
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+save(
+    "hard_wrench_realistic.lisp",
+    sol_hard_wrench_realistic
+);
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(sol_hard_wrench_realistic) $
+plot_theta(sol_hard_wrench_realistic) $
+plot_chi(sol_hard_wrench_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en(sol_hard_wrench_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(sol_hard_wrench_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_theta(sol_hard_wrench_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_xy(sol_hard_wrench_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en_no_adjust(sol_hard_wrench_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_chi(sol_hard_wrench_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kinda_lin_int(sol_hard_wrench_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$
