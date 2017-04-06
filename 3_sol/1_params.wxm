@@ -27,7 +27,7 @@ rhs_coords: (submatrix(4, 5, 6, 7, 8, 9, _V) . genmatrix(lambda([i, j], nu[i]), 
 _chi_max: %pi/4 $
 _chi_max_adjust: %pi/4 $
 
-real_params: [
+real_params_nosimp: [
     alpha[1] = 0,
     alpha[2] = 2*%pi/3,
     alpha[3] = 4*%pi/3,
@@ -42,12 +42,14 @@ real_params: [
     /* mass */
     M = 1,
     J = 1,
-    I_S = 1,
+    I_S = 1
 
-    theta = 0 /* looks like theta only appears as part of sin^2(theta) + cos^2(theta)
+    /*theta = 0  looks like theta only appears as part of sin^2(theta) + cos^2(theta)
                  (ONLY IN EQUATIONS FOR nu[i] and chi[i])
                  which Maxima fails to replace with 1 without trigsimp */
 ];
+
+real_params: append(real_params_nosimp, [ trigsimp, expand ]) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]

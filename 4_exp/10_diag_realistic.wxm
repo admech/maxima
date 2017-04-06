@@ -1,0 +1,145 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: title   start ]
+Вокруг своей оси
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+batchload("../0_0_foundation.wxm") $
+batchload("../4_exp/5_0_realistic_params.wxm") $
+plot_allowed: true $
+*/
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Экипаж движется приблизительно по прямой, но ни одна из псевдоскоростей не постоянна.
+nu1, nu2 - в третьем знаке,
+nu3 - в четвертом,
+T - в четвертом (ступеньки).
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+load(concat(get_current_dir(), "results/diag_realistic.lisp"));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_diag_0__2_realistic: omni_solve(
+    2, 1, 0, 
+    2, 0.01
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_diag_2__10_realistic: omni_solve_next(sol_diag_0__2_realistic, 10) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+sol_diag_realistic: append(sol_diag_0__2_realistic, sol_diag_2__10_realistic) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+save(
+    "results/diag_realistic.lisp",
+    sol_diag_realistic
+);
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(sol_diag_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_xy(sol_diag_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_theta(sol_diag_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_chi(sol_diag_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_nu3(sol_diag_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_nu12(sol_diag_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("normed nu1, nu2", [
+    normed(_nu1, sol_diag_realistic),
+    normed(_nu2, sol_diag_realistic)
+], sol_diag_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("nu1", [
+    _nu1
+], sol_diag_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("nu2", [
+    _nu2
+], sol_diag_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("normed x, y", [
+    normed(_x, sol_diag_realistic),
+    normed(_y, sol_diag_realistic)
+], sol_diag_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en(sol_diag_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Энергия более внимательно (work in progress!)
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+dispfun(real_M_star);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+T0: q . _M . q;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_M;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+(q . _M . q) where [ subst_stuff ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+q;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_q(p) := [ _x(p), _y(p), _theta(p), _chi1(p), _chi2(p), _chi3(p), _phi1(p), _phi2(p), _phi3(p) ];
+/* [wxMaxima: input   end   ] */
+
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

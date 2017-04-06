@@ -2,7 +2,7 @@
 /* [ Created with wxMaxima version 15.04.0 ] */
 
 /* [wxMaxima: title   start ]
-С закруткой
+Вокруг своей оси
    [wxMaxima: title   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -14,7 +14,10 @@ plot_allowed: true $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
-Экипаж равномерно вращается вокруг своей оси - nu3 = 1 = const
+Экипаж равномерно вращается вокруг своей оси:
+nu3 = 1 = const,
+nu1 = nu2 = 0 = const,
+T = const.
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -73,6 +76,10 @@ plot_nu3(sol_self_rot_realistic) $
 
 /* [wxMaxima: input   start ] */
 plot_nu12(sol_self_rot_realistic) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en(sol_self_rot_realistic) $
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
