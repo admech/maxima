@@ -58,6 +58,9 @@ _chi3(p) := p[7] $
 _x(p) := p[8] $
 _y(p) := p[9] $
 _theta(p) := p[10] $
+_phi1(p) := p[11] $
+_phi2(p) := p[12] $
+_phi3(p) := p[13] $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -230,6 +233,23 @@ normed(fun, set) := block([_min, _max, _mid, _delta],
     _delta: _max - _min,
     buildq([fun, _mid, _delta], lambda([p], 2 * (fun(p) - _mid) / _delta))
 ) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+чтобы получать из символьных записей функции на решении:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+onsol(expr) := buildq([expr], lambda([p], float(expr where [
+    subst_stuff,
+    theta = _theta(p),
+    nu[1] = _nu1(p),
+    nu[2] = _nu2(p),
+    nu[3] = _nu3(p),
+    chi[1] = adjust(_chi1(p)),
+    chi[2] = adjust(_chi2(p)),
+    chi[3] = adjust(_chi3(p))
+]))) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]

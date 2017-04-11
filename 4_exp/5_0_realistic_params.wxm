@@ -29,10 +29,13 @@ real_params_nosimp: [
     J = 8.0391*1e-4,
     I_S = 0.02567
 
-    /*theta = 0  looks like theta only appears as part of sin^2(theta) + cos^2(theta)
+];
+
+real_params_zero_theta: append(real_params_nosimp, [ 
+    theta = 0 /* looks like theta only appears as part of sin^2(theta) + cos^2(theta)
                  (ONLY IN EQUATIONS FOR nu[i] and chi[i])
                  which Maxima fails to replace with 1 without trigsimp */
-];
+]) $
 
 real_params: append(real_params_nosimp, [ trigsimp, expand ]) $
 /* [wxMaxima: input   end   ] */

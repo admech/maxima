@@ -70,3 +70,5 @@ nth(list, n) := list[n] $
 file_type_maxima: cons("wxm", file_type_maxima) $
 
 get_current_dir() := if is(load_pathname = false) then "" else pathname_directory(load_pathname) $
+
+sub_list(l, i0, i1) := makelist(l[i], i, makelist(i, i, i0, i1));

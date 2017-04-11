@@ -2,15 +2,13 @@
 /* [ Created with wxMaxima version 15.04.0 ] */
 
 /* [wxMaxima: title   start ]
-Вокруг своей оси
+По диагонали
    [wxMaxima: title   end   ] */
 
 /* [wxMaxima: input   start ] */
-/*
 batchload("../0_0_foundation.wxm") $
 batchload("../4_exp/5_0_realistic_params.wxm") $
 plot_allowed: true $
-*/
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
@@ -117,19 +115,51 @@ plot_kin_en(sol_diag_realistic) $
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: input   start ] */
-dispfun(real_M_star);
+tmp_phi_adjust: omni_solve(
+    2, 1, 0,
+    1, 0.01
+) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-T0: q . _M . q;
+plot_trajectory(tmp_phi_adjust) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-_M;
+doPlot("phi", [
+    _phi1,
+    _phi2,
+    _phi3
+], tmp_phi_adjust) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-(q . _M . q) where [ subst_stuff ];
+plot_kin_en(tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_real_M_star: real_M_star() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+T_tmp(p) := float(kin_en(p, _real_M_star)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("phi and T", [
+    normed(_phi1, tmp_phi_adjust),
+    normed(_phi2, tmp_phi_adjust),
+    normed(_phi3, tmp_phi_adjust),
+    normed(T_tmp, tmp_phi_adjust)
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_Dq: onsol(_V . transpose([nu[1], nu[2], nu[3]])) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_M_tmp: onsol(_M) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -137,9 +167,262 @@ q;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-_q(p) := [ _x(p), _y(p), _theta(p), _chi1(p), _chi2(p), _chi3(p), _phi1(p), _phi2(p), _phi3(p) ];
+Dq: [ Dx, Dy, Dtheta, Dchi1, Dchi2, Dchi3, Dphi1, Dphi2, Dphi3 ];
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: input   start ] */
+T: (Dq . _M . transpose(Dq)) where [
+    subst_stuff
+];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_T_tmp(p) := transpose(_Dq(p)) . _M_tmp(p) . _Dq(p);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T via M", [
+    _T_tmp
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+T_terms: [
+    (41*Dy^2)/20,
+    (41*Dx^2)/20,
+    (2567*Dtheta^2)/100000,
+    (sin(chi[3])*Dphi3*Dtheta)/800000,
+    (sin(chi[2])*Dphi2*Dtheta)/800000,
+    (sin(chi[1])*Dphi1*Dtheta)/800000,
+    Dphi3^2/1600000,
+    Dphi2^2/1600000,
+    Dphi1^2/1600000,
+    (80391*Dchi3^2)/100000000,
+    (80391*Dchi2^2)/100000000,
+    (80391*Dchi1^2)/100000000
+];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+T_term(i, p) := block([Dqp],
+    Dqp: _Dq(p),
+    onsol(T_terms[i])(p) where [ 
+        Dx = Dqp[1][1],
+        Dy = Dqp[2][1],
+        Dtheta = Dqp[3][1],
+        Dchi1 = Dqp[4][1],
+        Dchi2 = Dqp[5][1],
+        Dchi3 = Dqp[6][1],
+        Dphi1 = Dqp[7][1],
+        Dphi2 = Dqp[8][1],
+        Dphi3 = Dqp[9][1]
+    ]
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T terms naive",
+    makelist(buildq([i], lambda([p], T_term(i, p))), i, 1, 9)
+, tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T terms naive normed",
+    makelist(buildq([i], normed(lambda([p], T_term(i, p)), tmp_phi_adjust)), i, 1, 9)
+, tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T term 1", [
+    lambda([p], T_term(1, p))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T term 2", [
+    lambda([p], T_term(2, p))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T term 3", [
+    lambda([p], T_term(3, p))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T term 4", [
+    lambda([p], T_term(4, p))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T term 5", [
+    lambda([p], T_term(5, p))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T term 6", [
+    lambda([p], T_term(6, p))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T term 7", [
+    lambda([p], T_term(7, p))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T term 8", [
+    lambda([p], T_term(8, p))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T term 9", [
+    lambda([p], T_term(9, p))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T term 10", [
+    lambda([p], T_term(10, p))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T term 11", [
+    lambda([p], T_term(11, p))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T term 12", [
+    lambda([p], T_term(12, p))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T as sum", [
+    lambda([p], sum(T_term(i, p), i, 1, 12))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("sum of terms with sin(chi)", [
+    lambda([p], sum(T_term(i, p), i, 4, 6))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("sum of terms with coords", [
+    lambda([p], sum(T_term(i, p), i, 1, 3))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("sum of terms with Dphi", [
+    lambda([p], sum(T_term(i, p), i, 7, 9))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T as sum of terms with Dchi", [
+    lambda([p], sum(T_term(i, p), i, 10, 12))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T as sum of terms with Dchi and Dphi", [
+    lambda([p], sum(T_term(i, p), i, 7, 12))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("T as sum of terms with coords, Dchi and Dphi", [
+    lambda([p], sum(T_term(i, p), i, 1, 3) + sum(T_term(i, p), i, 7, 12))
+], tmp_phi_adjust) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_Dq(tmp_phi_adjust[10]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+tmp_phi_hd: omni_solve(
+    2, 1, 0,
+    0.3, 0.0001
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+load(concat(get_current_dir(), "results/tmp_phi_hd.lisp"));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+save(
+    "results/tmp_phi_hd.lisp",
+    tmp_phi_hd
+);
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+diag_2_1__0_03_1e4: tmp_phi_hd $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(tmp_phi_hd) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en(tmp_phi_hd) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+circle_hd: omni_solve(
+    1, 0, 1,
+    1, 0.0001
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+save(
+    "results/circle_hd.lisp",
+    circle_hd
+);
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+load(concat(get_current_dir(), "results/circle_hd.lisp"));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(circle_hd) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en(circle_hd) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("stuff",[
+    _phi1
+], circle_hd) $
+/* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$
