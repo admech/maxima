@@ -1,0 +1,155 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: input   start ] */
+load("helper.mac");
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: title   start ]
+Структура уравнений
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: comment start ]
+Покажем, что уравнения для системы с роликами отличаются от уравнений без роликов
+аддитивным членом порядка момента инерции ролика в правой части (до разрешений относительно псевдоскоростей):
+M* Dnu = f(nu, chi) + B*g(nu, chi)
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Координаты и геометрия
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+N_wheels: 3 $
+n_rollers: 4 $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+n_free_rollers: N_wheels * (n_rollers - 1) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+phis: append(
+    makelist(concat(phi, i, "_1"), i, 1, N_wheels),
+    flatten(makelist(makelist(concat(phi, i, "_", j), j, 2, n_rollers), i, 1, N_wheels))
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+q: append(
+    [ x, y, theta ],
+    makelist(concat(chi, i), i, 1, N_wheels),
+    phis
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+n_coords: length(q);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+for var in q do depends(var, t);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+wheel_num(n) := floor(n / n_rollers) + 1 $
+roller_num(n) := mod(n, n_rollers) + 1 $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Связи и псевдоскорости
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(nu) $
+nu: makelist(concat(nu, i), i, 1, 3 + n_free_rollers);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+for var in nu do depends(var, t);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dof: length(nu);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+rho: makelist(l*cos(concat(chi, i)) - r, i, 1, N_wheels);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+constraints: append(
+    [
+        diff(x, t) = R*cos(theta)*nu1 - R*sin(theta)*nu2,
+        diff(y, t) = R*sin(theta)*nu1 + R*cos(theta)*nu2,
+        diff(theta, t) = 1/Lambda * nu3
+    ],
+    makelist(
+        diff(concat(chi, i), t) = R/l*sin(alpha[i])*nu1 - R/l*cos(alpha[i])*nu2 - R/(l*Lambda)*nu3,
+        i, 1, N_wheels
+    ),
+    makelist(
+        diff(concat(phi, i, "_1"), t) = R/rho[i]*cos(alpha[i])*nu1 + R/rho[i]*sin(alpha[i])*nu2,
+        i, 1, N_wheels
+    ),
+    makelist(
+        diff(phis[3 + i], t) = nu[3 + i],
+        i, 1, n_free_rollers
+    )
+) $
+for constraint in constraints do print(constraint) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_V: genmatrix(lambda([i,j],
+    diff(second(constraints[i]), nu[j])
+), n_coords, 3 + n_free_rollers);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Кинетическая энергия
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+_M: genmatrix(lambda([i,j], 
+    if i = j then
+        if i <= 2 then M
+        else if i = 3 then I_S
+        else if i <= 3 + N_wheels then J
+        else B
+    else if (i = 3 and j > 3 + N_wheels) or (j = 3 and i > 3 + N_wheels) 
+        then B*sin(
+            kappa[roller_num(max(i, j) - (3 + N_wheels) - 1)] + 
+            concat(chi, wheel_num(max(i, j) - (3 + N_wheels) - 1))
+        )
+    else 0
+), n_coords, n_coords);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+T: (q . _M . q) where [ expand ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Лагранжиан со связями
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+_M_star: (transpose(_V) . _M . _V) $
+for i:1 thru 2 do _M_star[i][i]: _M_star[i][i] - (sin(theta)^2*M*R^2+cos(theta)^2*M*R^2) + M*R^2 $
+_M_star;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+L_star: 1/2 * (nu . _M_star . nu) where [ expand ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+DL_star_nus: makelist(diff(L_star, nu[i]), i, 1, dof) $
+
+/* for i:1 thru dof do print('diff('L_star, nu[i]) = DL_star_nus[i]) $ */
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$
