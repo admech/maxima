@@ -7,7 +7,7 @@ ratprint: false $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: title   start ]
-Структура уравнений
+Структура уравнений без роликов
    [wxMaxima: title   end   ] */
 
 /* [wxMaxima: comment start ]
@@ -22,25 +22,14 @@ M* Dnu = f(nu, chi) + B*g(nu, chi)
 
 /* [wxMaxima: input   start ] */
 N_wheels: 3 $
+/* n_rollers - for mass and geometry parameters' calculations */
 n_rollers: 4 $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-n_free_rollers: N_wheels * (n_rollers - 1) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-phis: append(
-    makelist(concat(phi, i, "_1"), i, 1, N_wheels),
-    flatten(makelist(makelist(concat(phi, i, "_", j), j, 2, n_rollers), i, 1, N_wheels))
-);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
 q: append(
     [ x, y, theta ],
-    makelist(concat(chi, i), i, 1, N_wheels),
-    phis
+    makelist(concat(chi, i), i, 1, N_wheels)
 );
 /* [wxMaxima: input   end   ] */
 
@@ -54,7 +43,6 @@ for var in q do depends(var, t);
 
 /* [wxMaxima: input   start ] */
 wheel_num(n) := floor(n / n_rollers) + 1 $
-roller_num(n) := mod(n, n_rollers) + 1 $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -63,7 +51,7 @@ roller_num(n) := mod(n, n_rollers) + 1 $
 
 /* [wxMaxima: input   start ] */
 kill(nu) $
-nu: makelist(concat(nu, i), i, 1, 3 + n_free_rollers);
+nu: makelist(concat(nu, i), i, 1, 3);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -88,14 +76,6 @@ constraints: append(
     makelist(
         diff(concat(chi, i), t) = R/l*sin(alpha[i])*nu1 - R/l*cos(alpha[i])*nu2 - R/(l*Lambda)*nu3,
         i, 1, N_wheels
-    ),
-    makelist(
-        diff(concat(phi, i, "_1"), t) = R/rho[i]*cos(alpha[i])*nu1 + R/rho[i]*sin(alpha[i])*nu2,
-        i, 1, N_wheels
-    ),
-    makelist(
-        diff(phis[3 + i], t) = nu[3 + i],
-        i, 1, n_free_rollers
     )
 ) $
 for constraint in constraints do print(constraint) $
@@ -104,7 +84,7 @@ for constraint in constraints do print(constraint) $
 /* [wxMaxima: input   start ] */
 _V: genmatrix(lambda([i,j],
     diff(second(constraints[i]), nu[j])
-), n_coords, 3 + n_free_rollers);
+), n_coords, 3);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -112,28 +92,11 @@ _V: genmatrix(lambda([i,j],
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: input   start ] */
-(tmp_free_roller_indices: makelist(i, i, 0, (n_rollers - 1) * N_wheels - 1)) = "free rollers";
-makelist(floor(m/(n_rollers - 1)) + 1, m, tmp_free_roller_indices) = "chi";
-makelist(mod(m, n_rollers - 1) + 2, m, tmp_free_roller_indices) = "kappa";
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
 _M: genmatrix(lambda([i,j], 
     if i = j then
         if i <= 2 then M
         else if i = 3 then I_S
-        else if i <= 3 + N_wheels then J
-        else B
-    else if (i = 3 and j > 3 + N_wheels) or (j = 3 and i > 3 + N_wheels) 
-        then if max(i, j) <= 3 + 2 * N_wheels
-            then B*sin(
-                kappa[1] + 
-                concat(chi, max(i, j) - (3 + N_wheels))
-            )
-            else B*sin(
-                kappa[mod(max(i, j) - (3 + 2 * N_wheels + 1), n_rollers - 1) + 2] + 
-                concat(chi, floor((max(i, j) - (3 + 2 * N_wheels + 1))/(n_rollers - 1)) + 1)
-            )
+        else J
     else 0
 ), n_coords, n_coords);
 /* [wxMaxima: input   end   ] */
@@ -222,28 +185,21 @@ pois(_P[2], _P[3], z);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-/* if i or j > 3 - zero */
-pois(_P[1], _P[4], z);
-pois(_P[4], _P[5], z);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
 _p: transpose(_M . _V . nu)[1] $
 subst_ps: makelist(p[i] = _p[i], i, 1, n_coords) $
 for it in subst_ps do print(it) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-/* CAN'T HANDLE SIN(THETA)^2 + COS(THETA)^2 */
-pois(_P[2], _P[3], z) where subst_ps;
+(pois(_P[1], _P[3], z) where subst_ps) where [ expand, trigsimp ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+(pois(_P[2], _P[3], z) where subst_ps) where [ expand, trigsimp ];
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
 pois(_P[1], sum(nu[j]*_P[j], j, 1, dof), z);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-pois(_P[4], sum(nu[j]*_P[j], j, 1, dof), z);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: subsect start ]
@@ -254,28 +210,24 @@ pois(_P[4], sum(nu[j]*_P[j], j, 1, dof), z);
 pois(_P[1], L_star, z);
 /* [wxMaxima: input   end   ] */
 
-/* [wxMaxima: input   start ] */
-pois(_P[4], L_star, z);
-/* [wxMaxima: input   end   ] */
-
 /* [wxMaxima: section start ]
 Уравнения движения
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: input   start ] */
-eq(i) := diff(DL_star_nus[i], t) = (-pois(_P[i], L_star, z) + pois(_P[i], sum(nu[j]*_P[j], j, 1, dof), z)) where subst_ps;
+eq(i) := diff(DL_star_nus[i], t) = ((-pois(_P[i], L_star, z) + pois(_P[i], sum(nu[j]*_P[j], j, 1, dof), z)) where subst_ps) where [ expand, trigsimp ];
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-rhs(i) := (pois(_P[i], -L_star + sum(nu[j]*_P[j], j, 1, dof), z)) where subst_ps;
+rhs(i) := ((pois(_P[i], -L_star + sum(nu[j]*_P[j], j, 1, dof), z)) where subst_ps) where [ expand, trigsimp ];
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-eq1: eq(1) $
+eq1: eq(1) ;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-rhs1: rhs(1) $
+makelist(rhs(i), i, 1, 3);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -325,7 +277,7 @@ params(N_wheels, n_rollers) := block(
     I_S: I_0_S + 6*B + 6*A + 12*R^2*m + 6*r^2*m ,        /* whole system wrt platform axis */
 
     append(
-        [ 'M = M, 'R = R, 'J = J, 'r = r, 'Lambda = sqrt(I_S / (M * r^2)), 'l = l ],
+        [ 'M = M, 'R = R, 'J = J, 'r = r, 'Lambda = sqrt(I_S / (M * r^2)), 'l = l, 'I_S = I_S ],
         makelist(alpha[i] = (i - 1) * 2*%pi/N_wheels, i, 1, N_wheels),
         makelist(kappa[j] = (j - 1) * 2 * _chi_max_adjust, j, 1, n_rollers)
     )
@@ -337,16 +289,8 @@ params(N_wheels, n_rollers);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-eq1B: eq1 where params(N_wheels, n_rollers);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-rhss_noB: makelist(float(rhs(i) where append(
-    params(N_wheels, n_rollers),
-    makelist(nu[j] = 0, j, 4, dof),
-    [ B = 0, expand, trigsimp ]
-)), i, 1, 3) $
-for rhs_noB in rhss_noB do print(rhs_noB) $
+eqs: makelist(eq(i) where params(N_wheels, n_rollers), i, 1, 3) $
+for _eq in eqs do print(_eq) $
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
