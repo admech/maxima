@@ -271,11 +271,19 @@ rhs(i) := (pois(_P[i], -L_star + sum(nu[j]*_P[j], j, 1, dof), z)) where subst_ps
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
+lhs(i) := diff(DL_star_nus[i], t);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
 eq1: eq(1) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
 rhs1: rhs(1) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+lhs1: lhs(1) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -325,7 +333,7 @@ params(N_wheels, n_rollers) := block(
     I_S: I_0_S + 6*B + 6*A + 12*R^2*m + 6*r^2*m ,        /* whole system wrt platform axis */
 
     append(
-        [ 'M = M, 'R = R, 'J = J, 'r = r, 'Lambda = sqrt(I_S / (M * r^2)), 'l = l ],
+        [ 'M = M, 'R = R, 'J = J, 'r = r, 'Lambda = sqrt(I_S / (M * r^2)), 'l = l, 'I_S = I_S ],
         makelist(alpha[i] = (i - 1) * 2*%pi/N_wheels, i, 1, N_wheels),
         makelist(kappa[j] = (j - 1) * 2 * _chi_max_adjust, j, 1, n_rollers)
     )
@@ -346,7 +354,18 @@ rhss_noB: makelist(float(rhs(i) where append(
     makelist(nu[j] = 0, j, 4, dof),
     [ B = 0, expand, trigsimp ]
 )), i, 1, 3) $
-for rhs_noB in rhss_noB do print(rhs_noB) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+lhss_noB: makelist(float(lhs(i) where append(
+    params(N_wheels, n_rollers),
+    makelist(nu[j] = 0, j, 4, dof),
+    [ B = 0 ]
+)), i, 1, 3) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+for i:1 thru 3 do print(lhss_noB[i] = rhss_noB[i]) $
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
