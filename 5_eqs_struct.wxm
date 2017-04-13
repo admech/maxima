@@ -3,6 +3,7 @@
 
 /* [wxMaxima: input   start ] */
 load("helper.mac");
+ratprint: false $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: title   start ]
@@ -111,6 +112,12 @@ _V: genmatrix(lambda([i,j],
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: input   start ] */
+(tmp_free_roller_indices: makelist(i, i, 0, (n_rollers - 1) * N_wheels - 1)) = "free rollers";
+makelist(floor(m/(n_rollers - 1)) + 1, m, tmp_free_roller_indices) = "chi";
+makelist(mod(m, n_rollers - 1) + 2, m, tmp_free_roller_indices) = "kappa";
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
 _M: genmatrix(lambda([i,j], 
     if i = j then
         if i <= 2 then M
@@ -118,10 +125,15 @@ _M: genmatrix(lambda([i,j],
         else if i <= 3 + N_wheels then J
         else B
     else if (i = 3 and j > 3 + N_wheels) or (j = 3 and i > 3 + N_wheels) 
-        then B*sin(
-            kappa[roller_num(max(i, j) - (3 + N_wheels) - 1)] + 
-            concat(chi, wheel_num(max(i, j) - (3 + N_wheels) - 1))
-        )
+        then if max(i, j) <= 3 + 2 * N_wheels
+            then B*sin(
+                kappa[1] + 
+                concat(chi, max(i, j) - (3 + N_wheels))
+            )
+            else B*sin(
+                kappa[mod(max(i, j) - (3 + 2 * N_wheels + 1), n_rollers - 1) + 2] + 
+                concat(chi, floor((max(i, j) - (3 + 2 * N_wheels + 1))/(n_rollers - 1)) + 1)
+            )
     else 0
 ), n_coords, n_coords);
 /* [wxMaxima: input   end   ] */
@@ -185,12 +197,16 @@ for i:1 thru dof do print(P[i] = _P[i]);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
-Скобки Пуассона
+Скобки Пуассона импульсов
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: input   start ] */
 z: append(q, p);
 /* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+Друг с другом
+   [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: input   start ] */
 /* can't handle x*cos(y)^2 + x*sin(y)^2 = x :( */
@@ -212,11 +228,14 @@ pois(_P[4], _P[5], z);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-pois(_P[1], L_star, z);
+_p: transpose(_M . _V . nu)[1] $
+subst_ps: makelist(p[i] = _p[i], i, 1, n_coords) $
+for it in subst_ps do print(it) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-pois(_P[4], L_star, z);
+/* CAN'T HANDLE SIN(THETA)^2 + COS(THETA)^2 */
+pois(_P[2], _P[3], z) where subst_ps;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -227,16 +246,36 @@ pois(_P[1], sum(nu[j]*_P[j], j, 1, dof), z);
 pois(_P[4], sum(nu[j]*_P[j], j, 1, dof), z);
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: subsect start ]
+С лагранжианом
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+pois(_P[1], L_star, z);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+pois(_P[4], L_star, z);
+/* [wxMaxima: input   end   ] */
+
 /* [wxMaxima: section start ]
 Уравнения движения
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: input   start ] */
-eq(i) := diff(DL_star_nus[i], t) + pois(_P[i], L_star, z) = pois(_P[i], sum(nu[j]*_P[j], j, 1, dof), z);
+eq(i) := diff(DL_star_nus[i], t) = (-pois(_P[i], L_star, z) + pois(_P[i], sum(nu[j]*_P[j], j, 1, dof), z)) where subst_ps;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-eq1: eq(1);
+rhs(i) := (pois(_P[i], -L_star + sum(nu[j]*_P[j], j, 1, dof), z)) where subst_ps;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+eq1: eq(1) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+rhs1: rhs(1) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -298,7 +337,7 @@ params(N_wheels, n_rollers);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-eq1 where params(N_wheels, n_rollers);
+eq1B: eq1 where params(N_wheels, n_rollers);
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
