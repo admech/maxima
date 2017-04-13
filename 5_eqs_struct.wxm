@@ -151,5 +151,93 @@ DL_star_nus: makelist(diff(L_star, nu[i]), i, 1, dof) $
 print() $
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: input   start ] */
+DL_star_nus[1];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+"Импульсы"
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+p: makelist(concat(p, "_", coord), coord, q);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+for var in p do depends(var, t);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+P: makelist(concat(P, "_", i), i, 1, dof);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+for var in P do depends(var, t);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+'sum('P[i]*'nu[i], i, 1, dof) = 'sum('p[j]*'diff('q[j], t), j, 1, n_coords);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_P: (p . _V)[1] $
+for i:1 thru dof do print(P[i] = _P[i]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Скобки Пуассона
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+z: append(q, p);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* can't handle x*cos(y)^2 + x*sin(y)^2 = x :( */
+pois(_P[1], _P[2], z);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+pois(_P[1], _P[3], z);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+pois(_P[2], _P[3], z);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* if i or j > 3 - zero */
+pois(_P[1], _P[4], z);
+pois(_P[4], _P[5], z);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+pois(_P[1], L_star, z);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+pois(_P[4], L_star, z);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+pois(_P[1], sum(nu[j]*_P[j], j, 1, dof), z);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+pois(_P[4], sum(nu[j]*_P[j], j, 1, dof), z);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Уравнения движения
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+eq(i) := diff(DL_star_nus[i], t) + pois(_P[i], L_star, z) = pois(_P[i], sum(nu[j]*_P[j], j, 1, dof), z);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+eq(1);
+/* [wxMaxima: input   end   ] */
+
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$
