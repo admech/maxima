@@ -236,7 +236,69 @@ eq(i) := diff(DL_star_nus[i], t) + pois(_P[i], L_star, z) = pois(_P[i], sum(nu[j
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-eq(1);
+eq1: eq(1);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Реалистичные параметры
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+params(N_wheels, n_rollers) := block(
+    [
+        R, r, r_roller_moi,
+        M_platf, M_wheel, m,
+        _chi_max_adjust, _chi_max_geom, l, h_roller_moi,
+        M_0, M,
+        A, B, J_0, J, I_0_S, I_S
+    ],
+
+/* GIVEN */
+    /* geometry, m, rad */
+    R: 0.15 ,                            /* radius of platform */
+    r: 0.05 ,                            /* radius of wheel */
+
+    /* for moment of inertia calculations, rollers are considered cylinders */
+    r_roller_moi: 0.005 ,                     /* 'radius' of roller - quotes due to above line; see h_roller_moi below */
+
+    /* mass, kg */
+    M_platf: 1 ,     /* [kg] mass of the platform */
+    M_wheel: 0.15 ,  /* [kg] mass of a wheel without rollers */
+    m:       0.05 ,  /* [kg] mass of a roller */
+
+/* COMPUTED */
+    /* geometry, m, rad */
+    _chi_max_adjust: %pi/n_rollers ,          /* angle determining when the switch to next roller happens and its moment of inertia */
+    _chi_max_geom: %pi/(n_rollers - 1) ,      /* angle determining roller geometry, but not moment of inertia */
+    l: r / cos(_chi_max_geom) ,               /* radius of wheel with roller (distance from wheel axis to floor) */
+    h_roller_moi: 2*l*sin(_chi_max_adjust) ,  /* length of roller */
+
+    /* mass, kg */
+    M_0: M_platf + N_wheels*M_wheel , /* platform with wheels, but without rollers */
+    M:   M_0 + N_wheels*n_rollers*m , /* whole system */
+
+    /* moment of inertia, kg * m^2 */
+    A: 1/12 * m * (3*r_roller_moi^2 + h_roller_moi^2) ,  /* roller wrt wheel axis */
+    B: (m*r_roller_moi^2)/2 ,                            /* roller wrt roller axis */
+    J_0: (M_wheel*r^2)/2 ,                               /* wheel without rollers wrt wheel axis */
+    J: J_0 + n_rollers*(A + m*r^2) ,                     /* wheel with rollers wrt wheel axis */
+    I_0_S: (M_platf*R^2)/2 ,                             /* platform wrt platform axis */
+    I_S: I_0_S + 6*B + 6*A + 12*R^2*m + 6*r^2*m ,        /* whole system wrt platform axis */
+
+    append(
+        [ 'M = M, 'R = R, 'J = J, 'r = r, 'Lambda = sqrt(I_S / (M * r^2)), 'l = l ],
+        makelist(alpha[i] = (i - 1) * 2*%pi/N_wheels, i, 1, N_wheels),
+        makelist(kappa[j] = (j - 1) * 2 * _chi_max_adjust, j, 1, n_rollers)
+    )
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+params(N_wheels, n_rollers);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+eq1 where params(N_wheels, n_rollers);
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
