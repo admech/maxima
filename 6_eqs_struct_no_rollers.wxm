@@ -27,22 +27,22 @@ n_rollers: 4 $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-q: append(
+old_q: append(
     [ x, y, theta ],
     makelist(concat(chi, i), i, 1, N_wheels)
 );
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-n_coords: length(q);
+old_n_coords: length(old_q);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-for var in q do depends(var, t);
+for var in old_q do depends(var, t);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-wheel_num(n) := floor(n / n_rollers) + 1 $
+old_wheel_num(n) := floor(n / n_rollers) + 1 $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -50,16 +50,16 @@ wheel_num(n) := floor(n / n_rollers) + 1 $
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: input   start ] */
-kill(nu) $
-nu: makelist(concat(nu, i), i, 1, 3);
+kill(old_nu) $
+old_nu: makelist(concat(nu, i), i, 1, 3);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-for var in nu do depends(var, t);
+for var in old_nu do depends(var, t);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-dof: length(nu);
+old_dof: length(old_nu);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -67,7 +67,7 @@ rho: makelist(l*cos(concat(chi, i)) - r, i, 1, N_wheels);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-constraints: append(
+old_constraints: append(
     [
         diff(x, t) = R*cos(theta)*nu1 - R*sin(theta)*nu2,
         diff(y, t) = R*sin(theta)*nu1 + R*cos(theta)*nu2,
@@ -78,13 +78,13 @@ constraints: append(
         i, 1, N_wheels
     )
 ) $
-for constraint in constraints do print(constraint) $
+for constraint in old_constraints do print(constraint) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-_V: genmatrix(lambda([i,j],
-    diff(second(constraints[i]), nu[j])
-), n_coords, 3);
+_old_V: genmatrix(lambda([i,j],
+    diff(second(old_constraints[i]), old_nu[j])
+), old_n_coords, 3);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -92,17 +92,17 @@ _V: genmatrix(lambda([i,j],
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: input   start ] */
-_M: genmatrix(lambda([i,j], 
+_old_M: genmatrix(lambda([i,j], 
     if i = j then
         if i <= 2 then M
         else if i = 3 then I_S
         else J
     else 0
-), n_coords, n_coords);
+), old_n_coords, old_n_coords);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-T: (q . _M . q) where [ expand ];
+old_T: (old_q . _old_M . old_q) where [ expand ];
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -110,24 +110,24 @@ T: (q . _M . q) where [ expand ];
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: input   start ] */
-_M_star: (transpose(_V) . _M . _V) $
-for i:1 thru 2 do _M_star[i][i]: _M_star[i][i] - (sin(theta)^2*M*R^2+cos(theta)^2*M*R^2) + M*R^2 $
-_M_star;
+_old_M_star: (transpose(_old_V) . _old_M . _old_V) $
+for i:1 thru 2 do _old_M_star[i][i]: _old_M_star[i][i] - (sin(theta)^2*M*R^2+cos(theta)^2*M*R^2) + M*R^2 $
+_old_M_star;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-L_star: 1/2 * (nu . _M_star . nu) where [ expand ];
+old_L_star: 1/2 * (old_nu . _old_M_star . old_nu) where [ expand ];
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-DL_star_nus: makelist(diff(L_star, nu[i]), i, 1, dof) $
+old_DL_star_nus: makelist(diff(old_L_star, old_nu[i]), i, 1, old_dof) $
 
-/* for i:1 thru dof do print('diff('L_star, nu[i]) = DL_star_nus[i]) $ */
+/* for i:1 thru old_dof do print('diff('old_L_star, old_nu[i]) = old_DL_star_nus[i]) $ */
 print() $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-DL_star_nus[1];
+old_DL_star_nus[1];
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -135,28 +135,28 @@ DL_star_nus[1];
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: input   start ] */
-p: makelist(concat(p, "_", coord), coord, q);
+old_p: makelist(concat(p, "_", coord), coord, old_q);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-for var in p do depends(var, t);
+for var in old_p do depends(var, t);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-P: makelist(concat(P, "_", i), i, 1, dof);
+old_P: makelist(concat(P, "_", i), i, 1, old_dof);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-for var in P do depends(var, t);
+for var in old_P do depends(var, t);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-'sum('P[i]*'nu[i], i, 1, dof) = 'sum('p[j]*'diff('q[j], t), j, 1, n_coords);
+'sum('P[i]*'nu[i], i, 1, old_dof) = 'sum('p[j]*'diff('q[j], t), j, 1, old_n_coords);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-_P: (p . _V)[1] $
-for i:1 thru dof do print(P[i] = _P[i]);
+_old_P: (old_p . _old_V)[1] $
+for i:1 thru old_dof do print(P[i] = _old_P[i]);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -164,7 +164,7 @@ for i:1 thru dof do print(P[i] = _P[i]);
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: input   start ] */
-z: append(q, p);
+old_z: append(old_q, old_p);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: subsect start ]
@@ -173,33 +173,33 @@ z: append(q, p);
 
 /* [wxMaxima: input   start ] */
 /* can't handle x*cos(y)^2 + x*sin(y)^2 = x :( */
-pois(_P[1], _P[2], z);
+pois(_old_P[1], _old_P[2], old_z);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-pois(_P[1], _P[3], z);
+pois(_old_P[1], _old_P[3], old_z);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-pois(_P[2], _P[3], z);
+pois(_old_P[2], _old_P[3], old_z);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-_p: transpose(_M . _V . nu)[1] $
-subst_ps: makelist(p[i] = _p[i], i, 1, n_coords) $
-for it in subst_ps do print(it) $
+_old_p: transpose(_old_M . _old_V . old_nu)[1] $
+old_subst_ps: makelist(old_p[i] = _old_p[i], i, 1, old_n_coords) $
+for it in old_subst_ps do print(it) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-(pois(_P[1], _P[3], z) where subst_ps) where [ expand, trigsimp ];
+(pois(_old_P[1], _old_P[3], old_z) where old_subst_ps) where [ expand, trigsimp ];
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-(pois(_P[2], _P[3], z) where subst_ps) where [ expand, trigsimp ];
+(pois(_old_P[2], _old_P[3], old_z) where old_subst_ps) where [ expand, trigsimp ];
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-pois(_P[1], sum(nu[j]*_P[j], j, 1, dof), z);
+pois(_old_P[1], sum(old_nu[j]*_old_P[j], j, 1, old_dof), old_z);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: subsect start ]
@@ -207,7 +207,7 @@ pois(_P[1], sum(nu[j]*_P[j], j, 1, dof), z);
    [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: input   start ] */
-pois(_P[1], L_star, z);
+pois(_old_P[1], old_L_star, old_z);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -215,19 +215,19 @@ pois(_P[1], L_star, z);
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: input   start ] */
-eq(i) := diff(DL_star_nus[i], t) = ((-pois(_P[i], L_star, z) + pois(_P[i], sum(nu[j]*_P[j], j, 1, dof), z)) where subst_ps) where [ expand, trigsimp ];
+old_eq(i) := diff(old_DL_star_nus[i], t) = ((-pois(_old_P[i], old_L_star, old_z) + pois(_old_P[i], sum(old_nu[j]*_old_P[j], j, 1, old_dof), old_z)) where old_subst_ps) where [ expand, trigsimp ];
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-rhs(i) := ((pois(_P[i], -L_star + sum(nu[j]*_P[j], j, 1, dof), z)) where subst_ps) where [ expand, trigsimp ];
+old_rhs(i) := ((pois(_old_P[i], -old_L_star + sum(old_nu[j]*_old_P[j], j, 1, old_dof), old_z)) where old_subst_ps) where [ expand, trigsimp ];
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-eq1: eq(1) ;
+old_eq1: old_eq(1) ;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-makelist(rhs(i), i, 1, 3);
+makelist(old_rhs(i), i, 1, 3);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -289,8 +289,21 @@ params(N_wheels, n_rollers);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-eqs: makelist(eq(i) where params(N_wheels, n_rollers), i, 1, 3) $
-for _eq in eqs do print(_eq) $
+old_eqs: makelist(old_eq(i) where params(N_wheels, n_rollers), i, 1, 3) $
+for _eq in old_eqs do print(_eq) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Отличия от уравнений с роликами
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+for i:1 thru old_dof do
+    for j:1 thru old_dof do
+        block([coe],
+            coe: diff(diff(old_L_star where [ expand ], old_nu[i]), old_nu[j]),
+            if not coe = 0 then print(old_nu[i]*old_nu[j] = coe)
+        ) $
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
