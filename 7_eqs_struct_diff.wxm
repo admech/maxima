@@ -6,14 +6,6 @@ load("helper.mac");
 ratprint: false $
 /* [wxMaxima: input   end   ] */
 
-/* [wxMaxima: input   start ] */
-batchload("6_eqs_struct_no_rollers.wxm") ;
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-batchload("5_eqs_struct.wxm") ;
-/* [wxMaxima: input   end   ] */
-
 /* [wxMaxima: title   start ]
 Отличия от уравнений без роликов
    [wxMaxima: title   end   ] */
@@ -25,7 +17,74 @@ M* Dnu = f(nu, chi) + B*g(nu, chi)
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: section start ]
-Левая часть - d/dt(dL*/dnu)
+Приготовления
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: fold    start ] */
+
+/* [wxMaxima: subsect start ]
+Уравнения без роликов и с роликами
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("6_eqs_struct_no_rollers.wxm") ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("5_eqs_struct.wxm") ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+Вспомогательные функции
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+rho(i) := l*cos(q[3 + i]) - r $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+free_wheel_num(s) := floor((s - 1)/(n_rollers - 1)) $
+free_roller_num(s) := mod(s - 1, n_rollers - 1) + 2 $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+checkable(expr) := ev(ev(expr, sum) where append(
+    makelist(chi[i] = q[3 + i], i, 1, 3),
+    makelist((chi + kappa)[s] = q[3+free_wheel_num(s)] + kappa[free_roller_num(s)], s, 4, dof)
+), nouns) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+do_check(original, pretty) := (checkable(pretty) - original) where [ expand, ratsimp ] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+ok_or_error(expected, actual, difference) := if actual = expected then "OK" else error(concat("PRETTY IS NOT EQUAL TO ORIGINAL! DIFF = ", difference(actual))) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+check(original, pretty) := ok_or_error(0, do_check(original, pretty), lambda([expr], expr)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+check123(original, pretty) := block([result],
+    result: makelist(do_check(original[i], pretty[i]), i, 1, 3),
+    ok_or_error(makelist(0, i, 1, 3), result, simplode(result, ", "))
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+expr_to_terms(expr) := block([terms],
+    terms: [],
+    for term in expr do terms: cons(term, terms),
+    terms
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: fold    end   ] */
+
+/* [wxMaxima: section start ]
+Левая часть - d/dt(dL* / dnu)
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: subsect start ]
@@ -38,7 +97,7 @@ dL*
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-L_star_diff: (L_star - old_L_star) where [ expand ];
+L_star_diff: (L_star - old_L_star) where [ expand ] $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
@@ -64,35 +123,99 @@ for i:1 thru dof do
 */
 
 L_star_diff_pretty: B/2 * (
-    'nu[1]^2 * 'sum(R^2*cos(alpha[i])^2/(l*cos(chi[i]) - r), i, 1, N_wheels) + 
-    'nu[2]^2 * 'sum(R^2*sin(alpha[i])^2/(l*cos(chi[i]) - r), i, 1, N_wheels) +
-    'nu[3]*'sum('nu[s]*sin((chi+kappa)[s])/(2*Lambda), s, 4, dof) +
+    'nu[1]^2 * 'sum(R^2*cos(alpha[i])^2/'rho(i)^2, i, 1, N_wheels) + 
+    'nu[2]^2 * 'sum(R^2*sin(alpha[i])^2/'rho(i)^2, i, 1, N_wheels) +
+    'sum(2*cos(alpha[i])*sin(alpha[i])*'nu[1]*'nu[2]*R^2/'rho(i)^2, i, 1, N_wheels) +
+    'sum(2*(sin(alpha[i])*'nu[2] + cos(alpha[i])*'nu[1])*sin(chi[i] + kappa[1])*'nu[3]*R/(Lambda*'rho(i)), i, 1, N_wheels) +
+    'nu[3]*'sum(2*'nu[s]*sin((chi+kappa)[s])/Lambda, s, 4, dof) +
     'sum('nu[s]^2, s, 4, dof)
 ) $
 "L*_rollers - L*_old" = L_star_diff_pretty;
 "where s corresponds to free rollers and (kappa + chi)[s] means kappa[j] + chi[i] for i = 1..N_wheels, j = 2..n_rollers";
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: input   start ] */
+check(L_star_diff, L_star_diff_pretty);
+/* [wxMaxima: input   end   ] */
+
 /* [wxMaxima: subsect start ]
-dL*/dnu
+dL* / dnu
    [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: input   start ] */
-D_L_star_diff_dnus_pretty: append([
-    
-])
+D_L_star_dnus: makelist(diff(L_star_diff, nu[i]), i, 1, dof) $
+/*
+for i:1 thru dof do print(concat("dL* / dnu[", i, "] = "), D_L_star_dnus[i]) $
+*/
+print() $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-D_L_star_diff_dnus: makelist(diff(L_star_diff, nu[i]), i, 1, dof) $
-for i:1 thru dof do print(concat("dL*/dnu[", i, "] = "), D_L_star_diff_dnus[i]) $
+D_L_star_dnus_pretty: B * [
+    'sum(cos(alpha[i])^2*nu[1]*R^2/'rho(i)^2 + cos(alpha[i])*sin(alpha[i])*nu[2]*R^2/'rho(i)^2 + cos(alpha[i])*sin(chi[i] + kappa[1])*nu[3]*R/('rho(i)*Lambda), i, 1, 3),
+    'sum(sin(alpha[i])^2*nu[2]*R^2/'rho(i)^2 + cos(alpha[i])*sin(alpha[i])*nu[1]*R^2/'rho(i)^2 + sin(alpha[i])*sin(chi[i] + kappa[1])*nu[3]*R/('rho(i)*Lambda), i, 1, 3),
+    'sum((sin(alpha[i])*nu[2] + cos(alpha[i])*nu[1])*sin(chi[i] + kappa[1])*R/('rho(i)*Lambda), i, 1, 3) + 'sum((sin((chi+kappa)[s])*'nu[s])/Lambda, s, 4, dof),
+    'nu[s] + sin((chi+kappa)[s])*nu[3]/Lambda
+] $
+for i:1 thru 3 do print(concat("dL* / dnu[", i, "] = "), D_L_star_dnus_pretty[i]) $
+print(concat("dL* / dnu[s] = "), D_L_star_dnus_pretty[4]) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-D_L_star_diff_dnus_pretty: makelist(diff(L_star_diff_pretty, 'nu[i]), i, 1, dof) $
-for i:1 thru dof do print(concat("dL*/d", nu[i]) = D_L_star_diff_dnus_pretty[i]) $
+check123(D_L_star_dnus, D_L_star_dnus_pretty);
+/* [wxMaxima: input   end   ] */
 
-for i:1 thru dof do print(concat("dL*/d", nu[i]) = diff(L_star_diff, nu[i])) $
+/* [wxMaxima: subsect start ]
+d/dt(dL* / dnu)
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+Ddt_D_L_star_dnus_pretty: B*[
+    'sum(cos(alpha[i])^2*diff(nu[1], t)*R^2/'rho(i)^2 + 2*'nu[i]*cos(alpha[i])^2*sin(chi[i])*l*(chi[i])[t]*R^2/'rho(i)^3, i, 1, 3),
+    "???",
+    "???",
+    "???"
+] $
+for i:1 thru 3 do print(concat("d/dt(dL* / dnu[", i, "]) = "), Ddt_D_L_star_dnus_pretty[i]) $
+print(concat("d/dt(dL* / dnu[s]) = "), Ddt_D_L_star_dnus_pretty[4]) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+diff(
+    /* rho(i) -> rho(3), chi[i] -> q[3 + 2] */
+    cos(alpha[i])^2*nu[1]*R^2/rho(3)^2 + cos(alpha[i])*sin(alpha[i])*nu[2]*R^2/rho(3)^2 + cos(alpha[i])*sin(q[3 + 2] + kappa[1])*nu[3]*R/(rho(3)*Lambda)
+    , t
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+diff(
+    /* rho(i) -> rho(3), chi[i] -> q[3 + 2] */
+    cos(alpha[i])^2*nu[1]*R^2/rho(3)^2 + cos(alpha[i])*sin(alpha[i])*nu[2]*R^2/rho(3)^2 + cos(alpha[i])*sin(q[3 + 2] + kappa[1])*nu[3]*R/(rho(3)*Lambda)
+    , t
+)
+where [ chi2 = chi[i], rho(3) = 'rho(i) ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp: diff(ev(D_L_star_dnus_pretty[1], sum, 'rho), t);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+factor((2*cos(alpha[3])^2*nu1*(4*sin(chi3)*(chi3[t])*l*r-4*cos(chi3)*sin(chi3)*(chi3[t])*l^2)*B*R^2)/(2*r^2-4*cos(chi3)*l*r+2*cos(chi3)^2*l^2)^2);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+lsum(factor(term), term, Ddt_D_L_star_dnus[1]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+map(factor, expr_to_terms(Ddt_D_L_star_dnus[1]));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Ddt_D_L_star_dnus: diff(D_L_star_dnus, t) $
+for i:1 thru dof do print(concat("d/dt(dL* / dnu[", i, "]) = "), Ddt_D_L_star_dnus[i]) $
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
