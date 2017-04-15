@@ -24,6 +24,8 @@ M* Dnu = f(nu, chi) + B*g(nu, chi)
 Уравнения без роликов и с роликами
    [wxMaxima: subsect end   ] */
 
+/* [wxMaxima: fold    start ] */
+
 /* [wxMaxima: input   start ] */
 batchload("6_eqs_struct_no_rollers.wxm") ;
 /* [wxMaxima: input   end   ] */
@@ -31,6 +33,8 @@ batchload("6_eqs_struct_no_rollers.wxm") ;
 /* [wxMaxima: input   start ] */
 batchload("5_eqs_struct.wxm") ;
 /* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: fold    end   ] */
 
 /* [wxMaxima: subsect start ]
 Вспомогательные функции
@@ -152,11 +156,11 @@ expr_to_terms(expr) := block([terms],
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
-Левая часть - d/dt(dL* / dnu)
+Левая часть: d/dt(dL* / dnu)
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: subsect start ]
-dL*
+L*
    [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: comment start ]
@@ -191,16 +195,19 @@ for i:1 thru dof do
 */
 
 L_star_diff_pretty: B/2 * (
-    'nu[1]^2 * 'sum(R^2*cos(alpha[i])^2/'rho(i)^2, i, 1, N_wheels) + 
-    'nu[2]^2 * 'sum(R^2*sin(alpha[i])^2/'rho(i)^2, i, 1, N_wheels) +
-    'sum(2*cos(alpha[i])*sin(alpha[i])*'nu[1]*'nu[2]*R^2/'rho(i)^2, i, 1, N_wheels) +
-    'sum(2*(sin(alpha[i])*'nu[2] + cos(alpha[i])*'nu[1])*sin(chi[i] + kappa[1])*'nu[3]*R/(Lambda*'rho(i)), i, 1, N_wheels) +
-    'nu[3]*'sum(2*'nu[s]*sin((chi+kappa)[s])/Lambda, s, 4, dof) +
-    'sum('nu[s]^2, s, 4, dof)
+    'sum(
+        (('nu[1]*cos(alpha[i]) + 'nu[2]*sin(alpha[i]))*R)^2 /'rho(i)^2 +
+        2*(sin(alpha[i])*'nu[2] + cos(alpha[i])*'nu[1])*sin(chi[i] + kappa[1])*'nu[3]*R/(Lambda*'rho(i))
+    , i, 1, N_wheels) + 
+    
+    'sum(
+        'nu[3]*2*'nu[s]*sin((chi+kappa)[s])/Lambda + 'nu[s]^2
+    , s, 4, dof)
 ) $
 "L*_rollers - L*_old" = L_star_diff_pretty;
 "where s corresponds to free rollers and (kappa + chi)[s] means kappa[j] + chi[i] for i = 1..N_wheels, j = 2..n_rollers";
 /* [wxMaxima: input   end   ] */
+
 
 /* [wxMaxima: input   start ] */
 check(L_star_diff, L_star_diff_pretty);
@@ -275,6 +282,104 @@ for i:1 thru 3 do print(zero_or_error(compare_terms(Ddt_D_L_star_dnus_pretty[i],
 /* [wxMaxima: input   start ] */
 for i:4 thru dof do print(zero_or_error(compare_terms(Ddt_D_L_star_dnus_pretty[4] where [ s = i ], Ddt_D_L_star_dnus[i]))) $
 /* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Правая часть: -{ P[alpha], L* } + { P[alpha], nu[mu] * P[mu] }
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: subsect start ]
+{ P[alpha], L* }
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: comment start ]
+Заметим, что
+
+{ P_rol, L*_rol } - { P_old, L*_old } = { P_rol, L*_delta }, 
+
+
+Действительно, { P_rol, L*_rol } - { P_old, L*_old } = { P_old + P_delta, L*_old + L*_delta } - { P_old, L*_old } =
+
+= { P_old, L*_old } + { P_old, L*_delta } + { P_delta, L*_old} + { P_delta, L*_delta } - { P_old, L*_old } =
+  ^^^^^^^^^^^^^^^^^                         \________________/                        ^^^^^^^^^^^^^^^^^^^^
+                                                    ||
+                                                    0, ибо P_delta = P_delta(chi, p_phi),
+                                                            d(L*_old)/d(chi) и d(chi) = 0
+= { P_old, L*_delta } + { P_delta, L*_delta }.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_P_pretty: append([
+
+    /* P[1] */
+    p_y*sin(theta)*R+p_x*cos(theta)*R+
+    'sum(
+        (cos(alpha[i])*'p[3 + N_wheels + i]*R)/rho[i] +
+        (sin(alpha[i])*'p[3 + i]*R)/l
+    , i, 1, N_wheels),
+
+    /* P[2] */
+    -p_x*sin(theta)*R+p_y*cos(theta)*R+
+    'sum(
+        (sin(alpha[i])*'p[3 + N_wheels + i]*R)/rho[i] +
+        (cos(alpha[i])*'p[3 + i]*R)/l
+    , i, 1, N_wheels),
+
+    /* P[3] */
+    p_theta/Lambda - 'sum('p[3 + i]*R/(l*Lambda), i, 1, N_wheels)
+
+], makelist(p[i], i, 3 + 2*N_wheels + 1, n_coords)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+for i:1 thru 3 do print(concat("_P[", i, "] = "), _P_pretty[i]) $
+print("L_star_diff = ", L_star_diff_pretty) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+P зависит от theta, chi, p_x, p_y, p_chi (i+3), p_phi (i+6),
+L*_diff зависит только от chi,
+=> нас интересует только dP[1]/dp_chi и dL*_diff/dchi:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+chi_p_chi: append(
+    makelist(chi[i], i, 1, N_wheels),
+    makelist('p[3+i], i, 1, N_wheels)
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+pois_P_1_L_star_diff_pretty: 'sum(first(
+    pois(
+        ev(_P_pretty[1], sum),
+        ev(L_star_diff_pretty, sum, rho) where makelist(q[3+i] = chi[i], i, 1, N_wheels),
+    chi_p_chi)
+) where [
+    (rho(3) where [ chi3 = chi[3] ]) = rho[i],
+    alpha[3] = alpha[i],
+    chi[3] = chi[i]
+], i, 1, N_wheels);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp: checkable(pois_P_1_L_star_diff_pretty) where makelist(rho[i] = rho(i), i, 1, 3);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Эта часть, легко заметить, также пропорциональна B.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+pois_P_1_L_star_diff: pois(_P[1], L_star_diff, z);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+((coeff(tmp where [ expand ], B)*B) where [ expand ]) - (tmp where [ expand ]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+{ P[alpha], nu[mu] * P[mu] }
+   [wxMaxima: subsect end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$
