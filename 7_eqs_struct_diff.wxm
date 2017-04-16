@@ -208,7 +208,6 @@ L_star_diff_pretty: B/2 * (
 "where s corresponds to free rollers and (kappa + chi)[s] means kappa[j] + chi[i] for i = 1..N_wheels, j = 2..n_rollers";
 /* [wxMaxima: input   end   ] */
 
-
 /* [wxMaxima: input   start ] */
 check(L_star_diff, L_star_diff_pretty);
 /* [wxMaxima: input   end   ] */
@@ -303,7 +302,7 @@ for i:4 thru dof do print(zero_or_error(compare_terms(Ddt_D_L_star_dnus_pretty[4
   ^^^^^^^^^^^^^^^^^                         \________________/                        ^^^^^^^^^^^^^^^^^^^^
                                                     ||
                                                     0, ибо P_delta = P_delta(chi, p_phi),
-                                                            d(L*_old)/d(chi) и d(chi) = 0
+                                                            d(L*_old)/d(chi) и d(phi) = 0
 = { P_old, L*_delta } + { P_delta, L*_delta }.
    [wxMaxima: comment end   ] */
 
@@ -335,34 +334,62 @@ for i:1 thru 3 do print(concat("_P[", i, "] = "), _P_pretty[i]) $
 print("L_star_diff = ", L_star_diff_pretty) $
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: input   start ] */
+L_star_diff_pretty_chi: L_star_diff_pretty where [
+    'rho(i) = l*cos(chi[i]) - r,
+    'sum((2*'nu[3]*'nu[s]*sin((kappa+chi)[s]))/Lambda+'nu[s]^2,s,4,12) = 
+    'sum('sum(
+        (2*'nu[3]*'nu[free_nu_num(i, j)]*sin(kappa[j]+chi[i]))/Lambda+'nu[free_nu_num(i, j)]^2
+    , j, 2, n_rollers), i, 1, N_wheels)
+];
+/* [wxMaxima: input   end   ] */
+
 /* [wxMaxima: comment start ]
 P зависит от theta, chi, p_x, p_y, p_chi (i+3), p_phi (i+6),
 L*_diff зависит только от chi,
 => нас интересует только dP[1]/dp_chi и dL*_diff/dchi:
+
+{ P_rol, L*_delta } = -dP_rol/dp_chi * dL*_delta/dchi
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-chi_p_chi: append(
-    makelist(chi[i], i, 1, N_wheels),
-    makelist('p[3+i], i, 1, N_wheels)
-);
+diff(_P_pretty[1], 'p[3+i]) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-pois_P_1_L_star_diff_pretty: 'sum(first(
-    pois(
-        ev(_P_pretty[1], sum),
-        ev(L_star_diff_pretty, sum, rho) where makelist(q[3+i] = chi[i], i, 1, N_wheels),
-    chi_p_chi)
-) where [
-    (rho(3) where [ chi3 = chi[3] ]) = rho[i],
-    alpha[3] = alpha[i],
-    chi[3] = chi[i]
-], i, 1, N_wheels);
+diff(L_star_diff_pretty_chi, chi[i]) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-tmp: checkable(pois_P_1_L_star_diff_pretty) where makelist(rho[i] = rho(i), i, 1, 3);
+D_P_pretty_1_dp_chi_i: sin(alpha[i])*R/l $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+D_L_star_diff_pretty_dchi_i: (
+    B*(
+        (
+            (('nu[2]*sin(alpha[i])+'nu[1]*cos(alpha[i]))^2*sin(chi[i])*l*R^2)/rho[i]^3
+            +
+            (
+                'nu[3]*('nu[2]*sin(alpha[i])+'nu[1]*cos(alpha[i]))*R
+                *
+                (
+                    cos(chi[i]+kappa[1])*rho[i]
+                +
+                    sin(chi[i])*sin(chi[i]+kappa[1])*l
+                )
+            )/(Lambda*rho[i]^2)
+        )
+        +
+        ('nu[3]*
+                'sum('nu[j+3*i-1]*cos(kappa[j]+chi[i]),j,2,n_rollers)
+        )/Lambda
+    )
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+pois_P_1_L_star_delta: D_P_pretty_1_dp_chi_i * D_L_star_diff_pretty_dchi_i;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
@@ -380,6 +407,38 @@ pois_P_1_L_star_diff: pois(_P[1], L_star_diff, z);
 /* [wxMaxima: subsect start ]
 { P[alpha], nu[mu] * P[mu] }
    [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+_P[1];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_P[2];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+pois(_P[1], _P[2], z);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_old_P[1];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_old_P[2];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+pois(_old_P[1], _old_P[2], old_z);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_z;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+(pois(_old_P[1], _P[2] - _old_P[2], z)) where subst_ps;
+/* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$
