@@ -1,0 +1,81 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: input   start ] */
+_old_x(p) := p[5] $
+_old_y(p) := p[6] $
+_old_theta(p) := p[7] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+заведем отдельные функции для построения графиков величин
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+old_plot_coords(sol) := plot (
+    [
+        [discrete,makelist([p[1],p[5]],p,sol)],
+        [discrete,makelist([p[1],p[6]],p,sol)],
+        [discrete,makelist([p[1],p[7]],p,sol)]
+    ]
+    , "old X, Y and theta"
+) $
+
+old_plot_trajectory(sol) := plot_with_postamble (
+    [
+        [discrete,makelist([p[5],p[6]],p,sol)]
+    ]
+    , "old trajectory"
+    , "set size ratio -1;"
+) $
+
+old_plot_xy(sol) := plot (
+    [
+        [discrete,makelist([p[1],p[5]],p,sol)],
+        [discrete,makelist([p[1],p[6]],p,sol)]
+    ]
+    , "old X and Y"
+) $
+
+old_plot_theta(sol) := plot (
+    [
+        [discrete,makelist([p[1],p[7]],p,sol)]
+    ]
+    , "old theta"
+) $
+
+old_plot_all(sol) := plot (
+    makelist(
+        [discrete,makelist([p[1],p[i]],p,sol)],
+        i, 2, 7
+    )
+    , "old all vars"
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+для проверки нам также будет полезно строить графики кинетической энергии от времени:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+old_real_M_star() := ((transpose(_old_V) . _old_M . _old_V) where [
+    subst_stuff
+]) $
+
+old_kin_energy(nu_list, real_M_star) := (nu_list . real_M_star . transpose(nu_list)) $
+
+old_kin_en(sol_pt, real_M_star) := old_kin_energy([ sol_pt[2], sol_pt[3], sol_pt[4] ], [ sol_pt[5], sol_pt[6], sol_pt[7] ], real_M_star) $
+
+old_plot_kin_en(sol) := if plot_allowed then block([_real_M_star],
+        _real_M_star: old_real_M_star(),
+        plot (
+        [
+            [discrete,makelist([p[1],old_kin_en(p, _real_M_star)],p,sol)]
+        ]
+        , "old kin energy"
+    )
+) else print() $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

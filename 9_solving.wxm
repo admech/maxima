@@ -1,0 +1,80 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: title   start ]
+Сравнение численных решений систем с роликами и без
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: section start ]
+Приготовления
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: subsect start ]
+Для системы с роликами и общее
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("8_0_foundation.wxm");
+plot_allowed: true ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("3_sol/3_plot_old.wxm");
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+Для системы без роликов
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+bak: [ p, P ]  $
+kill(p, P) $
+bak $
+
+batchload("6_eqs_struct_no_rollers.wxm") $
+
+p: bak[1] $
+P: bal[2] $
+kill(bak) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Решения
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: subsect start ]
+С закруткой
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+circle: omni_solve(
+    1, 0, 1,
+    1, 0.01
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(circle) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_theta(circle) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_circle: old_omni_solve(
+    1, 0, 1,
+    250, 0.01
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_plot_trajectory(old_circle) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_plot_theta(old_circle) $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

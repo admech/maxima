@@ -50,5 +50,13 @@ batchload("3_sol/2_num_int.wxm") $
 batchload("3_sol/3_plot.wxm") $
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: comment start ]
+Реалистичные параметры
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("4_exp/5_0_realistic_params.wxm") $
+/* [wxMaxima: input   end   ] */
+
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$
