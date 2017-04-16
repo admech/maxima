@@ -24,8 +24,6 @@ M* Dnu = f(nu, chi) + B*g(nu, chi)
 Уравнения без роликов и с роликами
    [wxMaxima: subsect end   ] */
 
-/* [wxMaxima: fold    start ] */
-
 /* [wxMaxima: input   start ] */
 batchload("6_eqs_struct_no_rollers.wxm") ;
 /* [wxMaxima: input   end   ] */
@@ -33,8 +31,6 @@ batchload("6_eqs_struct_no_rollers.wxm") ;
 /* [wxMaxima: input   start ] */
 batchload("5_eqs_struct.wxm") ;
 /* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: fold    end   ] */
 
 /* [wxMaxima: subsect start ]
 Вспомогательные функции
@@ -346,22 +342,18 @@ L_star_diff_pretty_chi: L_star_diff_pretty where [
 
 /* [wxMaxima: comment start ]
 P зависит от theta, chi, p_x, p_y, p_chi (i+3), p_phi (i+6),
-L*_diff зависит только от chi,
+L*_delta зависит только от chi,
 => нас интересует только dP[1]/dp_chi и dL*_diff/dchi:
 
 { P_rol, L*_delta } = -dP_rol/dp_chi * dL*_delta/dchi
    [wxMaxima: comment end   ] */
 
-/* [wxMaxima: input   start ] */
-diff(_P_pretty[1], 'p[3+i]) $
-/* [wxMaxima: input   end   ] */
+/* [wxMaxima: comment start ]
+dL*_delta/dchi:
+   [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
 diff(L_star_diff_pretty_chi, chi[i]) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-D_P_pretty_1_dp_chi_i: sin(alpha[i])*R/l $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -388,8 +380,65 @@ D_L_star_diff_pretty_dchi_i: (
 ) $
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: comment start ]
+P[1]:
+   [wxMaxima: comment end   ] */
+
 /* [wxMaxima: input   start ] */
-pois_P_1_L_star_delta: D_P_pretty_1_dp_chi_i * D_L_star_diff_pretty_dchi_i;
+diff(_P_pretty[1], 'p[3+i]) ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+D_P_pretty_1_dp_chi_i: sin(alpha[i])*R/l ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+P[2]:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+diff(_P_pretty[2], 'p[3+i]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+D_P_pretty_2_dp_chi_i: cos(alpha[i])*R/l;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+P[3]:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_P_pretty[3];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+D_P_pretty_3_dp_chi_i: diff(_P_pretty[3], 'p[3+i])/N_wheels;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+P[s] не зависят от p_chi:
+
+P[s] = p_phi[s]
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+makelist(_P_pretty[i], i, 4, dof);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+D_P_pretty_s_dp_chi_i: 0;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+pois_P_L_star_delta: -[
+    D_P_pretty_1_dp_chi_i,
+    D_P_pretty_2_dp_chi_i,
+    D_P_pretty_3_dp_chi_i,
+    D_P_pretty_s_dp_chi_i
+] * D_L_star_diff_pretty_dchi_i $
+for i:1 thru 3 do print("{ P[", i, "], L*_delta } = ", pois_P_L_star_delta[i]) $
+print("{ P[s], L*_delta } = 0") $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
