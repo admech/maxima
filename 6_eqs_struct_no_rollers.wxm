@@ -293,18 +293,5 @@ old_eqs: makelist(old_eq(i) where params(N_wheels, n_rollers), i, 1, 3) $
 for _eq in old_eqs do print(_eq) $
 /* [wxMaxima: input   end   ] */
 
-/* [wxMaxima: section start ]
-Отличия от уравнений с роликами
-   [wxMaxima: section end   ] */
-
-/* [wxMaxima: input   start ] */
-for i:1 thru old_dof do
-    for j:1 thru old_dof do
-        block([coe],
-            coe: diff(diff(old_L_star where [ expand ], old_nu[i]), old_nu[j]),
-            if not coe = 0 then print(old_nu[i]*old_nu[j] = coe)
-        ) $
-/* [wxMaxima: input   end   ] */
-
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$

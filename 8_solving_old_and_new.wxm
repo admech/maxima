@@ -1,0 +1,245 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: input   start ] */
+batchload("helper.mac") ;
+ratprint: false $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("3_sol/2_num_int.wxm") ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("3_sol/3_plot.wxm") ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: title   start ]
+Отличия от уравнений без роликов
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: comment start ]
+Покажем, что уравнения для системы с роликами отличаются от уравнений без роликов
+аддитивным членом порядка момента инерции ролика в правой части (до разрешений относительно псевдоскоростей):
+M* Dnu = f(nu, chi) + B*g(nu, chi)
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Приготовления
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: subsect start ]
+Уравнения без роликов и с роликами
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("6_eqs_struct_no_rollers.wxm") ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("5_eqs_struct.wxm") ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+Вспомогательные функции
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(rho) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+rho(i) := l*cos(q[3 + i]) - r $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+free_wheel_num(s) := floor((s - 1)/(n_rollers - 1)) $
+free_roller_num(s) := mod(s - 1, n_rollers - 1) + 2 $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+subst_chis_and_kappas(expr) := expr where append(
+    makelist(chi[i] = q[3 + i], i, 1, N_wheels),
+    makelist((chi + kappa)[s] = q[3+free_wheel_num(s)] + kappa[free_roller_num(s)], s, 4, dof),
+    makelist(chi[s] = q[3+free_wheel_num(s)], s, 4, dof)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+checkable(expr) := ev(
+    ev(expr, sum) where [ 
+        subst_chis_and_kappas
+    ]
+, nouns) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* so that we could diff exprs of i and s */
+for var in [
+    chii,
+    kappa_chi_s,
+    chi,
+    rho,
+    nu,
+    nu_s
+] do depends(var, t) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+diffable(expr) := expr where [ 
+    'rho(i) = l*cos(chi[i]) - r,
+    chi[i] = chii,
+    (kappa + chi)[s] = kappa_chi_s
+] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+do_diff(expr) := diff(
+        expr where [
+            'rho(i) = rho[i],
+            'nu[s] = nu_s[s],
+            (kappa + chi)[s] = kappa[s] + chi[s]
+        ]
+    , t) where [ 
+    rho[i] = 'rho(i),
+    nu_s[s] = 'nu[s],
+    kappa[s] + chi[s] = (kappa + chi)[s]
+] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+summable(expr) := expr where [ chii = 'q[3 + i] ] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+do_check(original, pretty) := (checkable(pretty) - original) where [ expand, ratsimp ] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+compare_terms(pretty, original) := lsum(term, term, map(factor, 
+    expr_to_terms(expand(
+        checkable(summable(
+            pretty
+        ))
+    ))
+))
+-
+lsum(term, term, map(factor, 
+    expr_to_terms(
+        original
+    )
+)) 
+$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+ok_or_error(expected, actual, difference) := if actual = expected then "OK" else error(concat("PRETTY IS NOT EQUAL TO ORIGINAL! DIFF = ", difference(actual))) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+zero_or_error(actual) := ok_or_error(0, actual, lambda([expr], expr)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+check(original, pretty) := ok_or_error(0, do_check(original, pretty), lambda([expr], expr)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+check123(original, pretty) := block([result],
+    result: makelist(do_check(original[i], pretty[i]), i, 1, 3),
+    ok_or_error(makelist(0, i, 1, 3), result, simplode(result, ", "))
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+expr_to_terms(expr) := block([terms],
+    terms: [],
+    for term in expr do terms: cons(term, terms),
+    terms
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Уравнения без роликов
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+old_eq(1);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_eqs_explicit: solve(
+    makelist(old_eq(i), i, 1, 3),
+    makelist(diff(nu[i], t), i, 1, 3)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_rhss_explicit: (map(second, old_eqs_explicit[1])) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_rhs_coords: transpose((submatrix(4, 5, 6, _old_V) . genmatrix(lambda([i, j], nu[i]), 3, 1)) where [ theta = _theta ])[1] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_omni_solve_extended(
+    nu1_0, nu2_0, nu3_0, 
+    x_0, y_0, _theta_0,
+    t0, t1, t_step
+) := rk(
+    append(old_rhss_explicit, old_rhs_coords) where params(N_wheels, n_rollers),
+    [ nu1,   nu2,   nu3,   x,   y,   _theta   ],
+    [ nu1_0, nu2_0, nu3_0, x_0, y_0, _theta_0 ],
+    [ t, t0, t1, t_step]
+) $
+
+old_omni_solve(
+    nu1_0, nu2_0, nu3_0, 
+    t1, t_step
+) := old_omni_solve_extended(
+    nu1_0, nu2_0, nu3_0, 
+    0, 0, 0, 
+    0, t1, t_step
+) $
+
+old_omni_solve_next(sol, t1) := block([last_point],
+    last_point: last(sol),
+    old_omni_solve_extended(
+        last_point[2], last_point[3], last_point[4], 
+        last_point[5], last_point[6], last_point[7], 
+        last_point[1], t1, (last_point[1] - first(sol)[1])/(length(sol) - 1)
+    )
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+для интегрирования можно использовать вот это:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp: old_omni_solve(
+    1, 1, 1,
+    450, 0.01
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_allowed: true;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot(
+    [
+/*
+        [discrete, makelist([(tmp[i])[5], (tmp[i])[6]], i, 1, 45000/2)],
+        [discrete, makelist([tmp[i+100][5], tmp[i+100][6]], i, 1, 45000/2)]
+*/
+        [discrete, makelist([tmp[i][5] - tmp[i+50][5], tmp[i][6] - tmp[i+50][6]], i, 1, 45000/2)]
+    ]
+    , "trajectory"
+) $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$
