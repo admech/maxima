@@ -24,8 +24,6 @@ M* Dnu = f(nu, chi) + B*g(nu, chi)
 Уравнения без роликов и с роликами
    [wxMaxima: subsect end   ] */
 
-/* [wxMaxima: fold    start ] */
-
 /* [wxMaxima: input   start ] */
 batchload("6_eqs_struct_no_rollers.wxm") ;
 /* [wxMaxima: input   end   ] */
@@ -33,8 +31,6 @@ batchload("6_eqs_struct_no_rollers.wxm") ;
 /* [wxMaxima: input   start ] */
 batchload("5_eqs_struct.wxm") ;
 /* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: fold    end   ] */
 
 /* [wxMaxima: subsect start ]
 Вспомогательные функции
