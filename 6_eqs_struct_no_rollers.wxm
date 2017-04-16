@@ -293,5 +293,95 @@ old_eqs: makelist(old_eq(i) where params(N_wheels, n_rollers), i, 1, 3) $
 for _eq in old_eqs do print(_eq) $
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: input   start ] */
+old_eqs_explicit: solve(
+    makelist(old_eq(i), i, 1, 3),
+    makelist(diff(old_nu[i], t), i, 1, 3)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_rhss_explicit: (map(second, old_eqs_explicit[1])) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_rhs_coords: transpose((submatrix(4, 5, 6, _old_V) . genmatrix(lambda([i, j], old_nu[i]), 3, 1)) where [ theta = _theta ])[1] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_rhss: append(old_rhss_explicit, old_rhs_coords) where params(N_wheels, n_rollers);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_omni_solve_extended(
+    nu1_0, nu2_0, nu3_0, 
+    x_0, y_0, _theta_0,
+    t0, t1, t_step
+) := rk(
+    old_rhss,
+    [ nu1,   nu2,   nu3,   x,   y,   _theta   ],
+    [ nu1_0, nu2_0, nu3_0, x_0, y_0, _theta_0 ],
+    [ t, t0, t1, t_step]
+) $
+
+old_omni_solve(
+    nu1_0, nu2_0, nu3_0, 
+    t1, t_step
+) := old_omni_solve_extended(
+    nu1_0, nu2_0, nu3_0, 
+    0, 0, 0, 
+    0, t1, t_step
+) $
+
+old_omni_solve_next(sol, t1) := block([last_point],
+    last_point: last(sol),
+    old_omni_solve_extended(
+        last_point[2], last_point[3], last_point[4], 
+        last_point[5], last_point[6], last_point[7], 
+        last_point[1], t1, (last_point[1] - first(sol)[1])/(length(sol) - 1)
+    )
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+пример интегрирования и построения графика:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+circle: old_omni_solve(
+    1, 0, 1,
+    250, 0.01
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+batchload("3_sol/3_plot.wxm") ;
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+plot_allowed: true;
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+plot(
+    [
+        [discrete, makelist([p[5], p[6]], p, circle)]
+    ]
+    , "trajectory"
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$
