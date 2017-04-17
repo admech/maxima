@@ -68,7 +68,6 @@
             \asyinclude{pic_wheel.asy}
             \caption{Колесо}
         \endminipage
-        % \end{subfigure}
     \end{figure}
 \end{frame}
 
@@ -199,25 +198,27 @@
 \subsection{Переход между роликами}
 
 \begin{frame}{Переход между роликами}{Сложности и допущения}
-  \begin{itemize}
-  \item {
     \begin{prblm}[1]\label{p1}
     Уравнения вырождаются на стыках роликов.
     \end{prblm}
     Пусть переход на следующий ролик будет раньше стыка.
-  }
-  \item {
+    \begin{figure}
+        \centering
+        \asyinclude{pic_overlap.asy}
+        \caption{Ролики перекрываются}
+    \end{figure}
+\end{frame}
+
+\begin{frame}{Переход между роликами}{Сложности и допущения}
     \begin{prblm}[2]\label{p2}
     Ролики входят и выходят из состояния контакта.
     \end{prblm}
-    Будем рассматривать только движение роликов, находящихся в контакте. При переходе сохраним значения $\nu_i$, а остальные величины пересчитаем по уравнениям связей.
-  }
-  \item {
-    \begin{block}{Физическая аналогия}
-    Инерция роликов мала, и движение при смене контакта быстро устанавливается.
-    \end{block}
-  }
-  \end{itemize}
+    Будем рассматривать только движение роликов в контакте. При переходе сохраним значения $\nu_i$, а остальные величины пересчитаем по уравнениям связей.
+    \begin{figure}
+        \centering
+        \asyinclude{pic_change.asy}
+        \caption{$\nu = const, \chi$ вычисляется}
+    \end{figure}
 \end{frame}
 
 
