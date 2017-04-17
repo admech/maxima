@@ -20,14 +20,16 @@
 
 \newtheorem{stmt}{Утверждение}
 \newtheorem{prblm}{Затруднение}
+\definecolor{Periwinkle}{HTML}{4444AC}
 
 \title{Движение симметричного экипажа \\с массивными роликами на омни-колесах}
 
-\author{К.Герасимов, А.А. Зобова,  И.И.Косенко}
+\author{К.В. Герасимов, А.А. Зобова,  И.И.Косенко}
 
-\institute[Universities of Somewhere and Elsewhere]
+\institute[мех-мат МГУ]
 {
   Кафедра теоретической механики и мехатроники\\
+  Механико-математический факультет\\
   МГУ им. М.В. Ломоносова
 }
 
@@ -84,7 +86,7 @@
   }
   \item {
     Скорость точек контакта равна нулю:
-    $$\vec{v}_{C_i} = 0, i = 1..3$$
+    $$\vec{v}_{C_i} = 0, i = 1\dots N$$
   }
   \item{
     Количество степеней свободы:
@@ -98,17 +100,17 @@
   \begin{itemize}
   \item {
     Обобщенные координаты: \\
-    $q = (x, y, \theta, \chi_i, \phi_k, \phi_s),$ где $i,k = 1..N, s$ -- остальные.
+    $q = (x, y, \theta, \chi_i, \phi_k, \phi_s),$ где $i,k = 1\dots N$, $s$ -- ролики вне контакта.
   }
   \item{
     Псевдоскорости:\\
-    $\nu = (\nu_1, \nu_2, \nu_3, \nu_s), \vec{v_S} = R\nu_1\vec{e_\xi} + R\nu_2\vec{e_\eta}, \nu_3 = \Lambda\dot{\theta}, \nu_s = \dot{\phi_s}$
+    $\nu = (\nu_1, \nu_2, \nu_3, \nu_s), \vec{v}_S = R\nu_1\vec{e}_\xi + R\nu_2\vec{e}_\eta, \nu_3 = \Lambda\dot{\theta}, \nu_s = \dot{\phi}_s$
   }
   \item {
     Связи:
-	$$ \dot{x} = \nu_1cos(\theta)R-\nu_2sin(\theta)R, \hspace{15pt} \dot{y} = \nu_1sin(\theta)R+\nu_2cos(\theta)R,$$
-	$$\dot{\theta} = \frac{\nu_3}{\Lambda}, \hspace{15pt} \dot{\chi_i} = \frac{sin(\alpha_i)\nu_1R}{l} - \frac{cos(\alpha_i)\nu_2R}{l} - \frac{\nu_3R}{l\Lambda}, $$
-	$$ \dot{\phi_k} = \frac{cos(\alpha_1)\nu_1R}{cos(chi1)l-r} + \frac{sin(\alpha_1)\nu_2R}{cos(chi1)l-r}, \hspace{15pt} \dot{\phi_s} = \nu_s $$
+	$$ \dot{x} = R \nu_1\cos\theta-R\nu_2\sin\theta, \hspace{15pt} \dot{y} = R\nu_1\sin\theta+R\nu_2\cos\theta,$$
+	$$\dot{\theta} = \frac{\nu_3}{\Lambda}, \hspace{15pt} \dot{\chi}_i = \frac{R}{l}(\nu_1\sin\alpha_i - \nu_2\cos\alpha_i - \frac{\nu_3}{\Lambda}), $$
+	$$ \dot{\phi_k} = \frac{R}{l\cos\chi_k-r}(\nu_1\cos\alpha_k + \nu_2\sin\alpha_k), \hspace{15pt} \dot{\phi}_s = \nu_s $$
   }
 
   \end{itemize}
@@ -122,12 +124,11 @@
   \begin{itemize}
   \item {
     Присутствует аддитивный член, пропорциональный $B$ -- моменту инерции ролика относительно его оси собственного вращения:
-    $$ 2T = 2L = M\vec{v_S}^2 + I_S\dot{\theta}^2 + J\sum_i\dot{\chi_i}^2 + $$
-    $$ + \alert{B\sum_{i,j}(\dot{\phi_{ij}}^2 + 2\dot{\theta}sin(\kappa_j + \chi_i)\dot{\phi_{ij}})}, $$
-    где
-    $$ M = \mathring{M} + 3\cdot4m, $$
-    $$ I_S = \mathring{I_S} + 3\cdot4(\frac{A+B}{2} + mR^2 + \frac{mr^2}{2}), $$
-    $$ J = \mathring{J} + 4(A + mr^2) $$
+    $$ 2T = 2L = M\vec{v}_S^2 + I_S\dot{\theta}^2 + J\sum_i\dot{\chi}_i^2 + $$
+    $$ + \alert{B\sum_{i,j}(\dot{\phi}_{ij}^2 + 2\dot{\theta}\sin(\kappa_j + \chi_i)\dot{\phi}_{ij})}, $$
+    $$ M = \mathring{M} + Nnm $$
+    $$ I_S = \mathring{I_S} + N\cdot n(\frac{A+B}{2} + mR^2 + \frac{mr^2}{2}), $$
+    $$ J = \mathring{J} + n(A + mr^2) $$
   }
 
   \end{itemize}
@@ -139,26 +140,35 @@
     С учетом связей:
     $$ 2L^{*} = \mathring{\nu}^T \mathring{V}^T \mathring{M} \mathring{V} \mathring{\nu} + $$
     $$ + \alert{B}\sum_{i}(
-    	\frac{(\nu_2sin(\alpha_i)+\nu_1cos(\alpha_i))^2R^2}
+    	\frac{(\nu_2\sin\alpha_i+\nu_1\cos\alpha_i)^2R^2}
     	{\rho_i^2} + $$
     $$ +
-    	\frac{2\nu_3(\nu_2sin(\alpha_i)+\nu_1cos(\alpha_i))sin(\chi_i)R}
+    	\frac{2R\nu_3(\nu_2\sin\alpha_i+\nu_1\cos\alpha_i)\sin\chi_i}
     	{\rho_i\Lambda}
     ) $$
     $$ +
     \alert{B}\sum_{i,j}(
-    	\frac{2\nu_3\nu_{ni+j}sin((\kappa_j+\chi_i)}
+    	\frac{2\nu_3\nu_{ni+j}\sin(\kappa_j+\chi_i)}
     	{\Lambda}
     	+
     	\nu_{ni+j}^2
     )
     $$
-    где $ \frac{1}{2}\mathring{\nu}^T \mathring{V}^T \mathring{M} \mathring{V} \mathring{\nu} $ -- лагранжиан системы без роликов.
+    где $ \frac{1}{2}\mathring{\nu}^T \mathring{V}^T \mathring{M} \mathring{V} \mathring{\nu} $ -- лагранжиан системы без роликов, $\rho_i = l\cos\chi_i - r$
   }
 
   \end{itemize}
 \end{frame}
 
+\begin{frame}{Кинетическая энергия и лагранжиан}{Матрицы кинетической энергии и связей для системы без роликов}
+    $$ \mathring{M} = diag(M, M, I_S, J...J), $$
+    $$ \mathring{V} = \begin{bmatrix}
+        R\cos\theta & -R\sin\theta & 0 \\
+        R\sin\theta & R\cos\theta  & 0 \\
+        0           & 0            & \frac{1}{\Lambda} \\
+        \frac{R}{l}\sin\alpha_i & -\frac{R}{l}\cos\alpha_i & -\frac{R}{l\Lambda} \\
+    \end{bmatrix} $$
+\end{frame}
 
 \subsection{Структура уравнений - отличие от случая без роликов}
 
@@ -166,11 +176,11 @@
   \begin{itemize}
   \item {
     Уравнения Я.В. Татаринова:
-    $$ \frac{d}{dt}\frac{\partial L^{*}}{\partial \nu_\alpha} = - \{P_\alpha, L^{*}\} + \{P_\alpha, \nu_\mu P_\mu\}, $$
-    $$ \nu_\mu P_\mu = \dot{q_i} p_i, \hspace{10pt} p_i = \frac{\partial L}{\partial q_i} $$
+    $$ \frac{d}{dt}\frac{\partial L^{*}}{\partial \nu_\alpha}  + \{P_\alpha, L^{*}\} = \{P_\alpha, \nu_\mu P_\mu\}, $$
+    $$ \nu_\mu P_\mu = \dot{q_i} p_i, \hspace{10pt} p_i = \frac{\partial L}{\partial \dot{q}_i} $$
   }
   \item {
-    Лагранжиан и "импульсы" отличаются аддитивными членами:
+    Лагранжиан и ``импульсы'' отличаются аддитивными членами:
     $$ L^{*} = \mathring{L}^{*} + BL^{*}_\Delta(\nu, \chi) $$
     $$ P_\alpha = \mathring{P_\alpha}(\theta, p_x, p_y, p_\chi) + P_\Delta(p_{\phi_i}, \chi) $$
   }
@@ -179,18 +189,59 @@
 \end{frame}
 
 \begin{frame}{Структура уравнений}{Отличие от случая без роликов}
-  $$ \frac{d}{dt}\frac{\partial L^{*}}{\partial \nu_\alpha} = - \{P_\alpha, L^{*}\} + \{P_\alpha, \nu_\mu P_\mu\}, $$
-  \begin{itemize}
-  \item {
-    \begin{stmt}
-    Уравнения движения отличаются на добавку порядка $B$.
+     \begin{stmt}
+    Учет массы роликов приводит к появлению в правой части дифференциальных уравнений, описывающих динамику экипажа, слагаемых, пропорциональных собственному моменту инерции роликов $B$ и квадратично зависящих от псевдоскоростей. Эти новые слагаемые явно зависят от углов поворота колес $\chi_i$.
+    $$\boldsymbol{A}\dot{\boldsymbol{\nu}} = \frac1\Lambda
+    \left(
+    \begin{array}{c}
+         \nu_2\nu_3  \\
+         -\nu_1\nu_3 \\
+         0
+    \end{array}
+    \right) + \alert{B}
+     \left(
+    \begin{array}{c}
+         \boldsymbol{\nu}^T\boldsymbol{F}_1(\chi_i)\boldsymbol{\nu}  \\
+         \boldsymbol{\nu}^T\boldsymbol{F}_2(\chi_i)\boldsymbol{\nu} \\
+         \boldsymbol{\nu}^T\boldsymbol{F}_3(\chi_i)\boldsymbol{\nu}
+    \end{array}
+    \right)
+    $$
+    $$
+    \dot{\chi}_i = \frac{R\sin\alpha_i}{l}\nu_1 - \frac{R\cos(\alpha_i)}{l}\nu_2 - \frac{R}{l\Lambda}\nu_3, \quad i = 1..N
+    $$
+    $$
+    \Lambda\dot{\nu}_{ni+j} = -\dot{\nu}_3\sin(\chi_i+\kappa_j) - \dot{\chi_i}\nu_3\cos(\chi_i+\kappa_j), \quad j = 2..n
+    $$
     \end{stmt}
-    $$ \frac{d}{dt}\frac{\partial }{\partial \nu_\alpha}(L^{*} - \mathring{L^{*}}) = \alert{B}\frac{d}{dt}\frac{\partial}{\partial \nu_\alpha}L^{*}_\Delta(\nu, \chi) $$
+\end{frame}
+
+\begin{frame}{Структура уравнений}{Отличие от случая без роликов}    
+    $$\boldsymbol{A}\dot{\boldsymbol{\nu}} = \frac1\Lambda
+    \left(
+    \begin{array}{c}
+         \nu_2\nu_3  \\
+         -\nu_1\nu_3 \\
+         0
+    \end{array}
+    \right) + \alert{B}
+     \left(
+    \begin{array}{c}
+         \boldsymbol{\nu}^T\boldsymbol{F}_1(\chi_i)\boldsymbol{\nu}  \\
+         \boldsymbol{\nu}^T\boldsymbol{F}_2(\chi_i)\boldsymbol{\nu} \\
+         \boldsymbol{\nu}^T\boldsymbol{F}_3(\chi_i)\boldsymbol{\nu}
+    \end{array}
+    \right)
+    $$
+    
+    \textcolor{Periwinkle}{Доказательство:}
+%   \begin{proof}
+  $$ \frac{d}{dt}\frac{\partial L^{*}}{\partial \nu_\alpha} = - \{P_\alpha, L^{*}\} + \{P_\alpha, \nu_\mu P_\mu\},$$
+    $$ \frac{d}{dt}\frac{\partial }{\partial \nu_\alpha}(L^{*} - \mathring{L^{*}}) = \alert{B}\frac{d}{dt}\frac{\partial}{\partial \nu_\alpha}L^{*}_\Delta(\nu, \chi), $$
     $$ \{P_\alpha, L^{*}\} - \{\mathring{P}_\alpha, \mathring{L}^{*}\} = \alert{B}\{ P_\alpha, L^{*}_\Delta(\nu, \chi) \} $$
-    $$ \{P_\alpha, P_\mu\} - \{\mathring{P}_\alpha, \mathring{P}_\mu\}  = $$
-    $$ = \alert{B}\frac{R^2}{\Lambda}\sum_i\frac{f_\alpha(\nu, \chi)}{\rho^2_i}(\frac{R}{\rho_i}(\nu_1cos(\alpha_i) + \nu_2sin(\alpha_i)) + \frac{sin(\chi_i)\nu_3}{\Lambda})$$
-  }
-  \end{itemize}
+    $$\rho_i = l\cos\chi_i - r, \quad \{P_\alpha, P_\mu\} - \{\mathring{P}_\alpha, \mathring{P}_\mu\}  = $$
+    $$ = \alert{B}\frac{R^2}{\Lambda}\sum_i\frac{f_\alpha(\nu, \chi)}{\rho^2_i}(\frac{R}{\rho_i}(\nu_1\cos\alpha_i + \nu_2\sin\alpha_i) + \frac{\sin\chi_i}{\Lambda}\nu_3)$$
+%  \end{proof}
 \end{frame}
 
 \section{Численное решение}
@@ -198,9 +249,8 @@
 \subsection{Переход между роликами}
 
 \begin{frame}{Переход между роликами}{Сложности и допущения}
-    \begin{prblm}[1]\label{p1}
-    Уравнения вырождаются на стыках роликов.
-    \end{prblm}
+    \textcolor{Periwinkle}{(1) Уравнения вырождаются на стыках роликов:}\\
+    \textit{квадратичные формы $\boldsymbol{F}_i$ терпят разрыв 2ого рода из-за выражений $(l\cos\chi_i-r)$ в знаменателе.} \\
     Пусть переход на следующий ролик будет раньше стыка.
     \begin{figure}
         \centering
@@ -210,14 +260,17 @@
 \end{frame}
 
 \begin{frame}{Переход между роликами}{Сложности и допущения}
-    \begin{prblm}[2]\label{p2}
-    Ролики входят и выходят из состояния контакта.
-    \end{prblm}
-    Будем рассматривать только движение роликов в контакте. При переходе сохраним значения $\nu_i$, а остальные величины пересчитаем по уравнениям связей.
+    \textcolor{Periwinkle}{(2) Ролики входят и выходят из состояния контакта.}\\
+    Будем рассматривать только движение роликов в контакте.\\
+    Отбросим уравнения
+    $$
+    \Lambda\dot{\nu}_{ni+j} = -\dot{\nu}_3\sin(\chi_i+\kappa_j) - \dot{\chi_i}\nu_3\cos(\chi_i+\kappa_j), \quad j = 2..n.
+    $$
+    При переходе сохраним значения $\nu_1$, $\nu_2$, 
+    $\nu_3$, а $\dot\chi_i$ пересчитаем по уравнениям связей.
     \begin{figure}
         \centering
         \asyinclude{pic_change.asy}
-        \caption{$\nu = const, \chi$ вычисляется}
     \end{figure}
 \end{frame}
 
