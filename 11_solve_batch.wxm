@@ -1,0 +1,129 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: title   start ]
+Функции для решения батчами
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: input   start ] */
+get_sol_name(
+    name_prefix, first_solver, next_solver,
+    nu1_0, nu2_0, nu3_0, 
+    t_step, t0, t1
+) := ssubst("_", ".", concat(name_prefix, "_sol__", nu1_0, "_", nu2_0, "_", nu3_0, "__", t0, "__", t1, "__1e", round(float(log(1/t_step)/log(10))))) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+batch_solve(
+    name_prefix, first_solver, next_solver,
+    nu1_0, nu2_0, nu3_0, 
+    t_step, t1_batches
+) := block([previous_sol, sol_name, full_sol],
+    sol_name: get_sol_name(name_prefix, first_solver, next_solver, nu1_0, nu2_0, nu3_0, t_step, 0, t1_batches[1]),
+    print(sol_name, ","),
+    previous_sol: first_solver(nu1_0, nu2_0, nu3_0, t1_batches[1], t_step),
+    eval_string(concat(sol_name, ": previous_sol $")),
+    eval_string(concat("save(\"9_exp_compare/", sol_name, ".lisp\", ", sol_name, ") ;")),
+    full_sol: previous_sol,
+    for i:2 thru length(t1_batches) do block([current_sol],
+        sol_name: get_sol_name(name_prefix, first_solver, next_solver, nu1_0, nu2_0, nu3_0, t_step, t1_batches[i-1], t1_batches[i]),
+        print(sol_name, ","),
+        current_sol: next_solver(previous_sol, t1_batches[i]),
+        eval_string(concat(sol_name, ": current_sol $")),
+        eval_string(concat("save(\"9_exp_compare/", sol_name, ".lisp\", ", sol_name, ") ;")),
+        previous_sol: current_sol,
+        full_sol: append(full_sol, current_sol)
+    ),
+    sol_name: get_sol_name(name_prefix, first_solver, next_solver, nu1_0, nu2_0, nu3_0, t_step, 0, last(t1_batches)),
+    print(sol_name, ","),
+    eval_string(concat(sol_name, ": full_sol $")),
+    eval_string(concat("save(\"9_exp_compare/", sol_name, ".lisp\", ", sol_name, ") ;"))
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+batch_solve(
+    name_prefix, first_solver, next_solver,
+    nu1_0, nu2_0, nu3_0, 
+    t_step, t1_batches
+) := block([previous_sol, sol_name, full_sol,wall_clock_start],
+    wall_clock_start: absolute_real_time(),
+    sol_name: get_sol_name(name_prefix, first_solver, next_solver, nu1_0, nu2_0, nu3_0, t_step, 0, t1_batches[1]),
+    print(sol_name, ","),
+    previous_sol: first_solver(nu1_0, nu2_0, nu3_0, t1_batches[1], t_step),
+    eval_string(concat(sol_name, ": previous_sol $")),
+    eval_string(concat("save(\"9_exp_compare/", sol_name, ".lisp\", ", sol_name, ") ;")),
+    full_sol: previous_sol,
+    print(absolute_real_time() - wall_clock_start),
+    for i:2 thru length(t1_batches) do block([current_sol],
+        wall_clock_start: absolute_real_time(),
+        sol_name: get_sol_name(name_prefix, first_solver, next_solver, nu1_0, nu2_0, nu3_0, t_step, t1_batches[i-1], t1_batches[i]),
+        print(sol_name, ","),
+        current_sol: next_solver(previous_sol, t1_batches[i]),
+        eval_string(concat(sol_name, ": current_sol $")),
+        eval_string(concat("save(\"9_exp_compare/", sol_name, ".lisp\", ", sol_name, ") ;")),
+        previous_sol: current_sol,
+        full_sol: append(full_sol, current_sol),
+        print(absolute_real_time() - wall_clock_start)
+    ),
+    wall_clock_start: absolute_real_time(),
+    sol_name: get_sol_name(name_prefix, first_solver, next_solver, nu1_0, nu2_0, nu3_0, t_step, 0, last(t1_batches)),
+    print(sol_name, ","),
+    eval_string(concat(sol_name, ": full_sol $")),
+    eval_string(concat("save(\"9_exp_compare/", sol_name, ".lisp\", ", sol_name, ") ;")),
+    print(absolute_real_time() - wall_clock_start)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_batch_solve(
+    nu1_0, nu2_0, nu3_0, 
+    t_step, t1_batches
+) := batch_solve(
+    "_old", old_omni_solve, old_omni_solve_next,
+    nu1_0, nu2_0, nu3_0, 
+    t_step, t1_batches
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+new_batch_solve(
+    nu1_0, nu2_0, nu3_0, 
+    t_step, t1_batches
+) := batch_solve(
+    "", omni_solve, omni_solve_next,
+    nu1_0, nu2_0, nu3_0, 
+    t_step, t1_batches
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_stuff(sol) := block(
+    plot_trajectory(sol),
+    plot_theta(sol),
+    plot_nu12(sol),
+    doPlot("nu1, nu2 normed", [
+        lambda([p], _nu1(p) - _nu1(sol[1])),
+        lambda([p], _nu2(p) - _nu2(sol[1]))
+    ], sol),
+    plot_nu3(sol),
+    plot_kin_en(sol)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_plot_stuff(sol) := block(
+    old_plot_trajectory(sol),
+    old_plot_theta(sol),
+    plot_nu12(sol),
+    doPlot("nu1, nu2 normed", [
+        lambda([p], _nu1(p) - _nu1(sol[1])),
+        lambda([p], _nu2(p) - _nu2(sol[1]))
+    ], sol),
+    plot_nu3(sol),
+    old_plot_kin_en(sol)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

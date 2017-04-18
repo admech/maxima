@@ -39,6 +39,7 @@ ultimate_params(N_wheels, n_sharp_rollers) := block([
     J_0: (M_hub*r^2)/2,
     M: M_platf + N_wheels*M_hub + N_wheels*n_rollers*m,
     append(
+        [ sin(theta)^2*'M*'R^2=1-cos(theta)^2*'M*'R^2 ], /* just in case some symbolic math systems don't handle this */
         flatten(makelist([
             rho[i] = l*cos(chi[i]) - r,
             alpha[i] = 2*%pi/N_wheels*(i-1),

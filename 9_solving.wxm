@@ -618,5 +618,25 @@ batchload("3_sol/2_fancy_num_int.wxm") ;
 Порешаем!
    [wxMaxima: section end   ] */
 
+/* [wxMaxima: input   start ] */
+tmp3: omni_solve(
+    0, 0, 0,
+    0.1, 0.01
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+listofvars([rhs_nu, rhs_chi, rhs_coords, rhs_phi]where ultimate_params(N_wheels, n_rollers));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+rk(
+    (append(rhs_nu, rhs_chi) where ultimate_params(N_wheels, n_rollers)),
+    [ nu1,   nu2,   nu3,   chi1,   chi2,   chi3],
+    [ 0, 0, 0, 0, 0, 0 ],
+    [ t, 0, 0.03, 0.01]
+);
+/* [wxMaxima: input   end   ] */
+
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$
