@@ -1,0 +1,66 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: input   start ] */
+ultimate_params(N_wheels, n_sharp_rollers) := block([
+        n_rollers, /* actual n rollers - the number we should have when we cut rollers */
+        r, /*  radius of hub (dist from wheel axis to roller axis) */
+        _chi_max_geom, /* half roller width angle if it were to have sharp ends */
+        l, /* radius of wheel (distance from axis to ground) */
+        I_S, /* total moi wrt vert axis */
+        I_0_S, /* moi of platf and hubs wrt vert axis */
+        A, /* moi roller wrt orthogonal axis */
+        B, /* moi roller wrt roller axis */
+        R, /* platform radius */
+        m, /* roller mass */
+        M_platf,
+        M_hub,
+        r_roller_moi,
+        h_roller_moi,
+        _chi_max_adjust, /* value of chi on which rollers switch - i.e. border of cut roller */
+        J_0, /* moi hub wrt wheel axis */
+        M /* total mass */
+    ],
+    n_rollers: n_sharp_rollers + 1,
+    r: 0.05,
+    m: 0.05,
+    R: 0.15,
+    M_platf: 1,
+    M_hub: 0.15,
+    _chi_max_geom: %pi/(n_rollers - 1),
+    l: r / cos(_chi_max_geom),
+    I_0_S: M_platf*R^2/2 + N_wheels*(M_hub*R^2 + M_hub/12*(3*r^2 + 0.01^2)),
+    r_roller_moi: (l - r)/2,
+    _chi_max_adjust: %pi/n_rollers,
+    h_roller_moi: 2*l*sin(_chi_max_adjust),
+    A: 1/12 * m * (3*r_roller_moi^2 + h_roller_moi^2),
+    B: (m*r_roller_moi^2)/2,
+    I_S: I_0_S + N_wheels*n_rollers*((A+B)/2+m*R^2+m*r^2/2),
+    J_0: (M_hub*r^2)/2,
+    M: M_platf + N_wheels*M_hub + N_wheels*n_rollers*m,
+    append(
+        flatten(makelist([
+            rho[i] = l*cos(chi[i]) - r,
+            alpha[i] = 2*%pi/N_wheels*(i-1),
+            chi[i] = adjust(chis[i])
+        ], i, 1, N_wheels)),
+        makelist(nu[i] = nus[i], i, 1, 3),
+        [
+            theta = _theta,
+            '_chi_max_adjust = _chi_max_adjust,
+            'B = float(B),
+            'R = R,
+            'l = l,
+            J = float(J_0 + n_rollers*(A+m*r^2)),
+            'Lambda = float(I_S / (M*l^2)), /* dimensionless parameter defined as in paper */
+            'I_S = float(I_S),
+            'M = M,
+            'r = r
+        ]
+    )
+) $
+for param in ultimate_params(N_wheels, n_rollers) do print(param) $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

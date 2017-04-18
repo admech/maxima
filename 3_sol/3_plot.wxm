@@ -161,14 +161,16 @@ kin_energy(nu_list, chi_list, real_M_star) := (nu_list . real_M_star . transpose
 
 kin_en(sol_pt, real_M_star) := kin_energy([ sol_pt[2], sol_pt[3], sol_pt[4] ], [ sol_pt[5], sol_pt[6], sol_pt[7] ], real_M_star) $
 
-plot_kin_en(sol) := if plot_allowed then block([_real_M_star],
+plot_kin_en(sol) := if plot_allowed then block([_real_M_star, wall_clock_start],
+    wall_clock_start: absolute_real_time(),
         _real_M_star: real_M_star(),
         plot (
         [
             [discrete,makelist([p[1],kin_en(p, _real_M_star)],p,sol)]
         ]
         , "kin energy"
-    )
+    ),
+    print(absolute_real_time() - wall_clock_start)
 ) else print() $
 /* [wxMaxima: input   end   ] */
 

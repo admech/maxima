@@ -204,7 +204,7 @@ T_straight_wrong(_chi) := T where [
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-T_straight
+T_straight;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
@@ -295,6 +295,90 @@ _rhs_nu1_noadjust(p) := float(subst_stuff(rhs_nu[1][1]) where [
 doPlot("rhs for nu1 noadjust", [
     _rhs_nu1_noadjust
 ], sol) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Попытка понять что за.
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+showtime: true; plot_allowed: true $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp: omni_solve(
+    1, 0, 1,
+    1, 0.01
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_nu3(tmp) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dispfun(omni_solve);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dispfun(omni_solve_extended);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+listofvars(rhs_nu[1]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dispfun(real_life_zero_theta);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dispfun(adjust);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_chi_max_adjust;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+real_params_zero_theta;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dispfun(subst_stuff_and_params);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dispfun(rho);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dispfun(real_life);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dispfun(subst_stuff);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+real_params;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+real_params: [sin(theta)^2*M*R^2=1-cos(theta)^2*M*R^2,M=2.05,R=0.15,J=0.001022083333333333,r
+=0.05,Lambda=2.252613658105386,l=0.1,I_S=0.026005625,B=6.25*10^-7,chi_max=%pi/4,
+alpha[1]=0,alpha[2]=(2*%pi)/3,alpha[3]=(4*%pi)/3,kappa[1]=0,kappa[2]=%pi/2,kappa[3]=%pi,kappa[4]=(3*%pi)/2];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+real_params_zero_theta: real_params;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp1: omni_solve(
+    1, 0, 1,
+    1, 0.01
+) $
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */

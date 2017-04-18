@@ -632,5 +632,29 @@ pois(_P[1], L_star, z) where append(
 sum(nu[i] * pois(_P[1], _P[i], z), i, 1, dof);
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: title   start ]
+Для презентации
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_L_star;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+L_star_diff_pretty;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_M;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_V;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+eq(5);
+/* [wxMaxima: input   end   ] */
+
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$

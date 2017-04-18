@@ -38,43 +38,585 @@ P: bal[2] $
 kill(bak) $
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: subsect start ]
+Реалистичные параметры
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+params(N_wheels, n_rollers) := block(
+    [
+        R, r, r_roller_moi,
+        M_platf, M_wheel, m,
+        _chi_max_adjust, _chi_max_geom, l, h_roller_moi,
+        M_0, M,
+        A, B, J_0, J, I_0_S, I_S
+    ],
+/* GIVEN */
+    /* geometry, m, rad */
+    R: 0.15 ,                            /* radius of platform */
+    r: 0.05 ,                            /* radius of wheel */
+    /* for moment of inertia calculations, rollers are considered cylinders */
+    r_roller_moi: 0.005 ,                     /* 'radius' of roller - quotes due to above line; see h_roller_moi below */
+    /* mass, kg */
+    M_platf: 1 ,     /* [kg] mass of the platform */
+    M_wheel: 0.15 ,  /* [kg] mass of a wheel without rollers */
+    m:       0.05 ,  /* [kg] mass of a roller */
+/* COMPUTED */
+    /* geometry, m, rad */
+    _chi_max_adjust: %pi/n_rollers ,          /* angle determining when the switch to next roller happens and its moment of inertia */
+    _chi_max_geom: %pi/(n_rollers - 1) ,      /* angle determining roller geometry, but not moment of inertia */
+    l: r / cos(_chi_max_geom) ,               /* radius of wheel with roller (distance from wheel axis to floor) */
+    h_roller_moi: 2*l*sin(_chi_max_adjust) ,  /* length of roller */
+    /* mass, kg */
+    M_0: M_platf + N_wheels*M_wheel , /* platform with wheels, but without rollers */
+    M:   M_0 + N_wheels*n_rollers*m , /* whole system */
+    /* moment of inertia, kg * m^2 */
+    A: 1/12 * m * (3*r_roller_moi^2 + h_roller_moi^2) ,  /* roller wrt wheel axis */
+    B: (m*r_roller_moi^2)/2 ,                            /* roller wrt roller axis */
+    J_0: (M_wheel*r^2)/2 ,                               /* wheel without rollers wrt wheel axis */
+    J: J_0 + n_rollers*(A + m*r^2) ,                     /* wheel with rollers wrt wheel axis */
+    I_0_S: (M_platf*R^2)/2 ,                             /* platform wrt platform axis */
+    I_S: I_0_S + 6*B + 6*A + 12*R^2*m + 6*r^2*m ,        /* whole system wrt platform axis */
+    append(
+        [ 'M = M, 'R = R, 'J = J, 'r = r, 'Lambda = sqrt(I_S / (M * r^2)), 'l = l, 'I_S = I_S, 'B = B, 'chi_max = _chi_max_adjust ],
+        makelist(alpha[i] = (i - 1) * 2*%pi/N_wheels, i, 1, N_wheels),
+        makelist(kappa[j] = (j - 1) * 2 * _chi_max_adjust, j, 1, n_rollers)
+    )
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+real_params_bak: real_params;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_chi_max_adjust: %pi/(n_rollers + 1);
+real_params: append(
+    [ sin(theta)^2*M*R^2 = 1 - cos(theta)^2*M*R^2 ],
+    params(N_wheels, n_rollers)
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_params(N_wheels, n_rollers);
+/* [wxMaxima: input   end   ] */
+
 /* [wxMaxima: section start ]
 Решения
    [wxMaxima: section end   ] */
 
+/* [wxMaxima: section start ]
+Запуск на целый день
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+get_sol_name(
+    name_prefix, first_solver, next_solver,
+    nu1_0, nu2_0, nu3_0, 
+    t_step, t0, t1
+) := ssubst("_", ".", concat(name_prefix, "_sol__", nu1_0, "_", nu2_0, "_", nu3_0, "__", t0, "__", t1, "__1e", round(float(log(1/t_step)/log(10))))) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+batch_solve(
+    name_prefix, first_solver, next_solver,
+    nu1_0, nu2_0, nu3_0, 
+    t_step, t1_batches
+) := block([previous_sol, sol_name, full_sol,wall_clock_start],
+    wall_clock_start: absolute_real_time(),
+    sol_name: get_sol_name(name_prefix, first_solver, next_solver, nu1_0, nu2_0, nu3_0, t_step, 0, t1_batches[1]),
+    print(sol_name, ","),
+    previous_sol: first_solver(nu1_0, nu2_0, nu3_0, t1_batches[1], t_step),
+    eval_string(concat(sol_name, ": previous_sol $")),
+    eval_string(concat("save(\"9_exp_compare/", sol_name, ".lisp\", ", sol_name, ") ;")),
+    full_sol: previous_sol,
+    print(absolute_real_time() - wall_clock_start),
+    for i:2 thru length(t1_batches) do block([current_sol],
+        wall_clock_start: absolute_real_time(),
+        sol_name: get_sol_name(name_prefix, first_solver, next_solver, nu1_0, nu2_0, nu3_0, t_step, t1_batches[i-1], t1_batches[i]),
+        print(sol_name, ","),
+        current_sol: next_solver(previous_sol, t1_batches[i]),
+        eval_string(concat(sol_name, ": current_sol $")),
+        eval_string(concat("save(\"9_exp_compare/", sol_name, ".lisp\", ", sol_name, ") ;")),
+        previous_sol: current_sol,
+        full_sol: append(full_sol, current_sol),
+        print(absolute_real_time() - wall_clock_start)
+    ),
+    wall_clock_start: absolute_real_time(),
+    sol_name: get_sol_name(name_prefix, first_solver, next_solver, nu1_0, nu2_0, nu3_0, t_step, 0, last(t1_batches)),
+    print(sol_name, ","),
+    eval_string(concat(sol_name, ": full_sol $")),
+    eval_string(concat("save(\"9_exp_compare/", sol_name, ".lisp\", ", sol_name, ") ;")),
+    print(absolute_real_time() - wall_clock_start)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_batch_solve(
+    nu1_0, nu2_0, nu3_0, 
+    t_step, t1_batches
+) := batch_solve(
+    "_old", old_omni_solve, old_omni_solve_next,
+    nu1_0, nu2_0, nu3_0, 
+    t_step, t1_batches
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+new_batch_solve(
+    nu1_0, nu2_0, nu3_0, 
+    t_step, t1_batches
+) := batch_solve(
+    "", omni_solve, omni_solve_next,
+    nu1_0, nu2_0, nu3_0, 
+    t_step, t1_batches
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_stuff(sol) := block(
+    plot_trajectory(sol),
+    plot_theta(sol),
+    plot_nu12(sol),
+    doPlot("nu1, nu2 normed", [
+        lambda([p], _nu1(p) - _nu1(sol[1])),
+        lambda([p], _nu2(p) - _nu2(sol[1]))
+    ], sol),
+    plot_nu3(sol),
+    plot_kin_en(sol)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_plot_stuff(sol) := block(
+    old_plot_trajectory(sol),
+    old_plot_theta(sol),
+    plot_nu12(sol),
+    doPlot("nu1, nu2 normed", [
+        lambda([p], _nu1(p) - _nu1(sol[1])),
+        lambda([p], _nu2(p) - _nu2(sol[1]))
+    ], sol),
+    plot_nu3(sol),
+    old_plot_kin_en(sol)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: title   start ]
+ИТААААААК...
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+old_batch_solve(
+    1, 0, 1,
+    0.01, [ 100, 200, 300, 400, 500 ]
+) $
+
+old_batch_solve(
+    1, 0, 0,
+    0.01, [ 100, 200, 300, 400, 500 ]
+) $
+
+old_batch_solve(
+    0, 0, 1,
+    0.01, [ 100, 200, 300, 400, 500 ]
+) $
+
+old_batch_solve(
+    1, 1, 1,
+    0.01, [ 100, 200, 300, 400, 500 ]
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+new_batch_solve(
+    1, 0, 1,
+    0.01, makelist(i, i, 1, 15)
+) $
+
+new_batch_solve(
+    1, 0, 0,
+    0.01, makelist(i, i, 1, 15)
+) $
+
+new_batch_solve(
+    0, 0, 1,
+    0.01, makelist(i, i, 1, 15)
+) $
+
+new_batch_solve(
+    1, 1, 1,
+    0.01, makelist(i, i, 1, 15)
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+new_batch_solve(
+    1, 0, 1,
+    0.01, makelist(i, i, 1, 15)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_batch_solve(
+    1, 0, 1,
+    0.01, [ 200 ]
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_plot_stuff(_old_sol__1_0_1__0__200__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+doPlot("nu1, nu2 normed", [
+        lambda([p], p[5]),
+        lambda([p], p[6])
+    ], _old_sol__1_0_1__0__200__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+old_batch_solve(
+    1, 0, 1,
+    0.0001, [ 50, 100, 150, 200, 250 ]
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: title   start ]
+Решения для презентации
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: section start ]
+Вращение вокруг своей оси
+   [wxMaxima: section end   ] */
+
 /* [wxMaxima: subsect start ]
-С закруткой
+С роликами
    [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: input   start ] */
-circle: omni_solve(
-    1, 0, 1,
-    1, 0.01
+new_batch_solve(
+    0, 0, 1,
+    0.01, [ 1, 2, 3 ]
 ) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-plot_trajectory(circle) $
+    plot_trajectory(_sol__0_0_1__0__3__1e2) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-plot_theta(circle) $
+    plot_theta(_sol__0_0_1__0__3__1e2) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-old_circle: old_omni_solve(
-    1, 0, 1,
-    250, 0.01
+    plot_nu12(_sol__0_0_1__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    doPlot("nu1, nu2 centered", [
+        lambda([p], _nu1(p) - _nu1(_sol__0_0_1__0__3__1e2[1])),
+        lambda([p], _nu2(p) - _nu2(_sol__0_0_1__0__3__1e2[1]))
+    ], _sol__0_0_1__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_nu3(_sol__0_0_1__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_kin_en(_sol__0_0_1__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+Без роликов
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+old_batch_solve(
+    0, 0, 1,
+    0.01, [ 3 ]
 ) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-old_plot_trajectory(old_circle) $
+    old_plot_trajectory(_old_sol__0_0_1__0__3__1e2) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-old_plot_theta(old_circle) $
+    old_plot_theta(_old_sol__0_0_1__0__3__1e2) $
 /* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_nu12(_old_sol__0_0_1__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    doPlot("nu1, nu2 centered", [
+        lambda([p], _nu1(p) - _nu1(_old_sol__0_0_1__0__3__1e2[1])),
+        lambda([p], _nu2(p) - _nu2(_old_sol__0_0_1__0__3__1e2[1]))
+    ], _old_sol__0_0_1__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_nu3(_old_sol__0_0_1__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    old_plot_kin_en(_old_sol__0_0_1__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Движение по прямой
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: subsect start ]
+С роликами
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+new_batch_solve(
+    1, 0, 0,
+    0.01, [ 1, 2, 3 ]
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_trajectory(_sol__1_0_0__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_theta(_sol__1_0_0__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_nu12(_sol__1_0_0__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    doPlot("nu1, nu2 centered", [
+        lambda([p], _nu1(p) - _nu1(_sol__1_0_0__0__3__1e2[1])),
+        lambda([p], _nu2(p) - _nu2(_sol__1_0_0__0__3__1e2[1]))
+    ], _sol__1_0_0__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_nu3(_sol__1_0_0__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_kin_en(_sol__1_0_0__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+load("9_exp_compare/_sol__1_0_0__0__0_43__1e4.lisp");
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en(makelist(_sol__1_0_0__0__0_43__1e4[i], i, 1, 4570)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+Без роликов
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+old_batch_solve(
+    1, 0, 0,
+    0.01, [ 3 ]
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    old_plot_trajectory(_old_sol__1_0_0__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    old_plot_theta(_old_sol__1_0_0__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_nu12(_old_sol__1_0_0__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    doPlot("nu1, nu2 centered", [
+        lambda([p], _nu1(p) - _nu1(_old_sol__1_0_0__0__3__1e2[1])),
+        lambda([p], _nu2(p) - _nu2(_old_sol__1_0_0__0__3__1e2[1]))
+    ], _old_sol__1_0_0__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_nu3(_old_sol__1_0_0__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    old_plot_kin_en(_old_sol__1_0_0__0__3__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Движение с закруткой
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: subsect start ]
+С роликами
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+new_batch_solve(
+    1, 0, 1,
+    0.01, makelist(10*i, i, 1, 25)
+) $
+*/
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+load("9_exp_compare/_sol__1_0_1__0__250__1e2.lisp");
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp: makelist(_sol__1_0_1__0__250__1e2[i], i, 1, 15/0.01) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_trajectory(tmp) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_theta(tmp) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_nu12(tmp) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    doPlot("nu1, nu2 centered", [
+        lambda([p], _nu1(p) - _nu1(tmp[1])),
+        lambda([p], _nu2(p) - _nu2(tmp[1]))
+    ], tmp) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_nu3(tmp) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_kin_en(tmp) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+hd
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+new_batch_solve(
+    1, 0, 1,
+    0.0001, makelist(0.0001*5000*i, i, 1, 20)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en(_sol__1_0_1__0__0_5__1e4) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_trajectory(_sol__1_0_1__0__10_0__1e4) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_nu12(_sol__1_0_1__0__10_0__1e4) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+Без роликов
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+old_batch_solve(
+    1, 0, 1,
+    0.01, [ 250 ]
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    old_plot_trajectory(makelist(_old_sol__1_0_1__0__250__1e2[i], i, 1, 210/0.01)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    old_plot_theta(_old_sol__1_0_1__0__250__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_nu12(_old_sol__1_0_1__0__250__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    doPlot("nu1, nu2 centered", [
+        lambda([p], _nu1(p) - _nu1(_old_sol__1_0_1__0__250__1e2[1])),
+        lambda([p], _nu2(p) - _nu2(_old_sol__1_0_1__0__250__1e2[1]))
+    ], _old_sol__1_0_1__0__250__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    plot_nu3(_old_sol__1_0_1__0__250__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    old_plot_kin_en(_old_sol__1_0_1__0__250__1e2) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_kin_en(makelist(_sol__1_0_1__0__250__1e2[i], i, 1, 100)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+new_batch_solve(
+    1, 0, 1,
+    0.01, makelist(i*0.5, i, 1, 25)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Попытка выяснить, что не так с солвером с роликами
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+showtime: true;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+ответ: дело в параметрах:
+во-первых, для rhs_nu и rhs_chi использовались разные параметры (но это как-то не сильно повлияло!),
+во-вторых, с самими параметрами что-то в принципе не так. вопрос - что !
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+chis: [ chi1, chi2, chi3 ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+nus: [ nu1, nu2, nu3 ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("10_yet_another_params_calc.wxm") ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("3_sol/2_fancy_num_int.wxm") ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Порешаем!
+   [wxMaxima: section end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$
