@@ -168,52 +168,99 @@ expr_to_terms(expr) := block([terms],
    [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: input   start ] */
-params(N_wheels, n_rollers) := block(
-    [
-        R, r, r_roller_moi,
-        M_platf, M_wheel, m,
-        _chi_max_adjust, _chi_max_geom, l, h_roller_moi,
-        M_0, M,
-        A, B, J_0, J, I_0_S, I_S
+N_wheels: 3 $
+n_rollers: 4 $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+nus: [ nu1, nu2, nu3 ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+chis: [ chi1, chi2, chi3 ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+adjust(chi) := mod(chi - _chi_max_adjust, 2*_chi_max_adjust) - _chi_max_adjust;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+ultimate_params(N_wheels, n_sharp_rollers) := block([
+        n_rollers, /* actual n rollers - the number we should have when we cut rollers */
+        r, /*  radius of hub (dist from wheel axis to roller axis) */
+        _chi_max_geom, /* half roller width angle if it were to have sharp ends */
+        l, /* radius of wheel (distance from axis to ground) */
+        I_S, /* total moi wrt vert axis */
+        I_0_S, /* moi of platf and hubs wrt vert axis */
+        A, /* moi roller wrt orthogonal axis */
+        B, /* moi roller wrt roller axis */
+        R, /* platform radius */
+        m, /* roller mass */
+        M_platf,
+        M_hub,
+        r_roller_moi,
+        h_roller_moi,
+        _chi_max_adjust, /* value of chi on which rollers switch - i.e. border of cut roller */
+        J_0, /* moi hub wrt wheel axis */
+        M /* total mass */
     ],
-/* GIVEN */
-    /* geometry, m, rad */
-    R: 0.15 ,                            /* radius of platform */
-    r: 0.05 ,                            /* radius of wheel */
-    /* for moment of inertia calculations, rollers are considered cylinders */
-    r_roller_moi: 0.005 ,                     /* 'radius' of roller - quotes due to above line; see h_roller_moi below */
-    /* mass, kg */
-    M_platf: 1 ,     /* [kg] mass of the platform */
-    M_wheel: 0.15 ,  /* [kg] mass of a wheel without rollers */
-    m:       0.05 ,  /* [kg] mass of a roller */
-/* COMPUTED */
-    /* geometry, m, rad */
-    _chi_max_adjust: %pi/(n_rollers) ,          /* angle determining when the switch to next roller happens and its moment of inertia */
-    _chi_max_geom: %pi/(n_rollers - 1) ,      /* angle determining roller geometry, but not moment of inertia */
-    l: r / cos(_chi_max_geom) ,               /* radius of wheel with roller (distance from wheel axis to floor) */
-    h_roller_moi: 2*l*sin(_chi_max_adjust) ,  /* length of roller */
-    /* mass, kg */
-    M_0: M_platf + N_wheels*M_wheel , /* platform with wheels, but without rollers */
-    M:   M_0 + N_wheels*n_rollers*m , /* whole system */
-    /* moment of inertia, kg * m^2 */
-    A: 1/12 * m * (3*r_roller_moi^2 + h_roller_moi^2) ,  /* roller wrt wheel axis */
-    B: (m*r_roller_moi^2)/2 ,                            /* roller wrt roller axis */
-    J_0: (M_wheel*r^2)/2 ,                               /* wheel without rollers wrt wheel axis */
-    J: J_0 + n_rollers*(A + m*r^2) ,                     /* wheel with rollers wrt wheel axis */
-    I_0_S: (M_platf*R^2)/2 ,                             /* platform wrt platform axis */
-    I_S: I_0_S + 6*B + 6*A + 12*R^2*m + 6*r^2*m ,        /* whole system wrt platform axis */
-    
+    n_rollers: n_sharp_rollers + 1,
+    r: 0.05,
+    m: 0.05,
+    R: 0.15,
+    M_platf: 1,
+    M_hub: 0.15,
+    _chi_max_geom: %pi/(n_rollers - 1),
+    l: r / cos(_chi_max_geom),
+    I_0_S: M_platf*R^2/2 + N_wheels*(M_hub*R^2 + M_hub/12*(3*r^2 + 0.01^2)),
+    r_roller_moi: (l - r)/2,
+    _chi_max_adjust: %pi/n_rollers,
+    h_roller_moi: 2*l*sin(_chi_max_adjust),
+    A: 1/12 * m * (3*r_roller_moi^2 + h_roller_moi^2),
+    B: (m*r_roller_moi^2)/2,
+    I_S: I_0_S + N_wheels*n_rollers*((A+B)/2+m*R^2+m*r^2/2),
+    J_0: (M_hub*r^2)/2,
+    M: M_platf + N_wheels*M_hub + N_wheels*n_rollers*m,
     append(
-        [ '_chi_max_adjust = _chi_max_adjust, '_chi_max_geom = _chi_max_geom ],
-        [ 'M = M, 'R = R, 'J = J, 'r = r, 'Lambda = sqrt(I_S / (M * r^2)), 'l = l, 'I_S = I_S, 'B = B ],
-        makelist(alpha[i] = (i - 1) * 2*%pi/N_wheels, i, 1, N_wheels),
-        makelist(kappa[j] = (j - 1) * 2 * _chi_max_adjust, j, 1, n_rollers)
+        [ sin(theta)^2*'M*'R^2=1-cos(theta)^2*'M*'R^2 ], /* just in case some symbolic math systems don't handle this */
+        flatten(makelist([
+            alpha[i] = 2*%pi/N_wheels*(i-1),
+            chis[i] = adjust(chis[i])
+        ], i, 1, N_wheels)),
+        makelist(
+            kappa[i] = 2*%pi/n_sharp_rollers*(i-1)
+        , i, 1, n_sharp_rollers),
+        [
+            '_chi_max_adjust = _chi_max_adjust,
+            'B = float(B),
+            'R = R,
+            'l = l,
+            J = float(J_0 + n_rollers*(A+m*r^2)),
+            'Lambda = float(I_S / (M*l^2)), /* dimensionless parameter defined as in paper */
+            'I_S = float(I_S),
+            'M = M,
+            'r = r
+        ]
     )
 ) $
+for param in ultimate_params(N_wheels, n_rollers) do print(param) $
+/* [wxMaxima: input   end   ] */
 
-adjust(chi) := mod(chi - %pi/(n_rollers + 1), 2*%pi/(n_rollers + 1)) - %pi/(n_rollers + 1);
+/* [wxMaxima: input   start ] */
+_chi_max_adjust;
+/* [wxMaxima: input   end   ] */
 
-params(N_wheels, n_rollers);
+/* [wxMaxima: input   start ] */
+_chi_max_adjust: '_chi_max_adjust where ultimate_params(N_wheels, n_rollers);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+real_M_star():=_M_star_3 where ultimate_params(N_wheels, n_rollers) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+kin_energy(nu_list,chi_list,real_M_star):=float((nu_list . real_M_star . transpose(nu_list)) where [chis[1]=chi_list[1]
+,chis[2]=chi_list[2],chis[3]=chi_list[3]]) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -401,113 +448,6 @@ eqs_coords_explicit: makelist(diff(q[i], t) = rhs_coords[i], i, 1, 3);
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-real_rhss: append(rhs_nu, rhs_chi, rhs_coords) where append(
-    params(N_wheels, n_rollers + 1)
-) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-real_rhss: append(rhs_nu, rhs_chi, rhs_coords) where append(
-    params(N_wheels, n_rollers + 1)
-) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: comment start ]
-TEMPORARY= =====================
-   [wxMaxima: comment end   ] */
-
-/* [wxMaxima: input   start ] */
-N_wheels: 3 $
-n_rollers: 4 $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-nus: [ nu1, nu2, nu3 ];
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-chis: [ chi1, chi2, chi3 ];
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-adjust(chi) := mod(chi - _chi_max_adjust, 2*_chi_max_adjust) - _chi_max_adjust;
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-ultimate_params(N_wheels, n_sharp_rollers) := block([
-        n_rollers, /* actual n rollers - the number we should have when we cut rollers */
-        r, /*  radius of hub (dist from wheel axis to roller axis) */
-        _chi_max_geom, /* half roller width angle if it were to have sharp ends */
-        l, /* radius of wheel (distance from axis to ground) */
-        I_S, /* total moi wrt vert axis */
-        I_0_S, /* moi of platf and hubs wrt vert axis */
-        A, /* moi roller wrt orthogonal axis */
-        B, /* moi roller wrt roller axis */
-        R, /* platform radius */
-        m, /* roller mass */
-        M_platf,
-        M_hub,
-        r_roller_moi,
-        h_roller_moi,
-        _chi_max_adjust, /* value of chi on which rollers switch - i.e. border of cut roller */
-        J_0, /* moi hub wrt wheel axis */
-        M /* total mass */
-    ],
-    n_rollers: n_sharp_rollers + 1,
-    r: 0.05,
-    m: 0.05,
-    R: 0.15,
-    M_platf: 1,
-    M_hub: 0.15,
-    _chi_max_geom: %pi/(n_rollers - 1),
-    l: r / cos(_chi_max_geom),
-    I_0_S: M_platf*R^2/2 + N_wheels*(M_hub*R^2 + M_hub/12*(3*r^2 + 0.01^2)),
-    r_roller_moi: (l - r)/2,
-    _chi_max_adjust: %pi/n_rollers,
-    h_roller_moi: 2*l*sin(_chi_max_adjust),
-    A: 1/12 * m * (3*r_roller_moi^2 + h_roller_moi^2),
-    B: (m*r_roller_moi^2)/2,
-    I_S: I_0_S + N_wheels*n_rollers*((A+B)/2+m*R^2+m*r^2/2),
-    J_0: (M_hub*r^2)/2,
-    M: M_platf + N_wheels*M_hub + N_wheels*n_rollers*m,
-    append(
-        [ sin(theta)^2*'M*'R^2=1-cos(theta)^2*'M*'R^2 ], /* just in case some symbolic math systems don't handle this */
-        flatten(makelist([
-            alpha[i] = 2*%pi/N_wheels*(i-1),
-            chis[i] = adjust(chis[i])
-        ], i, 1, N_wheels)),
-        makelist(
-            kappa[i] = 2*%pi/n_sharp_rollers*(i-1)
-        , i, 1, n_sharp_rollers),
-        [
-            '_chi_max_adjust = _chi_max_adjust,
-            'B = float(B),
-            'R = R,
-            'l = l,
-            J = float(J_0 + n_rollers*(A+m*r^2)),
-            'Lambda = float(I_S / (M*l^2)), /* dimensionless parameter defined as in paper */
-            'I_S = float(I_S),
-            'M = M,
-            'r = r
-        ]
-    )
-) $
-for param in ultimate_params(N_wheels, n_rollers) do print(param) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-_chi_max_adjust;
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-_chi_max_adjust: '_chi_max_adjust where ultimate_params(N_wheels, n_rollers);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: comment start ]
-END OF TEMP=====================
-   [wxMaxima: comment end   ] */
-
-/* [wxMaxima: input   start ] */
 all_the_rhss: (append(rhs_nu, rhs_chi, rhs_coords) where ultimate_params(N_wheels, n_rollers)) $
 /* [wxMaxima: input   end   ] */
 
@@ -545,6 +485,10 @@ new_omni_solve_next(sol, t1) := block([last_point],
 ) $
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: title   start ]
+Решения
+   [wxMaxima: title   end   ] */
+
 /* [wxMaxima: input   start ] */
 showtime: true;
 /* [wxMaxima: input   end   ] */
@@ -552,6 +496,18 @@ showtime: true;
 /* [wxMaxima: input   start ] */
 plot_allowed: true;
 /* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Вокруг своей оси
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: subsect start ]
+Без роликов
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: subsect start ]
+С роликами
+   [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: input   start ] */
 tmp1: new_omni_solve(
@@ -563,6 +519,18 @@ tmp1: new_omni_solve(
 /* [wxMaxima: input   start ] */
 plot_theta(tmp1) $
 /* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+По прямой
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: subsect start ]
+Без роликов
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: subsect start ]
+С роликами
+   [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: input   start ] */
 tmp2: new_omni_solve(
@@ -583,14 +551,17 @@ plot_nu12(tmp2) $
 plot_kin_en(tmp2) $
 /* [wxMaxima: input   end   ] */
 
-/* [wxMaxima: input   start ] */
-real_M_star():=_M_star_3 where ultimate_params(N_wheels, n_rollers) $
-/* [wxMaxima: input   end   ] */
+/* [wxMaxima: section start ]
+С закруткой
+   [wxMaxima: section end   ] */
 
-/* [wxMaxima: input   start ] */
-kin_energy(nu_list,chi_list,real_M_star):=float((nu_list . real_M_star . transpose(nu_list)) where [chis[1]=chi_list[1]
-,chis[2]=chi_list[2],chis[3]=chi_list[3]]) $
-/* [wxMaxima: input   end   ] */
+/* [wxMaxima: subsect start ]
+Без роликов
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: subsect start ]
+С роликами
+   [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: input   start ] */
 tmp3: new_omni_solve(
@@ -612,74 +583,8 @@ plot_kin_en(tmp3);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-all_vars_in_rhs_except_nu_chi: setdifference(
-    setify(append(
-        listofvars(rhs_nu_noinvert),
-        listofvars(_M_star_3)
-    )),
-    setify(append(
-        nu_3,
-        makelist(q[3+i], i, 1, 3)
-    ))
-);
-all_params: setify(map(first, params(N_wheels, n_rollers)));
-subsetp(all_vars_in_rhs_except_nu_chi, all_params);
+plot_chi(tmp3);
 /* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-listofvars(real_rhss);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: comment start ]
-ПОЧЕМУ-ТО ИНТЕГРИРУЕТСЯ ХУЖЕ, ЧЕМ В ВАРИАНТЕ С ТРЁХИНДЕКСНЫМИ СИМВОЛАМИ, И СОВСЕМ НЕ ТАК
-   [wxMaxima: comment end   ] */
-
-/* [wxMaxima: input   start ] */
-tmp: new_omni_solve(
-    1, 0, 0,
-    1, 0.01
-) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-tmp2: omni_solve_next(tmp1, 0.8) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-tmp: append(
-    tmp1,
-    tmp2
-) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_nu12(tmp) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_trajectory(tmp) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_theta(tmp) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_chi(tmp) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-params(N_wheels, n_rollers);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot2d([adjust(x) where params(N_wheels, n_rollers + 1)], [x,-5,5],
- [gnuplot_postamble, "set zeroaxis;"])$
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: title   start ]
-Для презентации
-   [wxMaxima: title   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$
