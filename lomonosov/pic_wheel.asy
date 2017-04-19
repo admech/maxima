@@ -46,7 +46,7 @@ draw((0,0) -- 1.5*(cos(pi/2+pi/6),sin(pi/2+pi/6)), arrow = Arrow(SimpleHead));
 
 // ANGLES
 
-label("$\kappa_i$", 0.8*(cos(-2*pi/8),sin(-2*pi/8)), blue);
+label("$\kappa_j$", 0.8*(cos(-2*pi/8),sin(-2*pi/8)), blue);
 draw((0,0) -- -1.4*(cos(pi/2+pi/6),sin(pi/2+pi/6)), dashed+gray);
 draw((0,0) -- 1.4*(cos(-pi/2),sin(-pi/2)), dashed+gray);
 draw(arc(
