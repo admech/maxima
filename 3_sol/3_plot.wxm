@@ -36,8 +36,8 @@ plot_with_postamble(what, title, postamble) := if plot_allowed then block([term_
     term_id: next_qt_term(),
     plot2d (
         what
-        , [gnuplot_preamble, concat(
-            "set terminal qt ", term_id, " title '", term_id, " - ", title, "';")]
+        , (if listp(get_plot_option(gnuplot_out_file)) then [gnuplot_term, ps] else [gnuplot_preamble, concat(
+            "set terminal qt ", term_id, " title '", term_id, " - ", title, "';")])
         , [gnuplot_postamble, postamble ]
     )
 ) else print() $
