@@ -535,7 +535,7 @@ all_the_rhss: (append(rhs_nu, rhs_chi, rhs_coords) where ultimate_params(N_wheel
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-new_omni_solve_extended(
+omni_solve_extended(
     nu1_0, nu2_0, nu3_0, 
     chi1_0, chi2_0, chi3_0, 
     x_0, y_0, _theta_0,
@@ -547,7 +547,7 @@ new_omni_solve_extended(
     [ t, t0, t1, t_step]
 ) $
 
-new_omni_solve(
+omni_solve(
     nu1_0, nu2_0, nu3_0, 
     t1, t_step
 ) := new_omni_solve_extended(
@@ -557,7 +557,7 @@ new_omni_solve(
     0, t1, t_step
 ) $
 
-new_omni_solve_next(sol, t1) := block([last_point],
+omni_solve_next(sol, t1) := block([last_point],
     last_point: last(sol),
     omni_solve_extended(
         last_point[2], last_point[3], last_point[4], 
@@ -602,14 +602,12 @@ old_plot_stuff_to_file(
    [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: input   start ] */
-tmp1: new_omni_solve(
-    0, 0, 1,
-    1, 0.01
-)$
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_theta(tmp1) $
+plot_stuff_to_file(
+    new_batch_solve(
+        0, 0, 1, 
+        0.01, [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+    )
+) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
@@ -634,35 +632,11 @@ old_plot_stuff_to_file(
    [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: input   start ] */
-tmp2: new_omni_solve(
-    1, 0, 0,
-    1, 0.01
-)$
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_trajectory(tmp2) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_nu12(tmp2) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_kin_en(tmp2) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_stuff(sol) := block(
-    plot_trajectory(sol),
-    plot_theta(sol),
-    plot_nu12(sol),
-    doPlot("nu1, nu2 normed", [
-        lambda([p], _nu1(p) - _nu1(sol[1])),
-        lambda([p], _nu2(p) - _nu2(sol[1]))
-    ], sol),
-    plot_nu3(sol),
-    plot_kin_en(sol)
+plot_stuff_to_file(
+    new_batch_solve(
+        1, 0, 0, 
+        0.01, [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+    )
 ) $
 /* [wxMaxima: input   end   ] */
 
@@ -688,34 +662,12 @@ old_plot_stuff_to_file(
    [wxMaxima: subsect end   ] */
 
 /* [wxMaxima: input   start ] */
-tmp3: new_omni_solve(
-    1, 0, 1,
-    5, 0.01
-)$
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_trajectory(tmp3) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_nu12(tmp3);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_kin_en(tmp3);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-plot_chi(tmp3);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: title   start ]
-НЕ ЗАБЫТЬ УБРАТЬ ВЫВОД ГРАФИКОВ В ФАЙЛ
-   [wxMaxima: title   end   ] */
-
-/* [wxMaxima: input   start ] */
-remove_plot_option(gnuplot_out_file);
+plot_stuff_to_file(
+    new_batch_solve(
+        1, 0, 1, 
+        0.01, [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+    )
+) $
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
