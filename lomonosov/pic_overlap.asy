@@ -43,13 +43,7 @@ draw((0,0) -- 1.5*(cos(pi/2+pi/6),sin(pi/2+pi/6)), arrow = Arrow(SimpleHead));
 
 // ANGLES
 
-label("$\kappa_i$", 0.8*(cos(-pi/2+1.2*pi/12),sin(-pi/2+1.2*pi/12)), blue);
 draw((0,0) -- 1.4*(cos(-pi/3),sin(-pi/3)), dashed+gray);
 draw((0,0) -- 1.4*(cos(-pi/2),sin(-pi/2)), dashed+gray);
-draw(arc(
-    (0,0),
-    1.2*(cos(-pi/2),sin(-pi/2)),
-    1.2*(cos(-pi/3),sin(-pi/3))
-), arrow=Arrow(TeXHead), blue);
 
 draw((0,0) -- (1.6,0), dashed+gray);

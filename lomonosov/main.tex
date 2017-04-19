@@ -16,6 +16,16 @@
 \usepackage{asymptote} %% comes with options inline and attach
 %--------------------------------------
 
+
+% graphicx for graphs
+%--------------------------------------
+\usepackage{graphicx}
+\usepackage{subfig}
+\graphicspath{
+    {./pic/}
+}
+%--------------------------------------
+
 \usetheme{default}
 
 \newtheorem{stmt}{Утверждение}
@@ -275,51 +285,160 @@
 \end{frame}
 
 
-\subsection{Примеры}
+\subsection{Примеры. Сравнение со случаем без роликов}
 
-\subsection{Сравнение со случаем без роликов}
-
-
-% Placing a * after \section means it will not show in the
-% outline or table of contents.
-\section*{Summary}
-
-\begin{frame}{Summary}
-  \begin{itemize}
-  \item
-    The \alert{first main message} of your talk in one or two lines.
-  \item
-    The \alert{second main message} of your talk in one or two lines.
-  \item
-    Perhaps a \alert{third message}, but not more than that.
-  \end{itemize}
-  
-  \begin{itemize}
-  \item
-    Outlook
-    \begin{itemize}
-    \item
-      Something you haven't solved.
-    \item
-      Something else you haven't solved.
-    \end{itemize}
-  \end{itemize}
+\begin{frame}{Вращение вокруг своей оси ($\nu_{1,2}(0) = 0, \nu_3 = 1$)}{Экипаж без роликов}
+    \begin{columns}
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_old_sol__0_0_1__0__10__1e2_trajectory} \\
+            Траектория $X, Y$ \\
+            \includegraphics[width=\linewidth, height=30mm]{_old_sol__0_0_1__0__10__1e2_nu12} \\
+            $\nu_1(t), \nu_2(t)$
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_old_sol__0_0_1__0__10__1e2_theta} \\
+            $\theta(t)$ \\
+            \includegraphics[width=\linewidth, height=30mm]{_old_sol__0_0_1__0__10__1e2_nu3} \\
+            $\nu_3(t)$
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_old_sol__0_0_1__0__10__1e2_kin_en} \\
+            Кинетическая энергия \\
+            \vspace{15pt}
+            Центр экипажа неподвижен, скорость вращения и энергия постоянны.
+    \end{columns}
 \end{frame}
 
-\begin{frame}{Blocks}
-\begin{block}{Block Title}
-You can also highlight sections of your presentation in a block, with it's own title
-\end{block}
-\begin{theorem}
-There are separate environments for theorems, examples, definitions and proofs.
-\end{theorem}
-\begin{example}
-Here is an example of an example block.
-\end{example}
+\begin{frame}{Вращение вокруг своей оси ($\nu_{1,2}(0) = 0, \nu_3 = 1$)}{Экипаж с роликами}
+    \begin{columns}
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_sol__0_0_1__0__3__1e2_trajectory} \\
+            Траектория $X, Y$ \\
+            \includegraphics[width=\linewidth, height=30mm]{_sol__0_0_1__0__3__1e2_nu12} \\
+            $\nu_1(t), \nu_2(t)$
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_sol__0_0_1__0__3__1e2_theta} \\
+            $\theta(t)$ \\
+            \includegraphics[width=\linewidth, height=30mm]{_sol__0_0_1__0__3__1e2_nu3} \\
+            $\nu_3(t)$
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_sol__0_0_1__0__3__1e2_kin_en} \\
+            Кинетическая энергия \\
+            \vspace{15pt}
+            Аналогично случаю с роликами, но есть шум.
+    \end{columns}
 \end{frame}
 
+\begin{frame}{Движение по прямой ($\nu_1(0) = 1, \nu_{2,3} = 0$)}{Экипаж без роликов}
+    \begin{columns}
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_old_sol__1_0_0__0__10__1e2_trajectory} \\
+            Траектория $X, Y$ \\
+            \includegraphics[width=\linewidth, height=30mm]{_old_sol__1_0_0__0__10__1e2_nu12_centered} \\
+            $\nu_{1,2}(t) - \nu_{1,2}(0)$
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_old_sol__1_0_0__0__10__1e2_theta} \\
+            $\theta(t)$ \\
+            \includegraphics[width=\linewidth, height=30mm]{_old_sol__1_0_0__0__10__1e2_nu3} \\
+            $\nu_3(t)$
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_old_sol__1_0_0__0__10__1e2_kin_en} \\
+            Кинетическая энергия \\
+            \vspace{15pt}
+            Экипаж равномерно движется по прямой, не вращаясь, энергия постоянна.
+    \end{columns}
+\end{frame}
 
+\begin{frame}{Движение по прямой ($\nu_1(0) = 1, \nu_{2,3} = 0$)}{Экипаж с роликами}
+    \begin{columns}
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_sol__1_0_0__0__3__1e2_trajectory} \\
+            Траектория $X, Y$ \\
+            \includegraphics[width=\linewidth, height=30mm]{_sol__1_0_0__0__3__1e2_nu12_centered} \\
+            $\nu_{1,2}(t) - \nu_{1,2}(0)$
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_sol__1_0_0__0__3__1e2_theta} \\
+            $\theta(t)$ \\
+            \includegraphics[width=\linewidth, height=30mm]{_sol__1_0_0__0__3__1e2_nu3} \\
+            $\nu_3(t)$
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_sol__1_0_0__0__3__1e2_kin_en_strange} \\
+            Кинетическая энергия \\
+            \vspace{15pt}
+            Энергия не постоянна. Присутствует шум по координатам.
+    \end{columns}
+\end{frame}
 
+\begin{frame}{Движение с закруткой ($\nu_1(0) = 1, \nu_2(0) = 0, \nu_3(0) = 1$)}{Экипаж без роликов}
+    \begin{columns}
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_old_sol__1_0_1__0__230__1e2_trajectory} \\
+            Траектория $X, Y$ \\
+            \includegraphics[width=\linewidth, height=30mm]{_old_sol__1_0_1__0__230__1e2_nu12} \\
+            $\nu_{1,2}(t) - \nu_{1,2}(0)$
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_old_sol__1_0_1__0__230__1e2_theta} \\
+            $\theta(t)$ \\
+            \includegraphics[width=\linewidth, height=30mm]{_old_sol__1_0_1__0__230__1e2_nu3} \\
+            $\nu_3(t)$
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_old_sol__1_0_1__0__230__1e2_kin_en} \\
+            Кинетическая энергия \\
+            \vspace{15pt}
+            Экипаж движется по окружности, равномерно вращаясь вокруг своей оси.
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Движение с закруткой ($\nu_1(0) = 1, \nu_2(0) = 0, \nu_3(0) = 1$)}{Экипаж c роликами}
+    \begin{columns}
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_sol__1_0_1__0__250__1e2_trajectory} \\
+            Траектория $X, Y$ \\
+            \includegraphics[width=\linewidth, height=30mm]{_sol__1_0_1__0__250__1e2_nu12_centered} \\
+            $\nu_{1,2}(t) - \nu_{1,2}(0)$
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{_sol__1_0_1__0__250__1e2_theta} \\
+            $\theta(t)$ \\
+            \includegraphics[width=\linewidth, height=30mm]{_sol__1_0_1__0__250__1e2_nu3} \\
+            $\nu_3(t)$
+        \column{0.33\textwidth}
+            \centering
+            \includegraphics[width=\linewidth, height=30mm]{test123} \\
+            Кинетическая энергия \\
+            \vspace{15pt}
+            Энергия не постоянна. Биения в псевдоскоростях.
+    \end{columns}
+\end{frame}
+
+\begin{frame}{Результаты}
+  \begin{itemize}
+  \item
+    Получены уравнения движения экипажа \alert{с полным набором роликов} в неголономной постановке.
+  \item
+    Показано, что разница с уравнениями для системы без роликов пропорциональна моменту инерции ролика.
+  \item Предложена модель перехода с ролика на ролик.
+  \item
+    Получены численные решения при неподвижных свободных роликах для симметричной конфигурации.
+  \end{itemize}
+  \vspace{10pt}
+  \centering
+  \textcolor{Periwinkle}{Спасибо за внимание!}
+\end{frame}
 
 \end{document}
 

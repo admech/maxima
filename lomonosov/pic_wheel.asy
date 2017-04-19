@@ -46,13 +46,13 @@ draw((0,0) -- 1.5*(cos(pi/2+pi/6),sin(pi/2+pi/6)), arrow = Arrow(SimpleHead));
 
 // ANGLES
 
-label("$\kappa_i$", 0.8*(cos(-3*pi/8),sin(-3*pi/8)), blue);
-draw((0,0) -- 1.4*(cos(-pi/4),sin(-pi/4)), dashed+gray);
+label("$\kappa_i$", 0.8*(cos(-2*pi/8),sin(-2*pi/8)), blue);
+draw((0,0) -- -1.4*(cos(pi/2+pi/6),sin(pi/2+pi/6)), dashed+gray);
 draw((0,0) -- 1.4*(cos(-pi/2),sin(-pi/2)), dashed+gray);
 draw(arc(
     (0,0),
-    1.2*(cos(-pi/2),sin(-pi/2)),
-    1.2*(cos(-pi/4),sin(-pi/4))
+    -1.15*(cos(pi/2+pi/6),sin(pi/2+pi/6)),
+    1.15*(cos(pi/6),sin(pi/6))
 ), arrow=Arrow(TeXHead), blue);
 
 label("$\chi_i$", 1.6*(cos(-pi/12+pi/6),sin(-pi/12+pi/6)), red);

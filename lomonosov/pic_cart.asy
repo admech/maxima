@@ -65,6 +65,7 @@ draw(arc(
 label("$\chi_i$", 1.6*(cos(pi/6),sin(pi/6)) + (0, 0.3), red);
 draw(arc(
     1.3*(cos(pi/6),sin(pi/6)),
+    1.3*(cos(pi/6),sin(pi/6)) + 0.3*(cos(pi/6+pi/4),sin(pi/6 + pi/4)),
     1.3*(cos(pi/6),sin(pi/6)) + 0.3*(cos(pi/6-pi/4),sin(pi/6 - pi/4)),
-    1.3*(cos(pi/6),sin(pi/6)) + 0.3*(cos(pi/6+pi/4),sin(pi/6 + pi/4))
+    CW
 ), arrow=Arrow(TeXHead), red);
