@@ -1,6 +1,6 @@
 # Omni-wheel Vehicle
 
-The work is being done using wxMaxima - many thanks to creators and supporters.
+The work is being done using wxMaxima -- many thanks to creators and supporters.
 
 ## Files:
 
@@ -26,12 +26,12 @@ This is the dependency tree in order of importing (order does matter!). If a nod
   * `1_kin_en.wxm` -- obtaining the formula for kinetic energy.
     * `omni_vect.mac` -- some utils for vectors.
   * `2_eqs.wxm` -- obtaining the equations of motion the same way it was done on paper (using three-index symbols).
+  * `7_eqs_struct_diff.wxm` -- comparison of the "old" and "new" equations in a human-readable form (uses 5 and 6).
   * `README.md` -- this document
 * All the stuff that appears to be non-critical: `0_0_foundation.wxmz`
 `0_omni.wxm`
 `10_yet_another_params_calc.wxm`
 `4_exp`
-`7_eqs_struct_diff.wxm`
 `8_0_foundation.wxm`
 `9_exp_compare`
 `9_solving.wxm`

@@ -1,0 +1,171 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: title   start ]
+Функция для интегрирования с переключениями
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: input   start ] */
+are_close(a, b) := abs(a - b) < 0.0001 $
+
+solve_switching(rhss, vars, initials, indep, initials_by_stop_reason, verbose) := block([iter, stop_reason, n_switches, n_cuts],
+    stop_reason: "",
+    sol: [],
+    n_switches: 0,
+    n_cuts: 0,
+    for i:1 while not(stop_reason = "OK") do(
+        if verbose then print("# of iteration: ", i),
+        iter: rk(rhss, vars, initials, indep),
+        if verbose and length(sol) > 0 then print(
+            "last time point of previous:", first(last(sol))
+        ),
+        if length(iter) > 1 
+            and are_close(first(last(iter)), third(indep)) 
+            and first(last(iter)) - first(iter[length(iter) - 1]) > 2*fourth(indep) 
+        then (
+            if verbose then print("unexpected t = max in last point, cutting it off, # iter = ", i), 
+            iter: rest(iter, -1),
+            n_cuts: n_cuts + 1
+        ),
+        sol: append(sol, rest(iter, -1)),
+        if verbose then print(
+            "first time point of this one:", first(first(iter)),
+            ", last time point of this one:", first(last(iter))
+        ),
+        if verbose then print("current stop_reason: ", stop_reason),
+        if not(stop_reason = "") and first(last(iter)) < third(indep) then (
+            if verbose then print("switching"),
+            initials: initials_by_stop_reason(stop_reason, rest(last(iter), 1)),
+            indep: [ first(indep), first(last(iter)), third(indep), fourth(indep) ],
+            if verbose then (
+                print("new initials:", initials),
+                print("new indep:", indep)
+            ),
+            stop_reason: "",
+            n_switches: n_switches + 1
+        ) else (
+            if verbose then print("terminated at", first(last(sol))),
+            stop_reason: "OK"
+        )
+    ),
+    print("switches:", n_switches, "cuts:", n_cuts),
+    sol
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+circular_shift(l, left) := if left then endcons(pop(l), l) else cons(last(l), rest(l, -1)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+permut(l, perm) := makelist(l[i], i, perm) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+lshift(l) := permut(l, endcons(1, makelist(i, i, 2, length(l)))) $
+rshift(l) := permut(l, cons(length(l), makelist(i, i, 1, length(l) - 1))) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: title   start ]
+Примеры
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: input   start ] */
+fst(p) := [ first(p), second(p) ] $
+scd(p) := [ first(p), third(p) ] $
+trd(p) := [ first(p), fourth(p) ] $
+lst(p) := [ first(p), last(p) ] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Какието синусы-косинусы
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+fun(x, y) := if y < 3 then cos(x) else stop_reason: "y > 3" $
+
+example_trig: solve_switching(
+    [ sin(t), fun(x, y)   ],
+    [ x,      y        ],
+    [ 0.5,    cos(0.5) ],
+    [ t, 0, 100, 0.1   ],
+    lambda([stop_reason, initials], 
+        if stop_reason = "y > 3" then [ first(initials) * (-0.1), second(initials) - 3 ]
+        else error("unknown stop_reason", stop_reason)
+    ),
+    false
+) $
+
+plot2d([[discrete, map(fst, example_trig)], [discrete, map(scd, example_trig)]]) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Три ролика
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Первый поворачивают некоторое время, остальные - в покое. Потом циклический сдвиг.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(stop_reason, example_rol) $
+
+rol(t, t0) := block(if are_close(t, t0) then stop_reason: concat("switch_t0=", t0, "_t=", t) else 1 )$
+
+example_rol: solve_switching(
+    [ rol(t, t0), 0, 0, 0 ],
+    [ x,          y, z, t0            ],
+    [ 0,          0, 0, 5             ],
+    [ t, 0, 100, 0.1   ],
+    lambda([stop_reason, initials], 
+        if ssearch("switch", stop_reason) = 1 then [ third(initials), first(initials), second(initials), fourth(initials) + 5 ]
+        else error("unknown stop_reason", stop_reason)
+    ),
+    false
+) $
+
+print(length(example_rol), stop_reason) $
+
+plot2d([
+    [discrete, map(fst, example_rol)], 
+    [discrete, map(scd, example_rol)],
+    [discrete, map(trd, example_rol)]
+]) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot2d([
+    [discrete, map(fst, example_rol)]
+]) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+get_permut(n, size) := append(makelist(i, i, mod(n, size)+1, size), makelist(i, i, 1, mod(n, size))) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+decipher_rol(p) := block([t, x, y, z, t0],
+    t: first(p),
+    x: second(p),
+    y: third(p),
+    z: fourth(p),
+    t0: last(p),
+
+    cons(t, endcons(t0, permut([x, y, z], get_permut(round(t0/5 - 1), 3))))
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+example_rol_deciphered: map(decipher_rol, example_rol) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot2d([
+    [discrete, map(fst, example_rol_deciphered)], 
+    [discrete, map(scd, example_rol_deciphered)],
+    [discrete, map(trd, example_rol_deciphered)]
+]) $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$
