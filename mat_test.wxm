@@ -1,0 +1,343 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: comment start ]
+helpers
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+mat_E(n) := genmatrix(lambda([i,j], if i = j then 1 else 0), n) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+mat_0(n,m) := genmatrix(lambda([i,j], 0), n, m) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+bs: [b1, b2, b3, b4] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* multiply by this matrix from the left (this . yours) to get yours row n multiplied by mult */
+mult_row(mult, n, size) := mat_E(size) + ematrix(size, size, mult - 1, n, n) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* add row n multiplied by mult to row m */
+add_row(mult, n, m, size) := mat_E(size) + ematrix(size, size, mult, m, n) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+blocks of M*
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_A: matrix(
+    [a11, a12, a13],
+    [a12, a22, a23],
+    [a13, a23, a33]
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_B: matrix(
+    [0,  0,  0,  0 ],
+    [0,  0,  0,  0 ],
+    bs
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_Bt: transpose(_B);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_BE: B*mat_E(4);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+M*
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_M: mat_fullunblocker(matrix(
+    [_A,  _B ],
+    [_Bt, _BE]
+));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+let's invert it using Gauss elimination
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: comment start ]
+step 1: eliminate the 1,2 block:
+multiply each line i > 3 by -b[i-3]/B and add to line 3
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+st1: lreduce(
+    lambda([a,b], a.b),
+    append(
+        makelist(add_row(-bs[i]/B, i+3, 3, 7), i, 1, 4),
+        [ _M ]
+    )
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+a33_add: sum(-bs[i]^2/B, i, 1, 4) $
+a33_1: a33 + a33_add ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_A_1: matrix(
+    [a11, a12, a13   ],
+    [a12, a22, a23   ],
+    [a13, a23, 'a33_1]
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_M_1: mat_fullunblocker(matrix(
+    [_A_1,  mat_0(3,4) ],
+    [_Bt,   _BE        ]
+));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_E_1: mat_fullunblocker(matrix(
+    [mat_E(3),   sum(ematrix(3, 4, -bs[i]/B, 3, i), i, 1, 4) ],
+    [mat_0(4,3), mat_E(4)                                    ]
+));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+step 2: eliminate A_1
+multiply _M_1 and _E_1 by a matrix with A_1^(-1) on the top left and E on the bottom right
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+st2: ratsimp(lreduce(
+    lambda([a,b], a.b),
+    append(
+        [ 
+            mat_fullunblocker(matrix(
+                [ invert(submatrix(4,5,6,7,st1,4,5,6,7)), mat_0(3,4) ],
+                [ mat_0(4,3),                             mat_E(4)   ]
+            ))
+        ],
+        makelist(add_row(-bs[i]/B, i+3, 3, 7), i, 1, 4),
+        [ _M ]
+    )
+));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_A_1_inv: matrix(
+    [a_1_inv_11, a_1_inv_12, a_1_inv_13 ],
+    [a_1_inv_12, a_1_inv_22, a_1_inv_23 ],
+    [a_1_inv_13, a_1_inv_23, a_1_inv_33 ]
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_A_1_inv_real: invert(_A_1);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+step_2_tmp: mat_fullunblocker(matrix(
+    [_A_1_inv,   mat_0(3,4) ],
+    [mat_0(4,3), mat_E(4)   ]
+));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+step_2_tmp_A: mat_fullunblocker(matrix(
+    [invert(_A_1), mat_0(3,4) ],
+    [mat_0(4,3),   mat_E(4)   ]
+)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_M_2: ratsimp(step_2_tmp_A . _M_1);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_E_2: step_2_tmp . _E_1;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+step 3: eliminate b[i]:
+multiply line 3 by -b[i] and add to line i
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+st3: ratsimp(lreduce(
+    lambda([a,b], a.b),
+    append(
+        makelist(add_row(-bs[i], 3, i+3, 7), i, 1, 4),
+        [ 
+            mat_fullunblocker(matrix(
+                [ invert(submatrix(4,5,6,7,st1,4,5,6,7)), mat_0(3,4) ],
+                [ mat_0(4,3),                             mat_E(4)   ]
+            ))
+        ],
+        makelist(add_row(-bs[i]/B, i+3, 3, 7), i, 1, 4),
+        [ _M ]
+    )
+));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_M_3: mat_fullunblocker(matrix(
+    [mat_E(3),   mat_0(3,4) ],
+    [mat_0(4,3), _BE        ]
+)) ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+step_3_tmp: matrix(
+    makelist(0, i, 1, 7),
+    makelist(0, i, 1, 7),
+    makelist(0, i, 1, 7),
+    -_E_2[3] * bs[1],
+    -_E_2[3] * bs[2],
+    -_E_2[3] * bs[3],
+    -_E_2[3] * bs[4]
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_E_3: _E_2 + step_3_tmp;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+step 4: eliminate B
+multiply lines 3+1 .. n by 1/B
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+st4: ratsimp(lreduce(
+    lambda([a,b], a.b),
+    append(
+        makelist(mult_row(1/B, i, 7), i, 4, 7),
+        makelist(add_row(-bs[i], 3, i+3, 7), i, 1, 4),
+        [ 
+            mat_fullunblocker(matrix(
+                [ invert(submatrix(4,5,6,7,st1,4,5,6,7)), mat_0(3,4) ],
+                [ mat_0(4,3),                             mat_E(4)   ]
+            ))
+        ],
+        makelist(add_row(-bs[i]/B, i+3, 3, 7), i, 1, 4),
+        [ _M ]
+    )
+));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_M_4: mat_E(7);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_E_4: genmatrix(lambda([i,j], _E_3[i,j]/(if i>3 then B else 1)), 7);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+check
+replace a_1_inv with its real elements and multiply _M
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: comment start ]
+replace
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+det_A_1: (a11*(a22*'a33_1-a23^2)+a12*(a13*a23-a12*'a33_1)+a13*(a12*a23-a13*a22));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_A_1_inv_real_nodet: ''(_A_1_inv_real * det_A_1) / 'det_A_1;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+subst_A_1_inv(i,j,mat) := subst(_A_1_inv_real_nodet[i,j], _A_1_inv[i,j], mat) $
+_E_4_real: _E_4 $
+for i:1 thru 3 do for j:1 thru 3 do _E_4_real: subst_A_1_inv(i,j,_E_4_real) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_E_4_real;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+multiply
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+subst_A_1_inv_det(i,j,mat) := subst(_A_1_inv_real[i,j], _A_1_inv[i,j], mat) $
+_E_4_real_det: _E_4 $
+for i:1 thru 3 do for j:1 thru 3 do _E_4_real_det: subst_A_1_inv_det(i,j,_E_4_real_det) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp: ratsimp(expand(_M . _E_4_real_det));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp1: subst(a33_1, 'a33_1, tmp);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+ratsimp(expand(tmp1));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+mat
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+e_st4: ratsimp(lreduce(
+    lambda([a,b], a.b),
+    append(
+        makelist(mult_row(1/B, i, 7), i, 4, 7),
+        makelist(add_row(-bs[i], 3, i+3, 7), i, 1, 4),
+        [ 
+            mat_fullunblocker(matrix(
+                [ invert(submatrix(4,5,6,7,st1,4,5,6,7)), mat_0(3,4) ],
+                [ mat_0(4,3),                               mat_E(4)   ]
+            ))
+        ],
+        makelist(add_row(-bs[i]/B, i+3, 3, 7), i, 1, 4),
+        [ mat_E(7) ]
+    )
+));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+ratsimp(expand(e_st4 . _M));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+uber_det_B: ((a11*a22-a12^2)*a33-a11*a23^2+2*a12*a13*a23-a13^2*a22)*B^2+((a12^2-a11*a22)*b4^2+(a12^2-a11*a22)*b3^2+(a12^2-a11*a22)*b2^2+(a12^2-a11*a22)*b1^2)*B $
+/* ((a11*a22-a12^2)*a33-a11*a23^2+2*a12*a13*a23-a13^2*a22)*B   +(a12^2-a11*a22)*b4^2+(a12^2-a11*a22)*b3^2+(a12^2-a11*a22)*b2^2 */
+uber_det: ((a11*a22-a12^2)*a33-a11*a23^2+2*a12*a13*a23-a13^2*a22)*B   +(a12^2-a11*a22)*b4^2+(a12^2-a11*a22)*b3^2+(a12^2-a11*a22)*b2^2+(a12^2-a11*a22)*b1^2 $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+det_bits: [ (a12^2-a11*a22)*b4^2, (a12^2-a11*a22)*b3^2, (a12^2-a11*a22)*b2^2, (a12^2-a11*a22)*b1^2 ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+uber_det - det_bits[4];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+subst(
+    uber_det*B, ((a11*a22-a12^2)*a33-a11*a23^2+2*a12*a13*a23-a13^2*a22)*B^2+((a12^2-a11*a22)*b4^2+(a12^2-a11*a22)*b3^2+(a12^2-a11*a22)*b2^2+(a12^2-a11*a22)*b1^2)*B,
+    subst(uber_det, ((a11*a22-a12^2)*a33-a11*a23^2+2*a12*a13*a23-a13^2*a22)*B+(a12^2-a11*a22)*b4^2+(a12^2-a11*a22)*b3^2+(a12^2-a11*a22)*b2^2+(a12^2-a11*a22)*b1^2, e_st4)
+);
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$
