@@ -239,6 +239,10 @@ pois(_P[2], _P[3], z) where subst_ps;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
+trigsimp((-cos(theta)*M*R*(nu1*cos(theta)*R-nu2*sin(theta)*R)-sin(theta)*M*R*(nu1*sin(theta)*R+nu2*cos(theta)*R))/Lambda);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
 pois(_P[1], sum(nu[j]*_P[j], j, 1, dof), z);
 /* [wxMaxima: input   end   ] */
 

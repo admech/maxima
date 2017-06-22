@@ -54,11 +54,11 @@ solve_switching(rhss, vars, initials, indep, initials_by_stop_reason, verbose) :
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-circular_shift(l, left) := if left then endcons(pop(l), l) else cons(last(l), rest(l, -1)) $
+permut(l, perm) := makelist(l[i], i, perm) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-permut(l, perm) := makelist(l[i], i, perm) $
+nlshift_perm(n, size) := append(makelist(i, i, mod(n, size)+1, size), makelist(i, i, 1, mod(n, size))) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -82,10 +82,10 @@ lst(p) := [ first(p), last(p) ] $
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: input   start ] */
-fun(x, y) := if y < 3 then cos(x) else stop_reason: "y > 3" $
+fun_sincos(x, y) := if y < 3 then cos(x) else stop_reason: "y > 3" $
 
 example_trig: solve_switching(
-    [ sin(t), fun(x, y)   ],
+    [ sin(t), fun_sincos(x, y)   ],
     [ x,      y        ],
     [ 0.5,    cos(0.5) ],
     [ t, 0, 100, 0.1   ],
@@ -100,7 +100,7 @@ plot2d([[discrete, map(fst, example_trig)], [discrete, map(scd, example_trig)]])
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
-Три ролика
+"Три ролика"
    [wxMaxima: section end   ] */
 
 /* [wxMaxima: comment start ]
@@ -118,7 +118,7 @@ example_rol: solve_switching(
     [ 0,          0, 0, 5             ],
     [ t, 0, 100, 0.1   ],
     lambda([stop_reason, initials], 
-        if ssearch("switch", stop_reason) = 1 then [ third(initials), first(initials), second(initials), fourth(initials) + 5 ]
+        if ssearch("switch", stop_reason) = 1 then endcons(fourth(initials) + 5, rshift(rest(initials, -1)))
         else error("unknown stop_reason", stop_reason)
     ),
     false
@@ -140,10 +140,6 @@ plot2d([
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-get_permut(n, size) := append(makelist(i, i, mod(n, size)+1, size), makelist(i, i, 1, mod(n, size))) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
 decipher_rol(p) := block([t, x, y, z, t0],
     t: first(p),
     x: second(p),
@@ -151,20 +147,226 @@ decipher_rol(p) := block([t, x, y, z, t0],
     z: fourth(p),
     t0: last(p),
 
-    cons(t, endcons(t0, permut([x, y, z], get_permut(round(t0/5 - 1), 3))))
+    cons(t, endcons(t0, permut([x, y, z], nlshift_perm(round(t0/5 - 1), 3))))
 ) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
 example_rol_deciphered: map(decipher_rol, example_rol) $
-/* [wxMaxima: input   end   ] */
 
-/* [wxMaxima: input   start ] */
 plot2d([
     [discrete, map(fst, example_rol_deciphered)], 
     [discrete, map(scd, example_rol_deciphered)],
     [discrete, map(trd, example_rol_deciphered)]
 ]) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Омни-экипаж
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Щас будем решать уравнения движения со всеми роликами. Такого ещё не было!
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: comment start ]
+в Maxima не пространств имен, к сожалению...
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(all);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Возьмем всю инфраструктуру из уравнений без роликов и только с нижним роликом:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+batchload("8_solving_old_and_new.wxm") ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Результаты положим в отдельный каталог:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+target_dir: "12_switching";
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Дальше, чтобы понять, надо, чтобы был открыт 8_solving_old_and_new.wxm рядом на разделе Уравнения с роликами.
+Всё в том же порядке делается.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: comment start ]
+Матрицы кинетической энергии и связей берем полностью, псевдоскорости - все:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_M_star $
+_V $
+nu $
+q $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_all_V_chi: genmatrix(lambda([i,j], _V[3+i, j]), N_wheels, dof);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Получим слагаемые в уравнениях:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: comment start ]
+dM*/dt.nu
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_all_D_M_star_dt_dot_nu: (sum(diff(_M_star, q[3+i]) * _all_V_chi[i] . nu, i, 1, N_wheels)) . nu $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+{ P[alpha], L* }
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_all_pois_P_L_star: transpose(makelist(
+    pois(_P[i], L_star, z) where append(
+        subst_ps
+    )
+, i, 1, dof)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+{ P[alpha], nu[mu]*P[mu] }
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_all_sum_pois_P_alpha_P_mu_nu_mu: transpose(makelist(sum(nu[mu] * pois(_P[i], _P[mu], z), mu, 1, dof) where append(
+    subst_ps,
+    [ theta = 0 ] /* easiest way to make Maxima handle sin^2 + cos^2 */
+), i, 1, dof)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+соберем всю правую часть:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_all_rhs_nu_noinvert: (-_all_D_M_star_dt_dot_nu - _all_pois_P_L_star + _all_sum_pois_P_alpha_P_mu_nu_mu) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+Матрицу M* так просто не обратишь из-за размерности.
+Воспользуемся её блочной структурой и формулой Фробениуса:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+frobenius_block_invert(block_mat) := block([A,B,C,D, N,Ainv,BN,AinvBN,CAinv],
+    print("Invoking Frobenius..."),
+    A: block_mat[1][1],
+    B: block_mat[1][2],
+    C: block_mat[2][1],
+    D: block_mat[2][2],
+
+    print("Inverting upper-left corner..."),
+    Ainv: invert(A),
+    print("Doing some multiplications..."),
+    CAinv: C.Ainv,
+    print("Obtaining inverse Schur..."),
+    N: invert(D − CAinv.B),
+    print("Doing other multiplications..."),
+    BN: B.N,
+    AinvBN: Ainv.BN,
+
+    matrix(
+        [ Ainv + AinvBN.CAinv, -AinvBN ],
+        [ -N.CAinv,            N       ]
+    )
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+to_block_mat(mat, upper_left_size) := matrix(
+    [
+        genmatrix(lambda([i, j], mat[i][j]), upper_left_size, upper_left_size),
+        genmatrix(lambda([i, j], mat[i][upper_left_size + j]), upper_left_size, length(mat) - upper_left_size)
+    ],
+    [
+        genmatrix(lambda([i, j], mat[upper_left_size + i][j]), length(mat) - upper_left_size, upper_left_size),
+        genmatrix(lambda([i, j], mat[upper_left_size + i][upper_left_size + j]), length(mat) - upper_left_size, length(mat) - upper_left_size)
+    ]
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp: mat_fullunblocker(matrix(
+    [matrix([0, 1], [1, 0]), matrix([0, 0], [0, 0])], 
+    [matrix([0, 0], [0, 0]), matrix([0, 1], [1, 0])]
+));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+btmp: to_block_mat(
+    tmp,
+    2
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+itmp: frobenius_block_invert(btmp) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+mat_fullunblocker(btmp).mat_fullunblocker(itmp);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_M_star_block: to_block_mat(_M_star, 3) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    block_mat: _M_star_block $
+
+    print("Invoking Frobenius...") $
+    A: block_mat[1][1];
+   B: block_mat[1][2];
+   C: block_mat[2][1];
+   D: block_mat[2][2];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+   print("Inverting upper-left corner...")$
+   Ainv: invert(A)$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+transpose(B).transpose(Ainv).B where(ultimate_params(3, 4));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    print("Doing the multiplications...")$
+    CAinv: C.Ainv$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    print("Obtaining inverse Schur...")$
+    N: invert(D − CAinv.B)$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    print("Doing the multiplications...")$
+    BN: B.N$
+    AinvBN: Ainv.BN$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_M_star_block_inverse: frobenius_block_invert(_M_star_block) $
+print("DON'T STOP CLOSE OR RELOAD !!!! EXPORT TO LISP !!!!") $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+mat_fullunblocker(_M_star).mat_fullunblocker(frobenius_block_invert(_M_star_block));
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
