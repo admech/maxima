@@ -60,6 +60,9 @@ plot_stuff_to_file(sol_name) := block([sol],
     set_gnuplot_out_file(concat(sol_name, "_kin_en")),
     plot_kin_en(sol),
 
+    set_gnuplot_out_file(concat(sol_name, "_chi")),
+    plot_chi(sol),
+
     remove_gnuplot_out_file()
 ) $
 /* [wxMaxima: input   end   ] */
@@ -550,7 +553,7 @@ omni_solve_extended(
 omni_solve(
     nu1_0, nu2_0, nu3_0, 
     t1, t_step
-) := new_omni_solve_extended(
+) := omni_solve_extended(
     nu1_0, nu2_0, nu3_0, 
     0, 0, 0,
     0, 0, 0, 

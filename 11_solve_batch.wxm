@@ -86,7 +86,8 @@ plot_stuff(sol) := block(
         lambda([p], _nu2(p) - _nu2(sol[1]))
     ], sol),
     plot_nu3(sol),
-    plot_kin_en(sol)
+    plot_kin_en(sol),
+    plot_chi(sol)
 ) $
 /* [wxMaxima: input   end   ] */
 
