@@ -6,7 +6,7 @@
    [wxMaxima: title   end   ] */
 
 /* [wxMaxima: input   start ] */
-are_close(a, b) := abs(a - b) < 0.03 /* 0.0001 */ $
+are_close(a, b) := abs(a - b) < 0.03 $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -46,12 +46,15 @@ solve_switching(rhss, vars, initials, indep, initials_by_stop_reason) := block(
             and first(last(iter)) < third(indep) /* there is still time to be integrated */
         then (
             print("switching..."),
+            /*
             print("cutting last point off to start next iter therefrom"),
             sol: append(sol, rest(iter, -1)),
-            print("last point of iter=", last(iter)),
-            initials: initials_by_stop_reason(stop_reason, rest(last(iter), 1)),
-            indep: [ first(indep), first(last(iter)), third(indep), fourth(indep) ],
-            print("new initials=", initials, ", new indep=", indep),
+            */
+            sol: append(sol, iter),
+            print("proceeding from t=", t_dump, ": ", vars_dump),
+            initials: initials_by_stop_reason(stop_reason, vars_dump),
+            indep: [ first(indep), t_dump, third(indep), fourth(indep) ],
+            print("new initials=", float(initials), ", new indep=", indep),
             stop_reason: "",
             sudden_last: false,
             n_switches: n_switches + 1
@@ -78,119 +81,9 @@ lshift(l) := permut(l, endcons(1, makelist(i, i, 2, length(l)))) $
 rshift(l) := permut(l, cons(length(l), makelist(i, i, 1, length(l) - 1))) $
 /* [wxMaxima: input   end   ] */
 
-/* [wxMaxima: title   start ]
-Примеры
-   [wxMaxima: title   end   ] */
-
-/* [wxMaxima: input   start ] */
-/*
-fst(p) := [ first(p), second(p) ] $
-scd(p) := [ first(p), third(p) ] $
-trd(p) := [ first(p), fourth(p) ] $
-lst(p) := [ first(p), last(p) ] $
-*/
-print() $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: section start ]
-Какието синусы-косинусы
-   [wxMaxima: section end   ] */
-
-/* [wxMaxima: input   start ] */
-/*
-fun_sincos(x, y) := if y < 3 then cos(x) else stop_reason: "y > 3" $
-
-example_trig: solve_switching(
-    [ sin(t), fun_sincos(x, y)   ],
-    [ x,      y        ],
-    [ 0.5,    cos(0.5) ],
-    [ t, 0, 100, 0.1   ],
-    lambda([stop_reason, initials], 
-        if stop_reason = "y > 3" then [ first(initials) * (-0.1), second(initials) - 3 ]
-        else error("unknown stop_reason", stop_reason)
-    ),
-    false
-) $
-
-plot2d([[discrete, map(fst, example_trig)], [discrete, map(scd, example_trig)]]) $
-*/
-print("Example skipped") $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: section start ]
-"Три ролика"
-   [wxMaxima: section end   ] */
-
-/* [wxMaxima: comment start ]
-Первый поворачивают некоторое время, остальные - в покое. Потом циклический сдвиг.
-   [wxMaxima: comment end   ] */
-
-/* [wxMaxima: input   start ] */
-kill(stop_reason, example_rol) $
-/*
-rol(t, t0) := block(if are_close(t, t0) then stop_reason: concat("switch_t0=", t0, "_t=", t) else 1 )$
-
-example_rol: solve_switching(
-    [ rol(t, t0), 0, 0, 0 ],
-    [ x,          y, z, t0            ],
-    [ 0,          0, 0, 5             ],
-    [ t, 0, 100, 0.1   ],
-    lambda([stop_reason, initials], 
-        if ssearch("switch", stop_reason) = 1 then endcons(fourth(initials) + 5, rshift(rest(initials, -1)))
-        else error("unknown stop_reason", stop_reason)
-    ),
-    false
-) $
-
-print(length(example_rol), stop_reason) $
-
-plot2d([
-    [discrete, map(fst, example_rol)], 
-    [discrete, map(scd, example_rol)],
-    [discrete, map(trd, example_rol)]
-]) $
-
-plot2d([
-    [discrete, map(fst, example_rol)]
-]) $
-
-decipher_rol(p) := block([t, x, y, z, t0],
-    t: first(p),
-    x: second(p),
-    y: third(p),
-    z: fourth(p),
-    t0: last(p),
-
-    cons(t, endcons(t0, permut([x, y, z], nlshift_perm(round(t0/5 - 1), 3))))
-) $
-
-example_rol_deciphered: map(decipher_rol, example_rol) $
-
-plot2d([
-    [discrete, map(fst, example_rol_deciphered)], 
-    [discrete, map(scd, example_rol_deciphered)],
-    [discrete, map(trd, example_rol_deciphered)]
-]) $
-*/
-print("Example skipped") $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: section start ]
-Омни-экипаж
-   [wxMaxima: section end   ] */
-
 /* [wxMaxima: comment start ]
 Щас будем решать уравнения движения со всеми роликами. Такого ещё не было!
    [wxMaxima: comment end   ] */
-
-/* [wxMaxima: comment start ]
-в Maxima не пространств имен, к сожалению...
-   [wxMaxima: comment end   ] */
-
-/* [wxMaxima: input   start ] */
-/* kill(all); */
-print() $
-/* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
 Возьмем всю инфраструктуру из уравнений без роликов и только с нижним роликом:
@@ -315,17 +208,6 @@ we will use chi to notify the solver that the wheels should switch.
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-/* adjusted chis are plotted, but we have access to vanilla ones */
-'_chi_max_adjust = _chi_max_adjust; /* 2 * %pi / (n_rollers + 1) */
-dispfun(adjust);
-dispfun(plot_chi);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-chis;
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
 get_wheels_switching_message(chi_rhss) := apply(concat, append(
     [ "switching " ],
     makelist(
@@ -338,26 +220,69 @@ get_wheels_switching_message(chi_rhss) := apply(concat, append(
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-_all_rhs_chi;
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
 /* maxima just can't get elements of stuff by index within makelist - see next cell */
 tmps: makelist(tmps[i], i, 1, N_wheels);
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: comment start ]
+in the old solutions it had n+1 in the denominator for some reason...
+   [wxMaxima: comment end   ] */
+
 /* [wxMaxima: input   start ] */
-_all_rhs_chi_switching: makelist(
-    if not(are_close(abs(adjust(chis[i])), _chi_max_adjust)) then tmps[i] else stop_reason: "switching",
+_chi_max_adjust: %pi/n_rollers;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+should switch iff close to border and actually crossing it. epic.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+close_and_crossing(the_chi, the_rhs) :=
+        are_close(abs(adjust(the_chi)), _chi_max_adjust)
+        and (
+            (adjust(the_chi) < _chi_max_adjust and the_rhs > 0)
+            or
+            (adjust(the_chi) > -_chi_max_adjust and the_rhs < 0)
+        ) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* HARDCODED TIME STEP 0.01 !!!!! */
+just_crossed(the_chi, the_rhs) :=
+    /* below the upper border,                declining,        was above */
+    (adjust(the_chi) < _chi_max_adjust   and  the_rhs < 0  and  adjust(the_chi) - the_rhs*0.01 > _chi_max_adjust )
+    or
+    /* above the lower border,                growing,          was below */
+    (adjust(the_chi) > -_chi_max_adjust  and  the_rhs > 0  and  adjust(the_chi) - the_rhs*0.01 < -_chi_max_adjust)
+$
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+float(_chi_max_adjust);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+chi_outside_boundaries(the_chi) := the_chi > _chi_max_adjust or the_chi < -_chi_max_adjust $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_all_rhs_chi_switching() := makelist(
+    if not(
+        /* close_and_crossing(chis[i], tmps[i]) */
+        /* 'just_crossed(chis[i], tmps[i]) */
+        chi_outside_boundaries(chis[i])
+    ) then tmps[i] else (
+        [
+            stop_reason: "switching",
+            vars_dump: [ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta,    nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12 ],
+            t_dump: t
+        ]
+    ),
     i, 1, N_wheels
 ) where makelist(
     tmps[i] = _all_rhs_chi[i],
     i, 1, N_wheels
-);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-_all_rhs_chi_switching: _all_rhs_chi;
+) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
@@ -371,10 +296,6 @@ _all_rhs_coords: makelist((_V . nu)[i][1], i, 1, 3);
 /* [wxMaxima: comment start ]
 ULTIMATE PARAMS
    [wxMaxima: comment end   ] */
-
-/* [wxMaxima: input   start ] */
-_chi_max_adjust: %pi/n_rollers;
-/* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
 all_ultimate_params(N_wheels, n_rollers) := block([
@@ -416,8 +337,8 @@ all_ultimate_params(N_wheels, n_rollers) := block([
     append(
         [ sin(theta)^2*'M*'R^2=1-cos(theta)^2*'M*'R^2 ], /* just in case some symbolic math systems don't handle this */
         flatten(makelist([
-            alpha[i] = 2*%pi/N_wheels*(i-1),
-            chis[i] = adjust(chis[i])
+            alpha[i] = 2*%pi/N_wheels*(i-1) /* ,
+            chis[i] = adjust(chis[i]) */ /* let's not adjust chi, but just terminate when they exceed */
         ], i, 1, N_wheels)),
         makelist(
             kappa[i] = 2*_chi_max_adjust*(i-1)
@@ -443,48 +364,16 @@ for param in all_ultimate_params(N_wheels, n_rollers) do print(param) $
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-_all_all_the_rhss: (append(_all_rhs_nu, _all_rhs_chi_switching, _all_rhs_coords) where all_ultimate_params(N_wheels, n_rollers)) $
+_all_all_the_rhss() := (append(_all_rhs_nu, _all_rhs_chi_switching(), _all_rhs_coords) where all_ultimate_params(N_wheels, n_rollers)) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
-CHECKING
+rhs with free rollers depends on the corresponding nus
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
 listofvars(all_the_rhss);
-listofvars(_all_all_the_rhss);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: comment start ]
-check that M* star is inverted properly
-   [wxMaxima: comment end   ] */
-
-/* [wxMaxima: input   start ] */
-    (invert_M(_M_star) . _M_star) where [
-        alpha[1] = 0,
-        chi1 = 0,
-        l = 1,
-        r = 0.5,
-        B = 0.01,
-        R = 1,
-        alpha[2] = 2*%pi/3,
-        chi2 = 0,
-        alpha[3] = 4*%pi/3,
-        chi3 = 0,
-        J = 1, 
-        kappa[2] = %pi/2,
-        Lambda = 1,
-        kappa[3] = %pi,
-        kappa[4] = 3*%pi/2,
-        I_S = 1,
-        kappa[1] = 0,
-        M = 1
-    ];
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-length(_all_rhs_nu);
-length(_all_all_the_rhss);
+listofvars(_all_all_the_rhss());
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
@@ -500,10 +389,94 @@ should understand how to rearrange variables: nu[s].
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
+extract_free_nus(initials, wheel_idx) := block(
+    [start_idx],
+    start_idx:
+        3+3+N_wheels /* skip big nus, big coords and chis */
+        + (wheel_idx-1)*(n_rollers-1) /* skip other wheels' free nus */
+    ,
+    makelist(initials[j], j, start_idx + 1, start_idx + n_rollers - 1)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp_initials: [ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta,    nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12 ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+extract_free_nus(tmp_initials, 1);
+extract_free_nus(tmp_initials, 2);
+extract_free_nus(tmp_initials, 3);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+next_free_nus(chi_val, phi_rhs, free_nus) := block(
+    [shifted_nus],
+    if chi_val > _chi_max_adjust then (
+        shifted_nus: rshift(free_nus),
+        shifted_nus[1]: phi_rhs
+    ) else if chi_val < -_chi_max_adjust then (
+        shifted_nus: lshift(free_nus),
+        shifted_nus[length(shifted_nus)]: phi_rhs
+    ) else shifted_nus: free_nus,
+    shifted_nus
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+next_free_nus(1,  100500, [nu4, nu5, nu6]);
+next_free_nus(-1, 100500, [nu4, nu5, nu6]);
+next_free_nus(0,  100500, [nu4, nu5, nu6]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+get_phi_rhss(initials) := makelist((_V . nu)[i][1], i, 3 + N_wheels + 1, 3 + 2*N_wheels) where append(
+    all_ultimate_params(N_wheels, n_rollers),
+    [ nu1 = initials[1], nu2 = initials[2] ],
+    makelist(chis[i] = initials[3+i], i, 1, N_wheels)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+get_phi_rhss([ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta,    nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12 ]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+do_switch(initials) := block(
+    /* [ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta,    nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12 ],*/
+    [ chi_vals, phi_rhss ],
+    chi_vals: makelist(initials[i], i, 4, 3+N_wheels),
+    phi_rhss: get_phi_rhss(initials),
+    append(
+        makelist(initials[i], i, 1, 3), /* big nus */
+        makelist(adjust(chi_vals[i]), i, 1, N_wheels),
+        makelist(initials[i], i, 3+N_wheels+1, 3+N_wheels+3), /* xytheta */
+        xreduce(
+            append,
+            makelist(
+                next_free_nus(chi_vals[i], phi_rhss[i], extract_free_nus(initials, i)),
+                i, 1, N_wheels
+            )
+        )
+    )
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+float(do_switch(
+    [nu1,nu2,nu3,1,-1,0,x,y,theta,nu4,nu5,nu6,nu7,nu8,nu9,nu10,nu11,nu12]
+));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
 omni_switcher(stop_reason, initials) := block(
         print("OMNI_SWITCHER INVOKED"),
         if ssearch("switch", stop_reason) = 1
-        then (print("SWIIIITCH!"), initials)
+        then (
+            print("SWIIIITCH!"),
+            /* initials */
+            do_switch(initials)
+        )
         else error("unknown stop_reason", stop_reason)) $
 /* [wxMaxima: input   end   ] */
 
@@ -512,7 +485,7 @@ SOLUTIONS
    [wxMaxima: title   end   ] */
 
 /* [wxMaxima: input   start ] */
-showtime: true;
+showtime: false;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -523,138 +496,26 @@ plot_allowed: true;
 target_dir: "12_switching";
 /* [wxMaxima: input   end   ] */
 
-/* [wxMaxima: input   start ] */
-/* NO SWITCH */
-omni_solve_extended(
-    nu1_0, nu2_0, nu3_0, 
-    chi1_0, chi2_0, chi3_0, 
-    x_0, y_0, _theta_0,
-    t0, t1, t_step
-) := rk(
-    all_the_rhss,
-    [ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta    ],
-    [ nu1_0, nu2_0, nu3_0, chi1_0, chi2_0, chi3_0, x_0, y_0, _theta_0 ],
-    [ t, t0, t1, t_step]
-) $
-
-_chi_max_adjust: %pi/5;
-
-plot_stuff_to_file(
-    new_batch_solve(
-        0, 0, 1, 
-        0.01, [ 0.05, 1, 1.2 ]
-    )
-) $
-/* [wxMaxima: input   end   ] */
+/* [wxMaxima: comment start ]
+free rollers will be put to the tail of the coords vector so that plot functions did not mix them up
+   [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-/* SWITCH */
-omni_solve_extended(
-    nu1_0, nu2_0, nu3_0, 
-    chi1_0, chi2_0, chi3_0, 
-    x_0, y_0, _theta_0,
-    t0, t1, t_step
-) := solve_switching(
-    _all_all_the_rhss,
-    [ nu1,   nu2,   nu3,   nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12, chi1,   chi2,   chi3,   x,   y,   theta    ],
-    [ nu1_0, nu2_0, nu3_0, 0,   0,   0,   0,   0,   0,   0,    0,    0,    chi1_0, chi2_0, chi3_0, x_0, y_0, _theta_0 ],
-    [ t, t0, t1, t_step],
-    omni_switcher,
-    true
-) $
+print("INITIALIZING RHS...") $
+the_rhss: _all_all_the_rhss() $
 
-_chi_max_adjust: %pi/n_rollers;
-
-plot_stuff_to_file(
-    new_batch_solve(
-        0, 0, 1, 
-        0.01, [ 0.05, 1, 1.2 ]
-    )
-) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-/* NEW NO FREE */
-
-_all_all_the_rhss_no_free: makelist(
-    _all_all_the_rhss[i],
-    i,
-    append(
-        [1,2,3],
-        makelist(j, j, dof+1, length(_all_all_the_rhss))
-    )
-) $
-
-omni_solve_extended(
-    nu1_0, nu2_0, nu3_0, 
-    chi1_0, chi2_0, chi3_0, 
-    x_0, y_0, _theta_0,
-    t0, t1, t_step
-) := rk(
-    _all_all_the_rhss_no_free where makelist(nu[i] = 0, i, 4, dof),
-    [ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta    ],
-    [ nu1_0, nu2_0, nu3_0, chi1_0, chi2_0, chi3_0, x_0, y_0, _theta_0 ],
-    [ t, t0, t1, t_step]
-) $
-
-_chi_max_adjust: %pi/n_rollers;
-
-plot_stuff_to_file(
-    new_batch_solve(
-        0, 0, 1, 
-        0.01, [ 0.05, 1, 1.2 ]
-    )
-) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-/* FREE TRAILING NO FREE */
-
+print("PUTTING FREE ROLLERS TO THE END") $
 _all_all_the_rhss_free_trailing: makelist(
-    _all_all_the_rhss[i],
+    the_rhss[i],
     i,
     append(
         [1,2,3],
-        makelist(j, j, dof+1, length(_all_all_the_rhss)),
+        makelist(j, j, dof+1, length(the_rhss)),
         makelist(j, j, 4,     dof)
     )
 ) $
 
-omni_solve_extended(
-    nu1_0, nu2_0, nu3_0, 
-    chi1_0, chi2_0, chi3_0, 
-    x_0, y_0, _theta_0,
-    t0, t1, t_step
-) := rk(
-    _all_all_the_rhss_free_trailing where makelist(nu[i] = 0, i, 4, dof),
-    [ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta,    nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12 ],
-    [ nu1_0, nu2_0, nu3_0, chi1_0, chi2_0, chi3_0, x_0, y_0, _theta_0, 0,   0,   0,   0,   0,   0,   0,    0,    0    ],
-    [ t, t0, t1, t_step]
-) $
-
-_chi_max_adjust: %pi/n_rollers;
-
-plot_stuff_to_file(
-    new_batch_solve(
-        0, 0, 1, 
-        0.01, [ 0.05, 1, 1.2 ]
-    )
-) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-/* FREE TRAILING NO FREE SWITCHING */
-
-_all_all_the_rhss_free_trailing: makelist(
-    _all_all_the_rhss[i],
-    i,
-    append(
-        [1,2,3],
-        makelist(j, j, dof+1, length(_all_all_the_rhss)),
-        makelist(j, j, 4,     dof)
-    )
-) $
-
+print("OVERRIDING SOLVER") $
 omni_solve_extended(
     nu1_0, nu2_0, nu3_0, 
     chi1_0, chi2_0, chi3_0, 
@@ -668,8 +529,7 @@ omni_solve_extended(
     omni_switcher
 ) $
 
-_chi_max_adjust: %pi/n_rollers;
-
+print("SOLVING") $
 plot_stuff_to_file(
     new_batch_solve(
         0, 0, 10, 
@@ -686,6 +546,29 @@ for i:1 thru length(_sol__0_0_10__0__0_15__1e2) do print(
     float(adjust(_sol__0_0_10__0__0_15__1e2[i][6])), is(are_close(abs(adjust(_sol__0_0_10__0__0_15__1e2[i][6])), _chi_max_adjust)),
     float(adjust(_sol__0_0_10__0__0_15__1e2[i][7])), is(are_close(abs(adjust(_sol__0_0_10__0__0_15__1e2[i][7])), _chi_max_adjust))
 );
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp: "";
+tmp1: 0;
+tmp2: "";
+
+rk(
+    if x > 1 then [tmp1:x, tmp2:"dfsd"] else 1,
+    x,
+    0.7,
+    [ t, 0, 1, 0.1]
+);
+
+tmp;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp1;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp2;
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
