@@ -16,7 +16,7 @@ are_very_close(a, b) := abs(a - b) < 0.0001 $
 /* [wxMaxima: input   start ] */
 /* this should be better */
 solve_switching(rhss, vars, initials, indep, initials_by_stop_reason) := block(
-    [iter, stop_reason, n_switches, n_cuts],
+    [iter, stop_reason, n_switches, n_cuts, last_point, stepover_iter],
     stop_reason: "",
     sol: [],
     n_switches: 0,
@@ -27,7 +27,8 @@ solve_switching(rhss, vars, initials, indep, initials_by_stop_reason) := block(
         print("starting iteration #", i),
         iter: rk(rhss, vars, initials, indep),
 
-        print("iteration done, length=", length(iter), ", last point=", last(iter)),
+        last_point: last(iter),
+        print("iteration done, length=", length(iter), ", last point=", last_point),
         print("current stop_reason=", stop_reason),
 
         if is((third(indep) - second(indep))/fourth(indep) > length(iter)) then (
@@ -51,6 +52,11 @@ solve_switching(rhss, vars, initials, indep, initials_by_stop_reason) := block(
             sol: append(sol, rest(iter, -1)),
             */
             sol: append(sol, iter),
+            
+            print("stepping over the switch..."),
+            stepover_iter: rk(rhss, vars, rest(last_point,1), [ first(indep), first(last_point), first(last_point) + fourth(indep), fourth(indep) ]),
+            print("acquired stepover, length=", length(stepover_iter), ", last=", last(stepover_iter), ", vars_dump=", vars_dump, ", t_dump=", t_dump),
+
             print("proceeding from t=", t_dump, ": ", vars_dump),
             initials: initials_by_stop_reason(stop_reason, vars_dump),
             indep: [ first(indep), t_dump, third(indep), fourth(indep) ],
@@ -485,7 +491,7 @@ SOLUTIONS
    [wxMaxima: title   end   ] */
 
 /* [wxMaxima: input   start ] */
-showtime: false;
+showtime: true;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -536,6 +542,34 @@ plot_stuff_to_file(
         0.01, [ 0.05, 0.15 ]
     )
 ) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+print("SOLVING WITH HIGH PRECISION") $
+plot_stuff_to_file(
+    new_batch_solve(
+        0, 0, 10, 
+        0.0001, [ 0.05, 0.15 ]
+    )
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+print("SOLVING WITH HIGH PRECISION") $
+solve_switching(
+    _all_all_the_rhss_free_trailing where makelist(nu[i] = 0, i, 4, dof),
+    [ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta,    nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12 ],
+    /* [ nu1_0, nu2_0, nu3_0, chi1_0, chi2_0, chi3_0, x_0, y_0, _theta_0, 0,   0,   0,   0,   0,   0,   0,    0,    0    ], */
+    [ 0.0,0.0,9.997313652903694,-0.7848552284913849,-0.7848552284913849,-0.7848552284913849,0.0,0.0,
+0.5232368189942561,1.152280929182663,-1.672658889827075,-1.152280929182663,1.152280929182663,-1.672658889827075,-1.152280929182663,1.152280929182663,-
+1.672658889827075,-1.152280929182663 ],
+    [ t, 0.0933, 0.5, 0.01],
+    omni_switcher
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_chi(%);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
