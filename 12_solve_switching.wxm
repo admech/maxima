@@ -280,7 +280,8 @@ _all_rhs_chi_switching() := makelist(
     ) then tmps[i] else (
         [
             stop_reason: "switching",
-            vars_dump: [ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta,    nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12 ],
+            /* vars_dump: [ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta,    nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12 ], */
+            vars_dump: solvable_vars(),
             t_dump: t
         ]
     ),
@@ -395,13 +396,21 @@ should understand how to rearrange variables: nu[s].
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
+verbose: false;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
 extract_free_nus(initials, wheel_idx) := block(
-    [start_idx],
+    [start_idx, result],
+    vprint("    extracting free nus for i=", wheel_idx, " from ", initials),
     start_idx:
         3+3+N_wheels /* skip big nus, big coords and chis */
         + (wheel_idx-1)*(n_rollers-1) /* skip other wheels' free nus */
     ,
-    makelist(initials[j], j, start_idx + 1, start_idx + n_rollers - 1)
+    vprint("        start_idx=", start_idx),
+    result: makelist(initials[j], j, start_idx + 1, start_idx + n_rollers - 1),
+    vprint("        result=", result),
+    result
 ) $
 /* [wxMaxima: input   end   ] */
 
@@ -418,13 +427,20 @@ extract_free_nus(tmp_initials, 3);
 /* [wxMaxima: input   start ] */
 next_free_nus(chi_val, phi_rhs, free_nus) := block(
     [shifted_nus],
+    vprint("    calculating next free nus for chi=", chi_val, ", phi_rhs=", phi_rhs, ", free_nus=", free_nus),
     if chi_val > _chi_max_adjust then (
+        vprint("          wheel rotates counter-clockwise, therefore the freed-up roller will have #=1, others shifted forward, last - dropped."),
         shifted_nus: rshift(free_nus),
         shifted_nus[1]: phi_rhs
     ) else if chi_val < -_chi_max_adjust then (
+        vprint("          wheel rotates clockwise, therefore the freed-up roller will have #=n, others shifted backward, first - dropped."),
         shifted_nus: lshift(free_nus),
         shifted_nus[length(shifted_nus)]: phi_rhs
-    ) else shifted_nus: free_nus,
+    ) else (
+        vprint("          this wheel is not switching"),
+        shifted_nus: free_nus
+    ),
+    vprint("        result=", shifted_nus),
     shifted_nus
 ) $
 /* [wxMaxima: input   end   ] */
@@ -437,25 +453,29 @@ next_free_nus(0,  100500, [nu4, nu5, nu6]);
 
 /* [wxMaxima: input   start ] */
 get_phi_rhss(initials) := block(
-    print("    calculating rhs for phi..."),
-    print("    nu1=", initials[1], ", nu2=", initials[2], ", chi=", makelist(chis[i] = initials[3+i], i, 1, N_wheels)),
-    print(nus),
-    makelist((_V . nu)[i][1], i, 3 + N_wheels + 1, 3 + 2*N_wheels) where append(
+    [ result ],
+    vprint("    calculating rhs for phi..."),
+    vprint("        nu1=", initials[1], ", nu2=", initials[2], ", chi=", makelist(chis[i] = initials[3+i], i, 1, N_wheels)),
+    vprint("        nu123=", nus),
+    result: makelist((_V . nu)[i][1], i, 3 + N_wheels + 1, 3 + 2*N_wheels) where append(
         all_ultimate_params(N_wheels, n_rollers),
         [ nu1 = initials[1], nu2 = initials[2] ],
         makelist(chis[i] = initials[3+i], i, 1, N_wheels)
-    )
+    ),
+    vprint("        phi_rhss=", result),
+    result
 ) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-get_phi_rhss([ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta,    nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12 ]);
+get_phi_rhss([ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta,    nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12 ]) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
 do_switch(initials) := block(
     /* [ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta,    nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12 ],*/
     [ chi_vals, phi_rhss ],
+    vprint("Calculating next initials..."),
     chi_vals: makelist(initials[i], i, 4, 3+N_wheels),
     phi_rhss: get_phi_rhss(initials),
     append(
@@ -539,14 +559,6 @@ omni_solve_extended(
     [ t, t0, t1, t_step],
     omni_switcher
 ) $
-
-print("SOLVING") $
-plot_stuff_to_file(
-    new_batch_solve(
-        0, 0, 10, 
-        0.01, [ 0.05, 0.15 ]
-    )
-) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
@@ -554,8 +566,8 @@ UP NEXT:
 
 1) FREE NUS:
     WHAT HAPPENS WITH THE FREE NUS ?!??
-    WHY DO THEY HAVE NON-ZERO RHS ??? (DO THEY???)
-    WHY DO THEIR VALUES BECOME ZERO ON SWITCH ???
+    WHY DO THEY HAVE NON-ZERO RHS ??? (DO THEY???) -- they do, because they are coupled with nu3
+    WHY DO THEIR VALUES BECOME ZERO ON SWITCH ??? -- beacause of vars_dump and that you are dumb and dump not all vars but only nus
 
 2) DECIPHER:
     HOW DO WE PLOT STUFF ???
@@ -567,6 +579,75 @@ UP NEXT:
     THAT WILL BE AVAILABLE VIA THE AGENT THAT EXPOSES A PORT I CAN WRITE PARAMS INTO AND IT WILL SEND ME BACK THE RESULTS,
     AND ALL THIS WILL BE SCHEDULED FROM MY LOCAL MACHINE (JENKINS?).
    [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+vprint([args]) := if verbose then apply(print, args) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+verbose:false;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+msgvars(message) := buildq([message], lambda([var], 
+    vprint(
+        t, " - ", message, ": ", ''var, "; vars: ",
+        /* nu1, nu2, nu3, nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12 */
+        vars_dump
+    ),
+    var
+)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dumping() := lambda([var],
+    vars_dump: solvable_vars(),
+    var
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+solvable_rhss: _all_all_the_rhss_free_trailing where makelist(nu[i] = 0, i, 4, dof) $
+solvable_vars() := [ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta,    nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12 ] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+printable_rhss() := makelist(
+    ('msgvars(concat(solvable_vars()[i], " :"))(solvable_rhss[i])),
+    i, 1, length(solvable_vars())
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+JUST A SWITCH
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+sol: solve_switching(
+    solvable_rhss,
+    solvable_vars(),
+    [0.0,0.0,9.99746279868765,-0.7570996161486709,-0.7570996161486709,-0.7570996161486709,0.0,0.0,0.5047330774324473
+,1.043774980965087,-1.561097497153088,-1.043774980965087,1.043774980965087,-1.561097497153088,-1.043774980965087,1.043774980965087,-1.561097497153088,-
+1.043774980965087],
+    [ t, 0.09, 0.1, 0.01],
+    omni_switcher
+) $
+for p in sol do print(p) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+A FAST SOLUTION
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+print("SOLVING") $
+plot_stuff_to_file(
+    new_batch_solve(
+        0, 0, 10, 
+        0.01, [ 0.05, 0.15 ]
+    )
+) $
+/* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$
