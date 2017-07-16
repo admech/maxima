@@ -131,3 +131,11 @@ invert_M(mat) := block(
     )
     /*)*/
 ) $
+
+/* Currying (from http://maxima.sourceforge.net/docs/manual/maxima_36.html) */
+curry (f, [a]) := buildq ([f, a], lambda ([[x]], apply (f, append (a, x)))) $
+
+/* lambdas are just too verbose in Maxima */
+/* usage: [a1,a2,a3] -> (a1 + a2 + a3) */
+"->" (args, expr) ::= buildq([args, expr], lambda(args, expr));
+infix("->");

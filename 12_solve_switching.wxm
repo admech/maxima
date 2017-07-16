@@ -21,22 +21,22 @@ solve_switching(rhss, vars, initials, indep, initials_by_stop_reason) := block(
     sol: [],
     n_switches: 0,
     n_cuts: 0,
-    print("starting with initials =", initials, ", indep =", indep),
+    vprint("starting with initials =", initials, ", indep =", indep),
     for i:1 while not(stop_reason = "OK") do(
 
-        print("starting iteration #", i),
+        vprint("starting iteration #", i),
         iter: rk(rhss, vars, initials, indep),
 
         last_point: last(iter),
-        print("iteration done, length=", length(iter), ", last point=", last_point),
-        print("current stop_reason=", stop_reason),
+        vprint("iteration done, length=", length(iter), ", last point=", last_point),
+        vprint("current stop_reason=", stop_reason),
 
         if is((third(indep) - second(indep))/fourth(indep) > length(iter)) then (
-            print("0_0 too short iteration! - maybe switching ???"),
+            vprint("0_0 too short iteration! - maybe switching ???"),
             if are_very_close(first(last(iter)), third(indep)) then (
-                print("last time point = max !"),
+                vprint("last time point = max !"),
                 if not(stop_reason = "") then (
-                    print("cutting off last point that's accidentally t=max"),
+                    vprint("cutting off last point that's accidentally t=max"),
                     iter: rest(iter, -1)
                 )
             )
@@ -46,26 +46,26 @@ solve_switching(rhss, vars, initials, indep, initials_by_stop_reason) := block(
             not(stop_reason = "") /* calculation stopped from inside */
             and first(last(iter)) < third(indep) /* there is still time to be integrated */
         then (
-            print("switching..."),
+            vprint("switching..."),
             /*
-            print("cutting last point off to start next iter therefrom"),
+            vprint("cutting last point off to start next iter therefrom"),
             sol: append(sol, rest(iter, -1)),
             */
             sol: append(sol, iter),
             
-            print("stepping over the switch..."),
+            vprint("stepping over the switch..."),
             stepover_iter: rk(rhss, vars, rest(last_point,1), [ first(indep), first(last_point), first(last_point) + fourth(indep), fourth(indep) ]),
-            print("acquired stepover, length=", length(stepover_iter), ", last=", last(stepover_iter), ", vars_dump=", vars_dump, ", t_dump=", t_dump),
+            vprint("acquired stepover, length=", length(stepover_iter), ", last=", last(stepover_iter), ", vars_dump=", vars_dump, ", t_dump=", t_dump),
 
-            print("proceeding from t=", t_dump, ": ", vars_dump),
+            vprint("proceeding from t=", t_dump, ": ", vars_dump),
             initials: initials_by_stop_reason(stop_reason, vars_dump),
             indep: [ first(indep), t_dump, third(indep), fourth(indep) ],
-            print("new initials=", float(initials), ", new indep=", indep),
+            vprint("new initials=", float(initials), ", new indep=", indep),
             stop_reason: "",
             sudden_last: false,
             n_switches: n_switches + 1
         ) else (
-            print("terminated okay. adding last iter to sol in full."),
+            vprint("terminated okay. adding last iter to sol in full."),
             sol: append(sol, iter),
             stop_reason: "OK"
         )
@@ -136,7 +136,7 @@ dM*/dt.nu
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-_all_D_M_star_dt_dot_nu: (sum(diff(_M_star, q[3+i]) * _all_V_chi[i] . nu, i, 1, N_wheels)) . nu $
+_all_D_M_star_dt_dot_nu: (sum(diff(_M_star, q[3+i]) * _all_V_chi[i] . nu, i, 1, N_wheels)) . nu ;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
@@ -181,7 +181,7 @@ _all_M_star_inverse: invert_M(_M_star) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-/* too huge, don't try to print - will read Maxima output forever */
+/* too huge, don't try to vprint - will read Maxima output forever */
 _all_rhs_nu_explicit: _all_M_star_inverse . _all_rhs_nu_noinvert $
 /* [wxMaxima: input   end   ] */
 
@@ -363,7 +363,7 @@ all_ultimate_params(N_wheels, n_rollers) := block([
         ]
     )
 ) $
-for param in all_ultimate_params(N_wheels, n_rollers) do print(param) $
+for param in all_ultimate_params(N_wheels, n_rollers) do vprint(param) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
@@ -402,14 +402,14 @@ verbose: false;
 /* [wxMaxima: input   start ] */
 extract_free_nus(initials, wheel_idx) := block(
     [start_idx, result],
-    vprint("    extracting free nus for i=", wheel_idx, " from ", initials),
+    print("    extracting free nus for i=", wheel_idx, " from ", initials),
     start_idx:
         3+3+N_wheels /* skip big nus, big coords and chis */
         + (wheel_idx-1)*(n_rollers-1) /* skip other wheels' free nus */
     ,
-    vprint("        start_idx=", start_idx),
+    print("        start_idx=", start_idx),
     result: makelist(initials[j], j, start_idx + 1, start_idx + n_rollers - 1),
-    vprint("        result=", result),
+    print("        result=", result),
     result
 ) $
 /* [wxMaxima: input   end   ] */
@@ -427,20 +427,20 @@ extract_free_nus(tmp_initials, 3);
 /* [wxMaxima: input   start ] */
 next_free_nus(chi_val, phi_rhs, free_nus) := block(
     [shifted_nus],
-    vprint("    calculating next free nus for chi=", chi_val, ", phi_rhs=", phi_rhs, ", free_nus=", free_nus),
+    print("    calculating next free nus for chi=", chi_val, ", phi_rhs=", phi_rhs, ", free_nus=", free_nus),
     if chi_val > _chi_max_adjust then (
-        vprint("          wheel rotates counter-clockwise, therefore the freed-up roller will have #=1, others shifted forward, last - dropped."),
+        print("          wheel rotates counter-clockwise, therefore the freed-up roller will have #=1, others shifted forward, last - dropped."),
         shifted_nus: rshift(free_nus),
         shifted_nus[1]: phi_rhs
     ) else if chi_val < -_chi_max_adjust then (
-        vprint("          wheel rotates clockwise, therefore the freed-up roller will have #=n, others shifted backward, first - dropped."),
+        print("          wheel rotates clockwise, therefore the freed-up roller will have #=n, others shifted backward, first - dropped."),
         shifted_nus: lshift(free_nus),
         shifted_nus[length(shifted_nus)]: phi_rhs
     ) else (
-        vprint("          this wheel is not switching"),
+        print("          this wheel is not switching"),
         shifted_nus: free_nus
     ),
-    vprint("        result=", shifted_nus),
+    print("        result=", shifted_nus),
     shifted_nus
 ) $
 /* [wxMaxima: input   end   ] */
@@ -454,15 +454,15 @@ next_free_nus(0,  100500, [nu4, nu5, nu6]);
 /* [wxMaxima: input   start ] */
 get_phi_rhss(initials) := block(
     [ result ],
-    vprint("    calculating rhs for phi..."),
-    vprint("        nu1=", initials[1], ", nu2=", initials[2], ", chi=", makelist(chis[i] = initials[3+i], i, 1, N_wheels)),
-    vprint("        nu123=", nus),
+    print("    calculating rhs for phi..."),
+    print("        nu1=", initials[1], ", nu2=", initials[2], ", chi=", makelist(chis[i] = initials[3+i], i, 1, N_wheels)),
+    print("        nu123=", nus),
     result: makelist((_V . nu)[i][1], i, 3 + N_wheels + 1, 3 + 2*N_wheels) where append(
         all_ultimate_params(N_wheels, n_rollers),
         [ nu1 = initials[1], nu2 = initials[2] ],
         makelist(chis[i] = initials[3+i], i, 1, N_wheels)
     ),
-    vprint("        phi_rhss=", result),
+    print("        phi_rhss=", result),
     result
 ) $
 /* [wxMaxima: input   end   ] */
@@ -475,7 +475,7 @@ get_phi_rhss([ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta,    
 do_switch(initials) := block(
     /* [ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta,    nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12 ],*/
     [ chi_vals, phi_rhss ],
-    vprint("Calculating next initials..."),
+    print("Calculating next initials..."),
     chi_vals: makelist(initials[i], i, 4, 3+N_wheels),
     phi_rhss: get_phi_rhss(initials),
     append(
@@ -501,10 +501,10 @@ float(do_switch(
 
 /* [wxMaxima: input   start ] */
 omni_switcher(stop_reason, initials) := block(
-        print("OMNI_SWITCHER INVOKED"),
+        vprint("OMNI_SWITCHER INVOKED"),
         if ssearch("switch", stop_reason) = 1
         then (
-            print("SWIIIITCH!"),
+            vprint("SWIIIITCH!"),
             /* initials */
             do_switch(initials)
         )
@@ -532,10 +532,10 @@ free rollers will be put to the tail of the coords vector so that plot functions
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-print("INITIALIZING RHS...") $
+vprint("INITIALIZING RHS...") $
 the_rhss: _all_all_the_rhss() $
 
-print("PUTTING FREE ROLLERS TO THE END") $
+vprint("PUTTING FREE ROLLERS TO THE END") $
 _all_all_the_rhss_free_trailing: makelist(
     the_rhss[i],
     i,
@@ -545,39 +545,63 @@ _all_all_the_rhss_free_trailing: makelist(
         makelist(j, j, 4,     dof)
     )
 ) $
+/* [wxMaxima: input   end   ] */
 
-print("OVERRIDING SOLVER") $
+/* [wxMaxima: input   start ] */
+vprint("OVERRIDING SOLVER") $
+
 omni_solve_extended(
     nu1_0, nu2_0, nu3_0, 
     chi1_0, chi2_0, chi3_0, 
     x_0, y_0, _theta_0,
+    free_nus,
     t0, t1, t_step
 ) := solve_switching(
     _all_all_the_rhss_free_trailing where makelist(nu[i] = 0, i, 4, dof),
     [ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   theta,    nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12 ],
-    [ nu1_0, nu2_0, nu3_0, chi1_0, chi2_0, chi3_0, x_0, y_0, _theta_0, 0,   0,   0,   0,   0,   0,   0,    0,    0    ],
+    [ nu1_0, nu2_0, nu3_0, chi1_0, chi2_0, chi3_0, x_0, y_0, _theta_0, free_nus[1], free_nus[2], free_nus[3], free_nus[4], free_nus[5], free_nus[6], free_nus[7], free_nus[8], free_nus[9] ],
     [ t, t0, t1, t_step],
     omni_switcher
+) $
+
+omni_solve(
+    nu1_0, nu2_0, nu3_0, 
+    t1, t_step
+) := omni_solve_extended(
+    nu1_0, nu2_0, nu3_0, 
+    0, 0, 0,
+    0, 0, 0,
+    makelist(0, i, 1, dof - 3),
+    0, t1, t_step
+) $
+
+omni_solve_next(sol, t1) := block([last_point],
+    last_point: last(sol),
+    omni_solve_extended(
+        last_point[2], last_point[3], last_point[4], 
+        last_point[5], last_point[6], last_point[7], 
+        last_point[8], last_point[9], last_point[10],
+        rest(last_point, 10),
+        last_point[1], t1, (last_point[1] - first(sol)[1])/(length(sol) - 1)
+    )
 ) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
 UP NEXT:
 
-1) FREE NUS:
-    WHAT HAPPENS WITH THE FREE NUS ?!??
-    WHY DO THEY HAVE NON-ZERO RHS ??? (DO THEY???) -- they do, because they are coupled with nu3
-    WHY DO THEIR VALUES BECOME ZERO ON SWITCH ??? -- beacause of vars_dump and that you are dumb and dump not all vars but only nus
-
 2) DECIPHER:
     HOW DO WE PLOT STUFF ???
     THAT IS, GET nu_j(t) where j > 3 ? AND phi_j(t). using chi, adjust and the switcher.
+
+*) WHY THE HELL DO WE HAVE NU[I] = 0 FOR 4..DOF !??!?!?!?!?!?
 
 3) PARALLELIZE:
     CAN I PACK IT INTO A VM AND SCHEDULE ON A CLUSTER ?
     E.G. MAKE A VIRTUALBOX IMAGE WITH MAXIMA, THE PROGRAM (SHOULD IT BE REWRITTEN?) AND A LAUNCHER AGENT (JAVA?)
     THAT WILL BE AVAILABLE VIA THE AGENT THAT EXPOSES A PORT I CAN WRITE PARAMS INTO AND IT WILL SEND ME BACK THE RESULTS,
     AND ALL THIS WILL BE SCHEDULED FROM MY LOCAL MACHINE (JENKINS?).
+
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -590,7 +614,7 @@ verbose:false;
 
 /* [wxMaxima: input   start ] */
 msgvars(message) := buildq([message], lambda([var], 
-    vprint(
+    print(
         t, " - ", message, ": ", ''var, "; vars: ",
         /* nu1, nu2, nu3, nu4, nu5, nu6, nu7, nu8, nu9, nu10, nu11, nu12 */
         vars_dump
@@ -612,11 +636,15 @@ solvable_vars() := [ nu1,   nu2,   nu3,   chi1,   chi2,   chi3,   x,   y,   thet
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-printable_rhss() := makelist(
+vprintable_rhss() := makelist(
     ('msgvars(concat(solvable_vars()[i], " :"))(solvable_rhss[i])),
     i, 1, length(solvable_vars())
 );
 /* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: title   start ]
+SOLUTIONS
+   [wxMaxima: title   end   ] */
 
 /* [wxMaxima: comment start ]
 JUST A SWITCH
@@ -632,7 +660,127 @@ sol: solve_switching(
     [ t, 0.09, 0.1, 0.01],
     omni_switcher
 ) $
-for p in sol do print(p) $
+for p in sol do vprint(p) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+NEW PLOTS
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+s(i,j) := (i-1)*(n_rollers-1)+(j-1) $
+nusi(nu, i, j) := nu[3+s(i,j)] $
+pnusi(p, i, j) := p[1+9+s(i,j)] $
+/* for i:1 thru N_wheels do for j:2 thru n_rollers do print(i, j, nusi(nu, i, j), pnusi(pp,i,j)) $ */
+plot_wheel(i, sol) := plot(
+    makelist(
+        [discrete,makelist([p[1],pnusi(p,i,j)],p,sol)],
+        j, 2, n_rollers
+    ),
+    concat("wheel ", i)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+next_contact_roller_index(p_cur, p_prev, cur_index) := block([deriv],
+    deriv: (_chi1(p_cur)-_chi1(p_prev))/(first(p_cur) - first(p_prev)),
+    print(deriv),
+    cur_index + (if deriv > 1000 then 1 else if deriv < -1000 then -1 else 0)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+next_contact_roller_indices(p_cur, p_prev, cur_indices) := block([derivs],
+    derivs: makelist((p_cur[4+i]-p_prev[4+i] /*chi*/)/(first(p_cur) - first(p_prev)), i, 1, N_wheels),
+    makelist(cur_indices[i] + (if derivs[i] > 1000 then 1 else if derivs[i] < -1000 then -1 else 0), i, 1, N_wheels)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+get_sol_contact_rollers(sol) := block([cur_indices, sol_from_second],
+    cur_indices: makelist(1, i, 1, N_wheels),
+    makelist(
+        append(
+            [sol[i][1]],
+            cur_indices: next_contact_roller_indices(sol[i], sol[i-1], cur_indices)
+        ),
+        i, 2, length(sol)
+    )
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_contact_rollers(sol) := block([sol_rollers, cur_indices, sol_from_second, forsol],
+    cur_indices: makelist(1, i, 1, N_wheels),
+    sol_rollers: get_sol_contact_rollers(sol),
+    forsol(p_fun) := [discrete, makelist([p[1], p_fun(p)], p, sol_rollers)],
+    plot(append(
+            makelist(
+                forsol([p] -> p[i+1]),
+                i, 1, N_wheels
+            ),
+            [ forsol([p] -> 0), forsol([p] -> (n_rollers + 1)) ]
+        ), "contact rollers"
+    )
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_stuff_to_file(sol_name) := block([sol],
+    sol: eval_string(sol_name),
+
+    set_gnuplot_out_file(concat(sol_name, "_trajectory")),
+    plot_trajectory(sol),
+
+    set_gnuplot_out_file(concat(sol_name, "_theta")),
+    plot_theta(sol),
+
+    set_gnuplot_out_file(concat(sol_name, "_nu12")),
+    plot_nu12(sol),
+
+    set_gnuplot_out_file(concat(sol_name, "_nu12_centered")),
+    doPlot("nu1, nu2 normed", [
+        lambda([p], _nu1(p) - _nu1(sol[1])),
+        lambda([p], _nu2(p) - _nu2(sol[1]))
+    ], sol),
+
+    set_gnuplot_out_file(concat(sol_name, "_nu3")),
+    plot_nu3(sol),
+
+    set_gnuplot_out_file(concat(sol_name, "_kin_en")),
+    plot_kin_en(sol),
+
+    set_gnuplot_out_file(concat(sol_name, "_chi")),
+    plot_chi(sol),
+
+    for i:1 thru N_wheels do (
+        set_gnuplot_out_file(concat(sol_name, "_wheel_", i)),
+        plot_wheel(i, sol)
+    ),
+
+    set_gnuplot_out_file(concat(sol_name, "_contact_rollers")),
+    plot_contact_rollers(sol),
+
+    remove_gnuplot_out_file()
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+real_M_star() := ((transpose(_V) . _M . _V) where 
+    all_ultimate_params(N_wheels, n_rollers)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+kin_energy(nu_list, chi_list, real_M_star) := (nu_list . real_M_star . transpose(nu_list)) where makelist(chis[i] = adjust(chi_list[i]), i, 1, N_wheels) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+kin_en(sol_pt, real_M_star) := kin_energy(
+    append([ sol_pt[2], sol_pt[3], sol_pt[4] ], rest(sol_pt, length(sol_pt) - (dof-3))),
+    [ sol_pt[5], sol_pt[6], sol_pt[7] ],
+    real_M_star
+) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
@@ -640,13 +788,99 @@ A FAST SOLUTION
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
-print("SOLVING") $
+showtime: true $
+vprint("SOLVING") $
 plot_stuff_to_file(
     new_batch_solve(
         0, 0, 10, 
-        0.01, [ 0.05, 0.15 ]
+        0.001, [ 0.05, 0.15 ]
     )
 ) $
+showtime: false $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: title   start ]
+Расшифровка
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: comment start ]
+Нужно по sol восстановить поведение каждой переменной и номера роликов в контакте в каждый момент
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+length(_sol__0_0_10__0__0_15__1e3);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+showtime: true $
+vprint("SOLVING") $
+plot_stuff_to_file(
+    new_batch_solve(
+        0, 0, 10, 
+        0.01, [ 0.05, 0.1, 0.15 ]
+    )
+) $
+showtime: false $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+sol: _sol__0_0_10__0__0_15__1e3 $
+contact_roller_index: 1 $
+verbose: true $
+cur_indices: [1,1,1] $
+for i:2 thru length(sol) do (
+    prev: sol[i-1],
+    cur: sol[i],
+    contact_roller_index: next_contact_roller_index(cur, prev, contact_roller_index),
+    cur_indices: next_contact_roller_indices(cur, prev, cur_indices),
+    vprint(first(cur), _chi1(cur), deriv, contact_roller_index, cur_indices)
+);
+verbose: false $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_chi(_sol__0_0_10__0__0_15__1e3) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_wheel(3, _sol__0_0_10__0__0_15__1e3) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+float(_all_rhs_nu_noinvert where append(
+    all_ultimate_params(N_wheels, n_rollers),
+    [
+    nu1=0,
+    nu2=0,
+    nu3=10,
+    nu4=0,
+    nu5=0,
+    nu6=0,
+    nu7=0,
+    nu8=0,
+    nu9=0,
+    nu10=0,
+    nu11=0,
+    nu12=0,
+    chi1=%pi/6,
+    chi2=%pi/6,
+    chi3=%pi/6
+    ]
+));
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+rest(_all_rhs_nu_noinvert, 3) 
+/* where all_ultimate_params(N_wheels, n_rollers) */
+;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+-rest(diff(_M_star, t).nu, 3) where makelist(
+    diff(chis[i], t) = (_V.nu)[3+i],
+    i, 1, N_wheels
+);
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */

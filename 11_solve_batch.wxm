@@ -41,7 +41,7 @@ batch_solve(
         eval_string(concat(sol_name, ": current_sol $")),
         eval_string(concat("save(\"", target_dir, "/", sol_name, ".lisp\", ", sol_name, ") ;")),
         previous_sol: current_sol,
-        full_sol: append(full_sol, current_sol),
+        full_sol: append(full_sol, rest(current_sol, 1)),
         print(absolute_real_time() - wall_clock_start)
     ),
     wall_clock_start: absolute_real_time(),
