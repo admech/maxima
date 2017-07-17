@@ -1,0 +1,109 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: input   start ] */
+batchload("12_solve_switching.wxm") ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: title   start ]
+SOLUTIONS
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: input   start ] */
+showtime: true;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_allowed: true;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+target_dir: "12_switching";
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+JUST A SWITCH
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+sol: solve_switching(
+    solvable_rhss,
+    solvable_vars(),
+    [0.0,0.0,9.99746279868765,-0.7570996161486709,-0.7570996161486709,-0.7570996161486709,0.0,0.0,0.5047330774324473
+,1.043774980965087,-1.561097497153088,-1.043774980965087,1.043774980965087,-1.561097497153088,-1.043774980965087,1.043774980965087,-1.561097497153088,-
+1.043774980965087],
+    [ t, 0.09, 0.1, 0.01],
+    omni_switcher
+) $
+for p in sol do vprint(p) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+A FAST SOLUTION
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+showtime: true $
+vprint("SOLVING") $
+plot_stuff_to_file(
+    new_batch_solve(
+        0, 0, 10, 
+        0.001, [ 0.05, 0.15 ]
+    )
+) $
+showtime: false $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+length(_sol__0_0_10__0__0_15__1e3);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Self-rotation
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_stuff_to_file(
+    new_batch_solve(
+        0, 0, 1, 
+        0.001, [ 0.2, 0.4, 0.6, 0.8, 1.0 ]
+    )
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Straight
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_stuff_to_file(
+    new_batch_solve(
+        1, 0, 0, 
+        0.001, [ 0.2, 0.4, 0.6, 0.8, 1.0 ]
+    )
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Wrench
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+plot_stuff_to_file(
+    new_batch_solve(
+        1, 0, 1, 
+        0.001, [ 0.2, 0.4, 0.6, 0.8, 1.0 ]
+    )
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+UP NEXT:
+
+1) MAKE WHEEL PLOTS CENTERED (LIKE NU12_CENTERED)
+
+2) UNDERSTAND WHY NU1 HAS SPIKE ON STRAIGHT
+   [wxMaxima: comment end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$
