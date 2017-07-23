@@ -1,0 +1,10 @@
+defstruct(
+	model(
+		rhss,
+		vars,
+		initials,
+		domain
+	)
+) $
+
+simulate(mdl) := rk(mdl@rhss, mdl@vars, mdl@initials, mdl@domain) $

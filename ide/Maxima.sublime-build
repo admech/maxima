@@ -1,0 +1,8 @@
+{
+  "cmd": [
+  	"/Applications/Maxima.app/Contents/Resources/maxima.sh",
+  	"--quiet",
+  	"--init-mac", "$file_path/$file_name", // /Users/data/Yandex.Disk/work/aspa/zobova/maxima/lib/main.mac
+  	"--batch-string", "quit()$"
+  ]
+}

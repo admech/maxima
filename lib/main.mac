@@ -1,0 +1,10 @@
+batchload("util/lang/module.mac") $
+
+import("util/lang/extensions.mac") $
+import("util/solve/rk_adapter.mac") $
+
+import("model/exp/oscillator.mac") $
+sol: simulate(oscillator) $
+print(sol) $
+
+print("done") $ 

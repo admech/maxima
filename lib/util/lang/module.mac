@@ -1,0 +1,6 @@
+print("Initializing module management...") $
+
+import(filename) := block(
+	print("Importing", filename),
+	load(filename)
+) $
