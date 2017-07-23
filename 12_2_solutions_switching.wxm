@@ -105,5 +105,14 @@ UP NEXT:
 2) UNDERSTAND WHY NU1 HAS SPIKE ON STRAIGHT
    [wxMaxima: comment end   ] */
 
+/* [wxMaxima: input   start ] */
+plot_stuff_to_file(
+    new_batch_solve(
+        1, 0, 1, 
+        0.001, [ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 ]
+    )
+) $
+/* [wxMaxima: input   end   ] */
+
 /* Maxima can't load/batch files which end with a comment! */
 "Created with wxMaxima"$
