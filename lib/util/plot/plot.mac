@@ -6,38 +6,76 @@ init() := block(
 	defstruct(
 		Plot(
 			devnull,
-			console,
-			windows
+			list,
+			windows,
+			console
 		)
 	),
 	plot : new(Plot),
 
-	plot@devnull : buildq([log],
-		lambda([sol],
-			log@info("plot > /dev/null")
+	defstruct(
+		Output(
+			name,
+			show
 		)
 	),
 
-	plot@console : buildq([log],
-		lambda([sol],
-			block(
-				log@info("Solution:"),
-				for p in sol do log@info(p),
-				log@info("End of solution.")
+	plot@devnull : new(Output(
+		"sending to /dev/null",
+		buildq([log],
+			lambda([sol, plot_vars],
+				log@info("plot > /dev/null")
 			)
 		)
-	),
+	)),
 
-	plot@windows : buildq([log],
-		lambda([sol],
-			block(
-				log@info("Gnuplotting..."),
-				plot2d (
-					[ discrete, makelist(first(p), p, sol) ],
-					/* [ gnuplot_term, dumb ] */
-					[ gnuplot_preamble, "set terminal qt persist" ]
+	plot@list : new(Output(
+		"listing the solution into the console",
+		buildq([log],
+			lambda([sol, plot_vars],
+				block(
+					log@info("Solution:"),
+					for p in sol do log@info(p),
+					log@info("End of solution.")
 				)
 			)
 		)
-	)
+	)),
+
+	plot@windows : new(Output(
+		"plotting in windows",
+		buildq([log],
+			lambda([sol, plot_vars],
+				block(
+					log@info("Gnuplotting to QT window..."),
+					plot2d (
+						makelist(
+							[ discrete, makelist(var(p), p, sol) ],
+							var, plot_vars
+						),
+						[ gnuplot_preamble, "set terminal qt persist" ]
+					)
+				)
+			)
+		)
+	)),
+
+	plot@console : new(Output(
+		"plotting in the console",
+		buildq([log],
+			lambda([sol, plot_vars],
+				block(
+					log@info("Gnuplotting to console..."),
+					plot2d (
+						makelist(
+							[ discrete, makelist(var(p), p, sol) ],
+							var, plot_vars
+						),
+						[ gnuplot_term, dumb ]
+					)
+				)
+			)
+		)
+	))
+
 ) $

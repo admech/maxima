@@ -1,0 +1,21 @@
+defstruct(
+	Model(
+		name,
+		rk_adapter,
+		plot_vars
+	)
+) $
+
+defstruct(
+	RKAdapter(
+		rhss,
+		vars,
+		initials,
+		domain
+	)
+) $
+
+simulate(Mdl) := block([rka],
+	rka : Mdl@rk_adapter,
+	rk(rka@rhss, rka@vars, rka@initials, rka@domain)
+) $

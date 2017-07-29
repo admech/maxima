@@ -2,9 +2,9 @@
 	Modules are needed to isolate namespaces and to manage dependencies.
 	(note: module.mac wants logging.mac which wants timing.mac, hence these can not be modules).
 */
-print("------------------------------") $
-print("------------------------------") $
-print("------------------------------") $
+print("______________________________") $
+print("______________________________") $
+print("______________________________") $
 print("") $
 
 batchload("util/infra/env.mac") $
@@ -13,7 +13,7 @@ batchload("util/infra/timing.mac") $
 batchload("util/infra/logging.mac") $
 batchload("util/lang/module.mac") $
 
-batchload("util/solve/rk_adapter.mac") $
+batchload("util/solve/model.mac") $
 import("util/plot/plot.mac") $
 
 import("util/infra/pipeline.mac") $
@@ -22,12 +22,17 @@ log : get_logger("main", log_level_info) $
 
 log@debug(hr()) $
 
-batchload("model/exp/oscillator.mac") $
+import("model/exp/oscillator.mac") $
 
 log_program_start() $
 
 
-run(Oscillator(), windows_pipeline()) $
+run(
+	Oscillator(), 
+	pipeline(
+		plot@console
+	)
+) $
 
 
 log_program_finish() $

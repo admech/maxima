@@ -5,7 +5,6 @@ init() := block( /* module declaration */
 
 	defstruct(
 		Pipeline(
-			name,
 			solver,
 			plotter
 		)
@@ -15,37 +14,23 @@ init() := block( /* module declaration */
 	run : buildq([log],                /* private fields */
 		lambda([model, P],             /* function's arguments */
 			block([sol, showtime_bak], /* function's intenal variables */
-				log@info("Solving", model@name, "with", P@name, "..."),
+				log@info("Solving", model@name, "and", P@plotter@name, "..."),
 				timeit_start(),
 				sol: P@solver(model),
 				timeit_show(),
 				log@info("Done."),
 
 				log@info("Plotting..."),
-				P@plotter(sol),
+				P@plotter@show(sol, model@plot_vars),
 				log@info("Done.")
 			)
 		)
 	),
 
 	/* PIPELINES */
-
-	console_pipeline() := new(Pipeline(
-		"Verbose pipeline printing solution to console", 
+	pipeline(plotter) := new(Pipeline(
 		simulate,
-		plot@console
-	)),
-
-	silent_pipeline() := new(Pipeline(
-		"Silent pipeline printing solution to /dev/null", 
-		simulate,
-		plot@devnull
-	)),
-
-	windows_pipeline() := new(Pipeline(
-		"Pipeline plotting stuff in windows.", 
-		simulate,
-		plot@windows
+		plotter
 	))
 
 ) $
