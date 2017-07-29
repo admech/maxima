@@ -12,8 +12,19 @@ init() := block(
 			[ t, 0, 10, 0.01 ]
 		)),
 		[
-			new(PlotVar("x", [p] -> [ p[1], p[2] ])),
-			new(PlotVar("y", [p] -> [ p[1], p[3] ]))
+			new(PlotGroup(
+				"coords",
+				[
+					new(PlotVar("x(t)", [p] -> [ p[1], p[2] ])),
+					new(PlotVar("y(t)", [p] -> [ p[1], p[3] ]))
+				]
+			)),
+			new(PlotGroup(
+				"phase",
+				[
+					new(PlotVar("y(x)", [p] -> [ p[2], p[3] ]))
+				]
+			))
 		]
 	)),
 

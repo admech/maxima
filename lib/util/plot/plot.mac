@@ -1,11 +1,12 @@
 init() := block(
 	[
-		log : get_logger("plot", log_level_info),
-		plot_to_terminal
+		log : get_logger("plot", log_level_debug),
+		console_term,
+		window_term
 	],
-	
+
 	defstruct(
-		Plot( /* different options how to show */
+		Plot( /* different ways of showing */
 			devnull,
 			list,
 			windows,
@@ -14,33 +15,42 @@ init() := block(
 	),
 	plot : new(Plot),
 
-	defstruct(
+	defstruct( /* a way of showing */
 		Output(
 			name, /* printed to log at pipeline launch */
-			show  /* [sol, plot_vars] -> < present visually > */
+			show  /* [sol, plot_groups] -> < present visually > */
 		)
 	),
 
-	defstruct(
+	defstruct( /* a figure */
+		PlotGroup(
+			name, /* plot title */
+			vars  /* list of PlotVars */
+		)
+	),
+
+	defstruct( /* a line on a figure */
 		PlotVar(
 			name, /* shown in legend */
 			get   /* [p] -> [ absciss, ordinate ] */
 		)
 	),
 
+	/* show nothing */
 	plot@devnull : new(Output(
 		"sending to /dev/null",
 		buildq([log],
-			lambda([sol, plot_vars],
+			lambda([sol, plot_groups],
 				log@info("plot > /dev/null")
 			)
 		)
 	)),
 
+	/* print all points of the solution */
 	plot@list : new(Output(
 		"listing the solution into the console",
 		buildq([log],
-			lambda([sol, plot_vars],
+			lambda([sol, plot_groups],
 				block(
 					log@info("Solution:"),
 					for p in sol do log@info(p),
@@ -50,46 +60,68 @@ init() := block(
 		)
 	)),
 
+	/* QT windows */
 	plot@windows : new(Output(
 		"plotting in windows",
 		buildq([log],
-			lambda([sol, plot_vars],
-				block(
-					log@info("Gnuplotting to QT window..."),
-					plot_to_terminal(
-						sol, plot_vars,
-						[ gnuplot_preamble, "set terminal qt persist" ]
-					)
+			lambda([sol, plot_groups],
+				plot_groups_separately(
+					"Gnuplotting to QT window...", /* FOR SOME REASON ONLY THE LAST WINDOW STICKS...*/
+					window_term()
 				)
 			)
 		)
 	)),
+	window_num : 0,
+	next_window_num() := (window_num: window_num + 1),
+	window_term() := lambda([group],
+		[ gnuplot_preamble, sconcat(
+				"set terminal qt ", next_window_num(),
+				" persist",
+				" title '", group@name, "'"
+		) ]
+	),
 
+	/* ASCII art in the console */
 	plot@console : new(Output(
 		"plotting in the console",
-		buildq([log],
-			lambda([sol, plot_vars],
-				block(
-					log@info("Gnuplotting to console..."),
-					plot_to_terminal(
-						sol, plot_vars,
-						[ gnuplot_term, dumb ]
-					)
+		buildq([log, console_term],
+			lambda([sol, plot_groups],
+				plot_groups_separately(
+					"Gnuplotting to console...", 
+					console_term
 				)
 			)
 		)
 	)),
+	console_term(group) := [ gnuplot_term, dumb ],
 
-	plot_to_terminal(sol, plot_vars, terminal) := plot2d (
-		makelist(
-			[ discrete, makelist(var@get(p), p, sol) ],
-			var, plot_vars
-		),
-		cons(
-			legend,
-			makelist(var@name, var, plot_vars)
-		),
-		terminal
-	)
+	/*
+		FUNTIONS THAT DO THE ACTUAL PLOTTING
+	*/
+
+	plot_groups_separately(msg, term) := block(
+		log@info(msg),
+		for group in plot_groups do
+			plot_to_terminal(
+				sol, group@vars,
+				term(group)
+			)
+	),
+
+	plot_to_terminal : buildq([log], lambda([sol, plot_vars, terminal],
+		log@debug(terminal),
+		plot2d (
+			makelist(
+				[ discrete, makelist(var@get(p), p, sol) ],
+				var, plot_vars
+			),
+			cons(
+				legend,
+				makelist(var@name, var, plot_vars)
+			),
+			terminal
+		)
+	))
 
 ) $

@@ -2,7 +2,7 @@ defstruct(
 	Model(
 		name,
 		rk_adapter,
-		plot_vars
+		plot_groups
 	)
 ) $
 

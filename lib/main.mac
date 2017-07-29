@@ -30,7 +30,7 @@ log_program_start() $
 run(
 	Oscillator(), 
 	pipeline(
-		plot@console
+		plot@windows
 	)
 ) $
 
