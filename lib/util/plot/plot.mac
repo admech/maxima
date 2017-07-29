@@ -1,10 +1,11 @@
 init() := block(
 	[
-		log : get_logger("plot", log_level_info)
+		log : get_logger("plot", log_level_info),
+		plot_to_terminal
 	],
 	
 	defstruct(
-		Plot(
+		Plot( /* different options how to show */
 			devnull,
 			list,
 			windows,
@@ -15,8 +16,15 @@ init() := block(
 
 	defstruct(
 		Output(
-			name,
-			show
+			name, /* printed to log at pipeline launch */
+			show  /* [sol, plot_vars] -> < present visually > */
+		)
+	),
+
+	defstruct(
+		PlotVar(
+			name, /* shown in legend */
+			get   /* [p] -> [ absciss, ordinate ] */
 		)
 	),
 
@@ -48,11 +56,8 @@ init() := block(
 			lambda([sol, plot_vars],
 				block(
 					log@info("Gnuplotting to QT window..."),
-					plot2d (
-						makelist(
-							[ discrete, makelist(var(p), p, sol) ],
-							var, plot_vars
-						),
+					plot_to_terminal(
+						sol, plot_vars,
 						[ gnuplot_preamble, "set terminal qt persist" ]
 					)
 				)
@@ -66,16 +71,25 @@ init() := block(
 			lambda([sol, plot_vars],
 				block(
 					log@info("Gnuplotting to console..."),
-					plot2d (
-						makelist(
-							[ discrete, makelist(var(p), p, sol) ],
-							var, plot_vars
-						),
+					plot_to_terminal(
+						sol, plot_vars,
 						[ gnuplot_term, dumb ]
 					)
 				)
 			)
 		)
-	))
+	)),
+
+	plot_to_terminal(sol, plot_vars, terminal) := plot2d (
+		makelist(
+			[ discrete, makelist(var@get(p), p, sol) ],
+			var, plot_vars
+		),
+		cons(
+			legend,
+			makelist(var@name, var, plot_vars)
+		),
+		terminal
+	)
 
 ) $
