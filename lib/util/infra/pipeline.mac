@@ -30,16 +30,22 @@ init() := block( /* module declaration */
 
 	/* PIPELINES */
 
-	verbose_pipeline() := new(Pipeline(
+	console_pipeline() := new(Pipeline(
 		"Verbose pipeline printing solution to console", 
 		simulate,
-		console
+		plot@console
 	)),
 
 	silent_pipeline() := new(Pipeline(
 		"Silent pipeline printing solution to /dev/null", 
 		simulate,
-		devnull
+		plot@devnull
+	)),
+
+	windows_pipeline() := new(Pipeline(
+		"Pipeline plotting stuff in windows.", 
+		simulate,
+		plot@windows
 	))
 
 ) $

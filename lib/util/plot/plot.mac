@@ -3,18 +3,40 @@ init() := block(
 		log : get_logger("plot", log_level_info)
 	],
 	
-	devnull : buildq([log],
+	defstruct(
+		Plot(
+			devnull,
+			console,
+			windows
+		)
+	),
+	plot : new(Plot),
+
+	plot@devnull : buildq([log],
 		lambda([sol],
 			log@info("plot > /dev/null")
 		)
 	),
 
-	console : buildq([log],
+	plot@console : buildq([log],
 		lambda([sol],
 			block(
 				log@info("Solution:"),
 				for p in sol do log@info(p),
 				log@info("End of solution.")
+			)
+		)
+	),
+
+	plot@windows : buildq([log],
+		lambda([sol],
+			block(
+				log@info("Gnuplotting..."),
+				plot2d (
+					[ discrete, makelist(first(p), p, sol) ],
+					/* [ gnuplot_term, dumb ] */
+					[ gnuplot_preamble, "set terminal qt persist" ]
+				)
 			)
 		)
 	)

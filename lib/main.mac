@@ -27,7 +27,7 @@ batchload("model/exp/oscillator.mac") $
 log_program_start() $
 
 
-run(Oscillator(), silent_pipeline()) $
+run(Oscillator(), windows_pipeline()) $
 
 
 log_program_finish() $
