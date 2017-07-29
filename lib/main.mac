@@ -1,10 +1,22 @@
+batchload("util/infra/timing.mac") $
+batchload("util/infra/logging.mac") $
 batchload("util/lang/module.mac") $
 
 import("util/lang/extensions.mac") $
 import("util/solve/rk_adapter.mac") $
+import("util/plot/plot.mac") $
+import("util/infra/pipeline.mac") $
+
+log : get_logger("main", log_level_info) $
+
+log@debug(hr()) $
 
 import("model/exp/oscillator.mac") $
-sol: simulate(oscillator) $
-print(sol) $
 
-print("done") $ 
+log@info(hr()) $
+
+
+run(Oscillator(), silent_pipeline()) $
+
+
+log@info(hr()) $

@@ -1,5 +1,6 @@
 
-oscillator: new(model(
+Oscillator() := new(Model(
+	"Harmonic oscillator",
 	[ y, -x ],
 	[ x, y  ],
 	[ 1, 0  ],

@@ -1,5 +1,6 @@
 defstruct(
-	model(
+	Model(
+		name,
 		rhss,
 		vars,
 		initials,
@@ -7,4 +8,4 @@ defstruct(
 	)
 ) $
 
-simulate(mdl) := rk(mdl@rhss, mdl@vars, mdl@initials, mdl@domain) $
+simulate(Mdl) := rk(Mdl@rhss, Mdl@vars, Mdl@initials, Mdl@domain) $

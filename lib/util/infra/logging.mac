@@ -1,0 +1,47 @@
+/* INTERFACE */
+defstruct(
+	Logger(
+		name,
+		level,
+		debug,
+		info,
+		error
+	)
+) $
+
+/* LEVELS */
+log_level_debug : 1 $
+log_level_info : 2 $
+log_level_error : 3 $
+log_levels : [ "DEBUG", "INFO", "ERROR" ] $
+level_as_string(level) := log_levels[level] $
+log_debug(logger) := buildq([logger], lambda([[args]], print_log_message(log_level_debug, logger, args))) $
+log_info(logger) := buildq([logger], lambda([[args]], print_log_message(log_level_info, logger, args))) $
+log_error(logger) := buildq([logger], lambda([[args]], print_log_message(log_level_error, logger, args))) $
+
+/* PRINTING FUNCTIONS */
+print_log_message(level, logger, args) := if level >= logger@level then print(
+	current_time(), 
+	"[", level_as_string(level), "]",
+	"[", logger@name, "]",
+	if listp(args) then lreduce(sconcat_on_space, args) else args
+) $
+
+/* FACTORY */
+get_logger(name, level) := block([logger],
+	logger: new(Logger),
+
+	logger@name  : name,
+	logger@level : level,
+	logger@debug : log_debug(logger),
+	logger@info  : log_info(logger),
+	logger@error : log_error(logger),
+
+	logger
+) $
+
+/* UTIL */
+sconcat_on_space([args]) := lreduce(lambda([a, b], concat(a, " ", b)), args) $
+
+hr() := "------------------------------" $
+

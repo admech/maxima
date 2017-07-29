@@ -1,0 +1,7 @@
+devnull(sol) := print("plot > /dev/null") $
+
+console(sol) := block(
+	print("Solution:"),
+	for p in sol do print(p),
+	print("End of solution.")
+) $

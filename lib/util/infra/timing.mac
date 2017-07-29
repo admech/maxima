@@ -1,0 +1,11 @@
+timeit_last : 0 $
+
+current_time() := elapsed_real_time() $
+
+timeit_start() := timeit_last : current_time() $
+
+timeit_show() := block([current_time],
+	current_time : current_time(),
+	timeit_last : current_time,
+	print("Took", current_time - timeit_last, "s.")
+) $

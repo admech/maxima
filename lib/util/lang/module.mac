@@ -1,6 +1,10 @@
-print("Initializing module management...") $
+module_log : get_logger("module", log_level_info) $
+
+module_log@info("Initializing module management...") $
 
 import(filename) := block(
-	print("Importing", filename),
+	module_log@debug("Importing", filename),
 	load(filename)
 ) $
+
+module_log@info("Done.") $

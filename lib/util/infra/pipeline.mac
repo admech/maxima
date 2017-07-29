@@ -1,0 +1,33 @@
+defstruct(
+	Pipeline(
+		name,
+		solver,
+		plotter
+	)
+) $
+
+run(model, P) := block([sol, showtime_bak],
+	print("Solving", model@name, "with pipeline", P@name, "..."),
+	timeit_start(),
+	sol: P@solver(model),
+	timeit_show(),
+	print("Done."),
+
+	print("Plotting..."),
+	P@plotter(sol),
+	print("Done.")
+) $
+
+/* PIPELINES */
+
+verbose_pipeline() := new(Pipeline(
+	"Verbose pipeline printing solution to console", 
+	simulate,
+	console
+)) $
+
+silent_pipeline() := new(Pipeline(
+	"Silent pipeline printing solution to /dev/null", 
+	simulate,
+	devnull
+)) $
