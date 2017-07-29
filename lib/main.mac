@@ -1,22 +1,35 @@
+/*
+	Modules are needed to isolate namespaces and to manage dependencies.
+	(note: module.mac wants logging.mac which wants timing.mac, hence these can not be modules).
+*/
+print("------------------------------") $
+print("------------------------------") $
+print("------------------------------") $
+print("") $
+
+batchload("util/infra/env.mac") $
+batchload("util/lang/extensions.mac") $
 batchload("util/infra/timing.mac") $
 batchload("util/infra/logging.mac") $
 batchload("util/lang/module.mac") $
 
-import("util/lang/extensions.mac") $
-import("util/solve/rk_adapter.mac") $
+batchload("util/solve/rk_adapter.mac") $
 import("util/plot/plot.mac") $
+
 import("util/infra/pipeline.mac") $
 
 log : get_logger("main", log_level_info) $
 
 log@debug(hr()) $
 
-import("model/exp/oscillator.mac") $
+batchload("model/exp/oscillator.mac") $
 
-log@info(hr()) $
+log_program_start() $
 
 
 run(Oscillator(), silent_pipeline()) $
 
 
-log@info(hr()) $
+log_program_finish() $
+
+

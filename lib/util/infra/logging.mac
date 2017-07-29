@@ -17,13 +17,19 @@ log_levels : [ "DEBUG", "INFO", "ERROR" ] $
 level_as_string(level) := log_levels[level] $
 log_debug(logger) := buildq([logger], lambda([[args]], print_log_message(log_level_debug, logger, args))) $
 log_info(logger) := buildq([logger], lambda([[args]], print_log_message(log_level_info, logger, args))) $
-log_error(logger) := buildq([logger], lambda([[args]], print_log_message(log_level_error, logger, args))) $
+log_error(logger) := buildq([logger], lambda([[args]], 
+	log_program_error(),
+	print_log_message(log_level_error, logger, args),
+	log_program_finish(),
+	error("error from", logger@name)
+)) $
 
 /* PRINTING FUNCTIONS */
-print_log_message(level, logger, args) := if level >= logger@level then print(
-	current_time(), 
-	"[", level_as_string(level), "]",
-	"[", logger@name, "]",
+print_log_message(level, logger, args) := if level >= logger@level then printf(true,
+	"~f~t~t[ ~a ]~t[ ~a ]~t~a~%",
+	current_time(),
+	level_as_string(level),
+	logger@name,
 	if listp(args) then lreduce(sconcat_on_space, args) else args
 ) $
 
@@ -41,7 +47,30 @@ get_logger(name, level) := block([logger],
 ) $
 
 /* UTIL */
-sconcat_on_space([args]) := lreduce(lambda([a, b], concat(a, " ", b)), args) $
+sconcat_on_space([args]) := lreduce(lambda([a, b], sconcat(a, " ", b)), args) $
 
 hr() := "------------------------------" $
 
+log_program_start() := block(
+	print(""),
+	print("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVV"),
+	print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"),
+	print("------------------------------"),
+	print("")
+) $
+
+log_program_finish() := block(
+	print(""),
+	print("------------------------------"),
+	print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"),
+	print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"),
+	print("")
+) $
+
+log_program_error() := block(
+	print(""),
+	print("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"),
+	print("    X_X   X_x    x_X    x_x   "),
+	print("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVV"),
+	print("")
+) $

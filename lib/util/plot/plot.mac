@@ -1,7 +1,21 @@
-devnull(sol) := print("plot > /dev/null") $
+init() := block(
+	[
+		log : get_logger("plot", log_level_info)
+	],
+	
+	devnull : buildq([log],
+		lambda([sol],
+			log@info("plot > /dev/null")
+		)
+	),
 
-console(sol) := block(
-	print("Solution:"),
-	for p in sol do print(p),
-	print("End of solution.")
+	console : buildq([log],
+		lambda([sol],
+			block(
+				log@info("Solution:"),
+				for p in sol do log@info(p),
+				log@info("End of solution.")
+			)
+		)
+	)
 ) $

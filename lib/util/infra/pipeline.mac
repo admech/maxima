@@ -1,33 +1,45 @@
-defstruct(
-	Pipeline(
-		name,
-		solver,
-		plotter
-	)
+init() := block( /* module declaration */
+	[   /* private fields */
+		log : get_logger("pipeline", log_level_info)
+	],
+
+	defstruct(
+		Pipeline(
+			name,
+			solver,
+			plotter
+		)
+	),
+
+	/* defining a function that will use private fields */
+	run : buildq([log],                /* private fields */
+		lambda([model, P],             /* function's arguments */
+			block([sol, showtime_bak], /* function's intenal variables */
+				log@info("Solving", model@name, "with", P@name, "..."),
+				timeit_start(),
+				sol: P@solver(model),
+				timeit_show(),
+				log@info("Done."),
+
+				log@info("Plotting..."),
+				P@plotter(sol),
+				log@info("Done.")
+			)
+		)
+	),
+
+	/* PIPELINES */
+
+	verbose_pipeline() := new(Pipeline(
+		"Verbose pipeline printing solution to console", 
+		simulate,
+		console
+	)),
+
+	silent_pipeline() := new(Pipeline(
+		"Silent pipeline printing solution to /dev/null", 
+		simulate,
+		devnull
+	))
+
 ) $
-
-run(model, P) := block([sol, showtime_bak],
-	print("Solving", model@name, "with pipeline", P@name, "..."),
-	timeit_start(),
-	sol: P@solver(model),
-	timeit_show(),
-	print("Done."),
-
-	print("Plotting..."),
-	P@plotter(sol),
-	print("Done.")
-) $
-
-/* PIPELINES */
-
-verbose_pipeline() := new(Pipeline(
-	"Verbose pipeline printing solution to console", 
-	simulate,
-	console
-)) $
-
-silent_pipeline() := new(Pipeline(
-	"Silent pipeline printing solution to /dev/null", 
-	simulate,
-	devnull
-)) $

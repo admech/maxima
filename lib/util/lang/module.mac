@@ -2,9 +2,15 @@ module_log : get_logger("module", log_level_info) $
 
 module_log@info("Initializing module management...") $
 
-import(filename) := block(
+import(filename) := block([init_result],
 	module_log@debug("Importing", filename),
-	load(filename)
+	load(filename),
+	init_result : init(),
+	if init_result = UNDEFINED then (
+		module_log@error("Could not import", filename, "- it does not seem to be a module.")
+	),
+	module_log@debug("Done importing", filename),
+	init() := UNDEFINED
 ) $
 
 module_log@info("Done.") $
