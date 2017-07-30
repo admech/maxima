@@ -9,7 +9,7 @@ init() := block(
 			[ y, -x ],
 			[ x, y  ],
 			[ 1, 0  ],
-			[ t, 0, 10, 0.01 ]
+			new(Domain( 0, 10, 0.01 ))
 		)),
 		[
 			new(PlotGroup(

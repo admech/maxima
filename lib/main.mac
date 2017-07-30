@@ -14,9 +14,9 @@ batchload("util/infra/logging.mac") $
 batchload("util/lang/module.mac") $
 
 batchload("util/solve/model.mac") $
+import("util/solve/solver.mac") $
 import("util/plot/plot.mac") $
 import("util/infra/file.mac") $
-
 import("util/infra/pipeline.mac") $
 
 log : get_logger("main", log_level_info) $
@@ -30,9 +30,10 @@ log_program_start() $
 
 run(
 	Oscillator(), 
-	pipeline(
-		plot@files_in(dir(out_dir))
-	)
+	new(Pipeline(
+		solver@batch([1, 2, 3.71, 10]),
+		plot@console /* files_in(dir(out_dir)) */
+	))
 ) $
 
 log_program_finish() $

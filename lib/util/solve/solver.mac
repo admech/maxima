@@ -1,0 +1,45 @@
+init() := block(
+	[
+		log : get_logger("solver", log_level_info),
+		batch_simulate
+	],
+
+	defstruct(
+		Solver(
+			simple, /* [Model] -> sol */
+			batch
+		)
+	),
+	solver : new(Solver),
+
+	solver@simple : simulate,
+
+	batch_simulate(batches) := buildq([batches], lambda([model], block(
+		[
+			sol: [],
+			last_point : [],
+			/* first, store the intials and time range */
+			initials : model@rk_adapter@initials,
+			domain : model@rk_adapter@domain
+		],
+		for batch in batches do (
+			log@info("[ solver ] Solving batch", batch), /* as in plot, not clear how to use the private logger here */
+			domain@finish : batch, /* then set t1 to the batch, but leave initials and t0 as is */
+
+			sol_batch : simulate_with(model, initials, domain),
+			save_sol(sol, concat("batch_", ssubst("_", ".", string(batch)))),
+
+			/* after obtaining the solution for the batch, take next initials and t0 from its last point */
+			last_point : last(sol_batch),
+			domain@start : first(last_point),
+			initials : rest(last_point, 1),
+
+			/* last, add the solution for the batch to the full solution, */
+			/* while dropping the last point as it will be the initial for the next batch */
+			sol : append(sol, rest(sol_batch, -1))
+		),
+		sol : append(sol, [ last_point ]) /* finally, restore the last point as there is are no more next batches */
+	))),
+	solver@batch : batch_simulate
+
+) $

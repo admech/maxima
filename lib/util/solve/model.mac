@@ -15,7 +15,21 @@ defstruct(
 	)
 ) $
 
+defstruct(
+	Domain(
+		start,
+		finish,
+		stp
+	)
+) $
+
 simulate(Mdl) := block([rka],
 	rka : Mdl@rk_adapter,
-	rk(rka@rhss, rka@vars, rka@initials, rka@domain)
+	simulate_with(Mdl, rka@initials, rka@domain)
 ) $
+
+simulate_with(Mdl, initials, domain) := block([rka],
+	rka : Mdl@rk_adapter,
+	rk(rka@rhss, rka@vars, initials, [ t, domain@start, domain@finish, domain@stp ])
+) $
+
