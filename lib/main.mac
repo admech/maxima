@@ -15,6 +15,7 @@ batchload("util/lang/module.mac") $
 
 batchload("util/solve/model.mac") $
 import("util/plot/plot.mac") $
+import("util/infra/file.mac") $
 
 import("util/infra/pipeline.mac") $
 
@@ -30,10 +31,9 @@ log_program_start() $
 run(
 	Oscillator(), 
 	pipeline(
-		plot@files_in(dir("sol/1"))
+		plot@files_in(dir(out_dir))
 	)
 ) $
-
 
 log_program_finish() $
 

@@ -1,0 +1,22 @@
+init() := block(
+	[
+		log : get_logger("file", log_level_info)
+	],
+
+	dir(relative_path) := concat(
+		root_dir, 
+		"/", relative_path
+	),
+
+	file(path, name, extension) := concat(path, "/", name, ".", extension),
+
+	save_sol : buildq([log],
+		lambda([sol],
+			block([full_file_name],
+				full_file_name : file(dir(out_dir), "sol", "lisp"),
+				log@info("Saving solution to", full_file_name),
+				save(full_file_name, sol)
+			)
+		)
+	)
+) $

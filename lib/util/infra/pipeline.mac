@@ -23,7 +23,10 @@ init() := block( /* module declaration */
 				log@info("Plotting..."),
 				P@plotter@show(sol, model@plot_groups),
 				log@info("Done."),
-				sol
+
+				log@info("Saving solution..."),
+				save_sol(sol),
+				log@info("Done.")
 			)
 		)
 	),
