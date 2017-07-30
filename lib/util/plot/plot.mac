@@ -2,7 +2,8 @@ init() := block(
 	[
 		log : get_logger("plot", log_level_debug),
 		console_term,
-		window_term
+		window_term,
+		file_term
 	],
 
 	defstruct(
@@ -10,7 +11,8 @@ init() := block(
 			devnull,
 			list,
 			windows,
-			console
+			console,
+			files_in
 		)
 	),
 	plot : new(Plot),
@@ -67,20 +69,20 @@ init() := block(
 			lambda([sol, plot_groups],
 				plot_groups_separately(
 					"Gnuplotting to QT window...", /* FOR SOME REASON ONLY THE LAST WINDOW STICKS...*/
-					window_term()
+					window_term
 				)
 			)
 		)
 	)),
 	window_num : 0,
 	next_window_num() := (window_num: window_num + 1),
-	window_term() := lambda([group],
+	window_term(group) := 
 		[ gnuplot_preamble, sconcat(
 				"set terminal qt ", next_window_num(),
 				" persist",
 				" title '", group@name, "'"
 		) ]
-	),
+	,
 
 	/* ASCII art in the console */
 	plot@console : new(Output(
@@ -95,6 +97,27 @@ init() := block(
 		)
 	)),
 	console_term(group) := [ gnuplot_term, dumb ],
+
+	/* file */
+	plot@files_in : buildq([target_dir], lambda([target_dir], new(Output(
+		"plotting to files",
+		buildq([log, file_term, target_dir],
+			lambda([sol, plot_groups],
+				plot_groups_separately(
+					"Gnuplotting to files...", 
+					file_term() /* target_dir) */
+				)
+			)
+		)
+	)))),
+	file_term() := lambda([group], block([target_file],
+		print(target_dir),
+		print(log@name),
+		target_file : concat("/Users/data/Yandex.Disk/work/aspa/zobova/maxima/sol/1", "/", group@name, ".eps"),
+		log@debug("going to write", target_file),
+		set_plot_option([gnuplot_out_file, target_file]),
+		[ gnuplot_term, ps ]
+	)),
 
 	/*
 		FUNTIONS THAT DO THE ACTUAL PLOTTING

@@ -26,20 +26,6 @@ init() := block(
 				]
 			))
 		]
-	)),
-
-	defstruct(OscillatorPlotVars(
-		t,
-		x,
-		y
-	)),
-
-	plot_vars() := block([pv],
-		pv : new(OscillatorPlotVars),
-		pv@t : [p] -> p[1],
-		pv@x : [p] -> p[2],
-		pv@y : [p] -> p[3]
-	)
-
+	))
 
 ) $
