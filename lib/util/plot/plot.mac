@@ -23,8 +23,9 @@ init() := block(
 
 	defstruct( /* a figure */
 		PlotGroup(
-			name, /* plot title */
-			vars  /* list of PlotVars */
+			name,     /* plot title */
+			vars,     /* list of PlotVars */
+			postamble /* e.g. scale axes equally */
 		)
 	),
 
@@ -123,11 +124,12 @@ init() := block(
 		for group in plot_groups do
 			plot_to_terminal(
 				sol, group@vars,
-				term(group)
+				term(group),
+				group@postamble
 			)
 	),
 
-	plot_to_terminal : buildq([log], lambda([sol, plot_vars, terminal],
+	plot_to_terminal : buildq([log], lambda([sol, plot_vars, terminal, postamble],
 		log@debug(terminal),
 		plot2d (
 			makelist(
@@ -138,8 +140,13 @@ init() := block(
 				legend,
 				makelist(var@name, var, plot_vars)
 			),
-			terminal
+			terminal,
+			postamble
 		)
-	))
+	)),
+
+	/* POSTAMBLES */
+	no_postamble : [ gnuplot_postamble, "" ],
+	equal_axes   : [ gnuplot_postamble, "set size ratio -1;" ]
 
 ) $
