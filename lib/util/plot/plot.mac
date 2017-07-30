@@ -1,9 +1,6 @@
 init() := block(
 	[
-		log : get_logger("plot", log_level_debug),
-		console_term,
-		window_term,
-		file_term
+		log : get_logger("plot", log_level_info)
 	],
 
 	defstruct(
@@ -99,25 +96,23 @@ init() := block(
 	console_term(group) := [ gnuplot_term, dumb ],
 
 	/* file */
-	plot@files_in : buildq([target_dir], lambda([target_dir], new(Output(
+	file_term(target_dir) := buildq([target_dir], lambda([group], block([target_file],
+		target_file : concat(target_dir, "/", group@name, ".eps"),
+		log@info("[ plot ] going to write", target_file),
+		set_plot_option([gnuplot_out_file, target_file]),
+		[ gnuplot_term, ps ]
+	))),
+	plot@files_in : buildq([target_dir, file_term], lambda([target_dir], new(Output(
 		"plotting to files",
-		buildq([log, file_term, target_dir],
+		buildq([log, target_dir],
 			lambda([sol, plot_groups],
 				plot_groups_separately(
 					"Gnuplotting to files...", 
-					file_term() /* target_dir) */
+					file_term(target_dir)
 				)
 			)
 		)
 	)))),
-	file_term() := lambda([group], block([target_file],
-		print(target_dir),
-		print(log@name),
-		target_file : concat("/Users/data/Yandex.Disk/work/aspa/zobova/maxima/sol/1", "/", group@name, ".eps"),
-		log@debug("going to write", target_file),
-		set_plot_option([gnuplot_out_file, target_file]),
-		[ gnuplot_term, ps ]
-	)),
 
 	/*
 		FUNTIONS THAT DO THE ACTUAL PLOTTING
