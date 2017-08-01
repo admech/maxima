@@ -30,19 +30,22 @@ import(filename) := block([init_result],
 
 defstruct(
 	Require(
-		mod1            = ([] -> load_with(batchload, "model/exp/mod1.mac"           )),
-		mod2            = ([] -> load_with(batchload, "model/exp/mod2.mac"           )),
-		mod3            = ([] -> load_with(batchload, "model/exp/mod3.mac"           )),
-		env             = ([] -> load_with(batchload, "util/infra/env.mac"           )),
-		file            = ([] -> load_with(import,    "util/infra/file.mac"          )),
-		logging         = ([] -> load_with(batchload, "util/infra/logging.mac"       )),
-		pipeline        = ([] -> load_with(import,    "util/infra/pipeline.mac"      )),
-		timing          = ([] -> load_with(batchload, "util/infra/timing.mac"        )),
-		plot            = ([] -> load_with(import,    "util/plot/plot.mac"           )),
-		model           = ([] -> load_with(batchload, "util/solve/model.mac"         )),
-		solver          = ([] -> load_with(import,    "util/solve/solver.mac"        )),
-		oscillator      = ([] -> load_with(import,    "model/exp/oscillator.mac"     )),
-		lotka_volterra  = ([] -> load_with(import,    "model/exp/lotka_volterra.mac" ))
+		mod1     = ([] -> load_with(batchload, "model/exp/mod1.mac"      )),
+		mod2     = ([] -> load_with(batchload, "model/exp/mod2.mac"      )),
+		mod3     = ([] -> load_with(batchload, "model/exp/mod3.mac"      )),
+		env      = ([] -> load_with(batchload, "util/infra/env.mac"      )),
+		file     = ([] -> load_with(import,    "util/infra/file.mac"     )),
+		logging  = ([] -> load_with(batchload, "util/infra/logging.mac"  )),
+		pipeline = ([] -> load_with(import,    "util/infra/pipeline.mac" )),
+		timing   = ([] -> load_with(batchload, "util/infra/timing.mac"   )),
+		plot     = ([] -> load_with(import,    "util/plot/plot.mac"      )),
+		model    = ([] -> load_with(batchload, "util/solve/model.mac"    )),
+		solver   = ([] -> load_with(import,    "util/solve/solver.mac"   )),
+
+		oscillator         = ([] -> load_with(import,    "model/exp/oscillator.mac"           )),
+		lotka_volterra     = ([] -> load_with(import,    "model/exp/lotka_volterra.mac"       )),
+		
+		omni_with_rollers  = ([] -> load_with(import,    "model/omni/withrollers/vehicle.mac" ))
 	)
 ) $
 require : new(Require) $

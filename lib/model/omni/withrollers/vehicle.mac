@@ -1,0 +1,37 @@
+require@model() $
+
+init() := block(
+	[
+		plot_vars
+	],
+
+	Oscillator() := new(Model(
+		"Omni vehicle with rollers",
+		new(RKAdapter(
+			[ y, -x ],
+			[ x, y  ],
+			[ 1, 0  ],
+			new(Domain( 0, 10, 0.01 ))
+		)),
+		[
+			new(PlotGroup(
+				"coords",
+				[
+					new(PlotVar("x(t)", [p] -> [ p[1], p[2] ])),
+					new(PlotVar("y(t)", [p] -> [ p[1], p[3] ]))
+				],
+				no_postamble,
+				[ "t", "coord" ]
+			)),
+			new(PlotGroup(
+				"phase",
+				[
+					new(PlotVar("y(x)", [p] -> [ p[2], p[3] ]))
+				],
+				equal_axes,
+				[ "x", "y" ]
+			))
+		]
+	))
+
+) $
