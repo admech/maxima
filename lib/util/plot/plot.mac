@@ -23,9 +23,10 @@ init() := block(
 
 	defstruct( /* a figure */
 		PlotGroup(
-			name,     /* plot title */
-			vars,     /* list of PlotVars */
-			postamble /* e.g. scale axes equally */
+			name,      /* plot title */
+			vars,      /* list of PlotVars */
+			postamble, /* e.g. scale axes equally */
+			xy_labels  /* [ xlabel, ylabel ] */
 		)
 	),
 
@@ -141,7 +142,9 @@ init() := block(
 				makelist(var@name, var, plot_vars)
 			),
 			terminal,
-			postamble
+			postamble,
+			[ xlabel, group@xy_labels[1] ],
+			[ ylabel, group@xy_labels[2] ]
 		)
 	)),
 

@@ -1,0 +1,32 @@
+init() := block(
+
+	LotkaVolterra(a, b, d, g, x0, y0) := new(Model(
+		"Lotka-Volterra system",
+		new(RKAdapter(
+			[ a*x - b*x*y,  d*x*y - g*y       ],
+			[ x /* prey */, y /* predators */ ],
+			[ x0,           y0                ],
+			new(Domain( 0, 10, 0.01 ))
+		)),
+		[
+			new(PlotGroup(
+				"coords",
+				[
+					new(PlotVar("prey(t)",      [p] -> [ p[1], p[2] ])),
+					new(PlotVar("predators(t)", [p] -> [ p[1], p[3] ]))
+				],
+				no_postamble,
+				[ "t", "number" ]
+			)),
+			new(PlotGroup(
+				"phase",
+				[
+					new(PlotVar("predators(prey)", [p] -> [ p[2], p[3] ]))
+				],
+				equal_axes,
+				[ "prey", "predators" ]
+			))
+		]
+	))
+
+) $

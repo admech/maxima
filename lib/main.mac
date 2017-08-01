@@ -24,15 +24,25 @@ log : get_logger("main", log_level_info) $
 log@debug(hr()) $
 
 import("model/exp/oscillator.mac") $
+import("model/exp/lotka_volterra.mac") $
 
 log_program_start() $
 
 
 run(
+	/*
 	Oscillator(), 
+	*/
+	LotkaVolterra(
+		2/3, 4/3, 1, 1,
+		1.8, 1.8
+	), 
 	new(Pipeline(
-		solver@batch([1, 2, 3.71, 10]),
-		plot@console /* files_in(dir(out_dir)) */
+		solver@batch([ 1 ]),
+		/*
+		plot@console
+		*/
+		plot@files_in(dir(out_dir))
 	))
 ) $
 

@@ -26,7 +26,9 @@ init() := block(
 			log@info("[ solver ] Solving batch", batch), /* as in plot, not clear how to use the private logger here */
 			domain@finish : batch, /* then set t1 to the batch, but leave initials and t0 as is */
 
+			timeit_start(),
 			sol_batch : simulate_with(model, initials, domain),
+			timeit_show(),
 			save_sol(sol, concat("batch_", ssubst("_", ".", string(batch)))),
 
 			/* after obtaining the solution for the batch, take next initials and t0 from its last point */
