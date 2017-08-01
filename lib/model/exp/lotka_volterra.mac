@@ -1,3 +1,5 @@
+require@model() $
+
 init() := block(
 
 	LotkaVolterra(a, b, d, g, x0, y0) := new(Model(

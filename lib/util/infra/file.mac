@@ -1,3 +1,5 @@
+require@logging() $
+
 init() := block(
 	[
 		log : get_logger("file", log_level_info)

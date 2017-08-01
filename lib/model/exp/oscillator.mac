@@ -1,3 +1,5 @@
+require@model() $
+
 init() := block(
 	[
 		plot_vars

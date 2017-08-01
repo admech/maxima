@@ -1,50 +1,39 @@
 /*
 	Modules are needed to isolate namespaces and to manage dependencies.
-	(note: module.mac wants logging.mac which wants timing.mac, hence these can not be modules).
+	(note: dependencies of module.mac are loaded with batchload).
 */
 print("______________________________") $
 print("______________________________") $
 print("______________________________") $
 print("") $
 
-batchload("util/infra/env.mac") $
 batchload("util/lang/extensions.mac") $
-batchload("util/infra/timing.mac") $
-batchload("util/infra/logging.mac") $
+batchload("util/infra/env.mac") $
 batchload("util/lang/module.mac") $
 
-batchload("util/solve/model.mac") $
-import("util/solve/solver.mac") $
-import("util/plot/plot.mac") $
-import("util/infra/file.mac") $
-import("util/infra/pipeline.mac") $
+require@logging() $
+require@pipeline() $
 
 log : get_logger("main", log_level_info) $
 
 log@debug(hr()) $
 
-import("model/exp/oscillator.mac") $
-import("model/exp/lotka_volterra.mac") $
+require@lotka_volterra() $
 
 log_program_start() $
 
 
 run(
-	/*
-	Oscillator(), 
-	*/
 	LotkaVolterra(
 		2/3, 4/3, 1, 1,
 		1.8, 1.8
 	), 
 	new(Pipeline(
 		solver@batch([ 1 ]),
-		/*
-		plot@console
-		*/
 		plot@files_in(dir(out_dir))
 	))
 ) $
+
 
 log_program_finish() $
 

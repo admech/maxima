@@ -1,3 +1,5 @@
+require@timing() $
+
 /* INTERFACE */
 defstruct(
 	Logger(

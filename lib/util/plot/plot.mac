@@ -1,3 +1,6 @@
+require@logging() $
+require@file() $
+
 init() := block(
 	[
 		log : get_logger("plot", log_level_info)

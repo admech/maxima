@@ -1,3 +1,7 @@
+require@logging() $
+require@timing() $
+require@model() $
+
 init() := block(
 	[
 		log : get_logger("solver", log_level_info),

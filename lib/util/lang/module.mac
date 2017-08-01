@@ -1,6 +1,21 @@
-module_log : get_logger("module", log_level_info) $
+defstruct(ModuleLog(
+	info = ([[args]] -> print("[ INFO ] [ MODULE ]", lreduce([a, b] -> sconcat(a, " ", b), args))),
+	debug = ([[args]] -> print("[ DEBUG ] [ MODULE ]", lreduce([a, b] -> sconcat(a, " ", b), args)))
+)) $
+module_log : new(ModuleLog) $
 
 module_log@info("Initializing module management...") $
+
+loaded_files : [
+	"util/lang/module.mac",
+	"main.mac"
+] $
+
+load_with(loader, filename) := if not(member(filename, loaded_files)) then (
+	loader(filename), 
+	module_log@debug("Loaded", filename),
+	loaded_files : cons(filename, loaded_files)
+) $
 
 import(filename) := block([init_result],
 	module_log@debug("Importing", filename),
@@ -12,5 +27,24 @@ import(filename) := block([init_result],
 	module_log@debug("Done importing", filename),
 	init() := UNDEFINED
 ) $
+
+defstruct(
+	Require(
+		mod1            = ([] -> load_with(batchload, "model/exp/mod1.mac"           )),
+		mod2            = ([] -> load_with(batchload, "model/exp/mod2.mac"           )),
+		mod3            = ([] -> load_with(batchload, "model/exp/mod3.mac"           )),
+		env             = ([] -> load_with(batchload, "util/infra/env.mac"           )),
+		file            = ([] -> load_with(import,    "util/infra/file.mac"          )),
+		logging         = ([] -> load_with(batchload, "util/infra/logging.mac"       )),
+		pipeline        = ([] -> load_with(import,    "util/infra/pipeline.mac"      )),
+		timing          = ([] -> load_with(batchload, "util/infra/timing.mac"        )),
+		plot            = ([] -> load_with(import,    "util/plot/plot.mac"           )),
+		model           = ([] -> load_with(batchload, "util/solve/model.mac"         )),
+		solver          = ([] -> load_with(import,    "util/solve/solver.mac"        )),
+		oscillator      = ([] -> load_with(import,    "model/exp/oscillator.mac"     )),
+		lotka_volterra  = ([] -> load_with(import,    "model/exp/lotka_volterra.mac" ))
+	)
+) $
+require : new(Require) $
 
 module_log@info("Done.") $

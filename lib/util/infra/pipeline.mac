@@ -1,3 +1,7 @@
+require@logging() $
+require@timing() $
+require@solver() $
+
 init() := block( /* module declaration */
 	[   /* private fields */
 		log : get_logger("pipeline", log_level_info)

@@ -1,3 +1,5 @@
+require@plot() $
+
 defstruct(
 	Model(
 		name,
