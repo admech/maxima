@@ -5,7 +5,7 @@ init() := block(
 		plot_vars
 	],
 
-	Oscillator() := new(Model(
+	OmniVehicle() := new(Model(
 		"Omni vehicle with rollers",
 		new(RKAdapter(
 			[ y, -x ],

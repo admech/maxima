@@ -1,0 +1,19 @@
+init() := block(
+
+	defstruct(Params(
+		N_wheels  = 3,
+		n_rollers = 4,
+		r_hub     = 0.05,
+		M_hub     = 0.15,
+		m_roller  = 0.05,
+		R_platf   = 0.15,
+		M_platf   = 1
+	)),
+	params : new(Params),
+
+	len_q  : 3 + params@N_wheels * (params@n_rollers + 1),
+	len_nu : 3 + params@N_wheels * (params@n_rollers - 1)
+
+
+
+) $

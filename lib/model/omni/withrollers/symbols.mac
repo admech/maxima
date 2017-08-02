@@ -1,0 +1,20 @@
+require@omni_with_rollers_params() $
+require@wheelutil() $
+
+init() := block(
+
+	for var in [x, y, theta, chi, phi] do depends(var, t),
+	depends(nu, t),
+
+	q : append(
+		[ x, y, theta ],
+		perwheel(chi[i], i),
+		perwheel(phi[i], i),
+		perfree(phi[i,j], i, j)
+	),
+	nu : append(
+		perbignu(nu[i], i),
+		pers3(nu[s], s)
+	)
+
+) $
