@@ -32,5 +32,9 @@ printlist(
 
 printlist(constraints) $
 
+display(_V) $
+
+tmp : submatrix(3, _M) $
+display(tmp) $ /* row 3 does not fit */
 
 

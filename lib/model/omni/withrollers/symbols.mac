@@ -31,7 +31,30 @@ init() := block(
 	    perwheel(diff(chi(i), t) = R/l*sin(alpha[i])*nu[1] - R/l*cos(alpha[i])*nu[2] - R/(l*Lambda)*nu[3], i),
 	    perwheel(diff(phi(i), t) = R/rho(i)*cos(alpha[i])*nu[1] + R/rho(i)*sin(alpha[i])*nu[2], i),
 	    perfree(diff(freephi(i,j), t) = nu[s(i,j)], i, j)
-	)
+	),
+
+	_V: genmatrix(lambda([i,j],
+	    diff(second(constraints[i]), nu[j])
+	), len_q, len_nu),
+
+	_M: genmatrix(lambda([i,j], 
+	    if i = j then
+	        if i <= 2 then M
+	        else if i = 3 then I_S
+	        else if i <= 3 + params@N_wheels then J
+	        else B
+	    else if (i = 3 and j > 3 + params@N_wheels) or (j = 3 and i > 3 + params@N_wheels) 
+	        then if max(i, j) <= 3 + 2 * params@N_wheels
+	            then B*sin(
+	                kappa[1] + 
+	                chi(max(i, j) - (3 + params@N_wheels))
+	            )
+	            else B*sin(
+	                kappa[mod(max(i, j) - (3 + 2 * params@N_wheels + 1), params@n_rollers - 1) + 2] + 
+	                chi(floor((max(i, j) - (3 + 2 * params@N_wheels + 1))/(params@n_rollers - 1)) + 1)
+	            )
+	    	else 0
+	), len_q, len_q)
 
 
 ) $
