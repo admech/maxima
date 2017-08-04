@@ -3,3 +3,4 @@
 "->" (args, expr) ::= buildq([args, expr], lambda(args, expr)) $
 infix("->") $
 
+printlist(list) := for i in list do print(i) $

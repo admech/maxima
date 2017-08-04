@@ -3,6 +3,7 @@ require@omni_with_rollers_params() $
 
 /* ITERATORS */
 
+/* per_element and per_two_elements are to be accessed only via the adapter methods below, that quote their arguments */
 per_element(expr, var, start, finish) := block(
 	[ iter_var ],
 	if not(atom(var)) then error("var should be an atom, was:", var) else (
@@ -14,20 +15,51 @@ per_element(expr, var, start, finish) := block(
 	    ))
 	)
 ) $
-perwheel(expr, var) := per_element(expr, var, 1, params@N_wheels) $
-perroller(expr, var) := per_element(expr, var, 1, params@n_rollers) $
-per_free_roller(expr, var) := per_element(expr, var, 2, params@n_rollers) $
-perfree(expr, wheel_var, roller_var) := lreduce(append,
-	perwheel(
-		per_free_roller(
-			expr, roller_var
-		), wheel_var
+per_two_elements(expr, outer_var, outer_start, outer_finish, inner_var, inner_start, inner_finish) := block(
+	[ outer_iter_var, inner_iter_var ],
+	if not(atom(outer_var)) then error("outer_var should be an atom, was:", outer_var) else (
+		if not(atom(inner_var)) then error("inner_var should be an atom, was:", inner_var) else (
+			outer_iter_var : concat("per_outer_", outer_var),
+			inner_iter_var : concat("per_inner_", inner_var),
+		    map(ev,
+		    	lreduce(append, (
+		    		makelist(
+				    	makelist(
+				        	subst(outer_iter_var, outer_var, subst(inner_iter_var, inner_var, expr)),
+				        	inner_iter_var,
+				        	inner_start, inner_finish
+				    	),
+				    	outer_iter_var,
+				    	outer_start, outer_finish
+				    )
+		    	))
+		    )
+		)
 	)
 ) $
-pers(expr, free_roller_var) := per_element(expr, free_roller_var, 1, params@N_wheels * (params@n_rollers - 1)) $
-pers3(expr, free_roller_var) := per_element(expr, free_roller_var, 4, 3 + params@N_wheels * (params@n_rollers - 1)) $
-perq(expr, var) := per_element(expr, var, 1, len_q) $
-pernu(expr, var) := per_element(expr, var, 1, len_nu) $
-perbignu(expr, var) := per_element(expr, var, 1, 3) $
+
+perwheel('expr, var) := per_element(expr, var, 1, params@N_wheels) $
+perroller('expr, var) := per_element(expr, var, 1, params@n_rollers) $
+per_free_roller('expr, var) := per_element(expr, var, 2, params@n_rollers) $
+pers('expr, free_roller_var) := per_element(expr, free_roller_var, 1, params@N_wheels * (params@n_rollers - 1)) $
+pers3('expr, free_roller_var) := per_element(expr, free_roller_var, 4, 3 + params@N_wheels * (params@n_rollers - 1)) $
+perq('expr, var) := per_element(expr, var, 1, len_q) $
+pernu('expr, var) := per_element(expr, var, 1, len_nu) $
+perbignu('expr, var) := per_element(expr, var, 1, 3) $
+perfree('expr, wheel_var, roller_var) := per_two_elements(expr, wheel_var, 1, params@N_wheels, roller_var, 2, params@n_rollers) $
+
+/* NUMERATION */
+
+index_of_free_roller(i,j) := 
+	params@N_wheels /* skip rollers in contact */
+	+ (i-1)*(params@n_rollers-1) /* skip rollers on previous wheels */
+	+ j-1 /* start indexing free rollers on the current wheel from 1, not 2 */
+$
+
+s(i,j) := 
+	3 /* skip big nu */
+	+ (i-1)*(params@n_rollers-1) /* skip rollers on previous wheels */
+	+ j-1 /* start indexing free rollers on the current wheel from 1, not 2 */
+$
 
 

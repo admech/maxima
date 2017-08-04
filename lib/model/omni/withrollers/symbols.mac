@@ -6,18 +6,32 @@ init() := block(
 	for var in [x, y, theta, chi, phi] do depends(var, t),
 	depends(nu, t),
 
+	chi(i) := chi[i],
+	phi(i) := phi[i,1],
+	freephi(i, j) := phi[i,j],
+	rho(i) := l*cos(chi[i]) - r,
+
 	q : append(
 		[ x, y, theta ],
-		perwheel(chi[i], i),
-		perwheel(phi[i], i),
-		perfree(phi[i,j], i, j)
+		perwheel(chi(i), i),
+		perwheel(phi(i), i),
+		perfree(freephi(i,j), i, j)
 	),
 	nu : append(
 		perbignu(nu[i], i),
 		pers3(nu[s], s)
 	),
 
-	rho(i) := l*cos(chi[i]) - r
+	constraints: append(
+	    [
+	        diff(x, t) = R*cos(theta)*nu[1] - R*sin(theta)*nu[2],
+	        diff(y, t) = R*sin(theta)*nu[1] + R*cos(theta)*nu[2],
+	        diff(theta, t) = 1/Lambda * nu[3]
+	    ],
+	    perwheel(diff(chi(i), t) = R/l*sin(alpha[i])*nu[1] - R/l*cos(alpha[i])*nu[2] - R/(l*Lambda)*nu[3], i),
+	    perwheel(diff(phi(i), t) = R/rho(i)*cos(alpha[i])*nu[1] + R/rho(i)*sin(alpha[i])*nu[2], i),
+	    perfree(diff(freephi(i,j), t) = nu[s(i,j)], i, j)
+	)
 
 
 ) $

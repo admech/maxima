@@ -17,4 +17,20 @@ print(len_q, len_nu) $
 print(perwheel(rho(i), i)) $
 
 print( perfree([i,j], i, j) ) $
-print( perfree(phi[i,j], i, j) ) $
+print( perfree(freephi(i,j), i, j) ) $
+
+print( perfree(index_of_free_roller(i,j), i, j)) $
+print( perfree(s(i,j), i, j)) $
+
+printlist(
+	    [
+	        diff(x, t) = R*cos(theta)*nu[1] - R*sin(theta)*nu[2],
+	        diff(y, t) = R*sin(theta)*nu[1] + R*cos(theta)*nu[2],
+	        diff(theta, t) = 1/Lambda * nu[3]
+	    ]
+) $
+
+printlist(constraints) $
+
+
+
