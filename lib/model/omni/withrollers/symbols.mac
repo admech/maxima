@@ -15,6 +15,9 @@ init() := block(
 	nu : append(
 		perbignu(nu[i], i),
 		pers3(nu[s], s)
-	)
+	),
+
+	rho(i) := l*cos(chi[i]) - r
+
 
 ) $

@@ -1,18 +1,19 @@
 require@omni_with_rollers_params() $
 /* require@omni_with_rollers_symbols() $ would be a cyclic dependency */
 
+/* ITERATORS */
+
 per_element(expr, var, start, finish) := block(
 	[ iter_var ],
-	if atom(var) then (
-		iter_var : concat("perwheel_", var),
-	    makelist(
+	if not(atom(var)) then error("var should be an atom, was:", var) else (
+		iter_var : concat("per_element_", var),
+	    map(ev, makelist(
 	        subst(iter_var, var, expr),
 	        iter_var,
 	        start, finish
-	    )
-	) else error("var should be an atom, was:", var)
+	    ))
+	)
 ) $
-
 perwheel(expr, var) := per_element(expr, var, 1, params@N_wheels) $
 perroller(expr, var) := per_element(expr, var, 1, params@n_rollers) $
 per_free_roller(expr, var) := per_element(expr, var, 2, params@n_rollers) $
@@ -25,7 +26,7 @@ perfree(expr, wheel_var, roller_var) := lreduce(append,
 ) $
 pers(expr, free_roller_var) := per_element(expr, free_roller_var, 1, params@N_wheels * (params@n_rollers - 1)) $
 pers3(expr, free_roller_var) := per_element(expr, free_roller_var, 4, 3 + params@N_wheels * (params@n_rollers - 1)) $
-percoord(expr, var) := per_element(expr, var, 1, len_q) $
+perq(expr, var) := per_element(expr, var, 1, len_q) $
 pernu(expr, var) := per_element(expr, var, 1, len_nu) $
 perbignu(expr, var) := per_element(expr, var, 1, 3) $
 

@@ -5,11 +5,16 @@ print( perwheel(x^2, x)  ) $
 print( perroller(y^3, y) ) $
 
 
-print( perfree([i,j], i, j) ) $
-
 print(q) $
 print(diff(q, t)) $
 
 print(q) $
 print(nu) $
 print(len_q, len_nu) $
+
+/* print(perwheel([chi[i], rho[i]], i)) $ */
+/* print(makelist(rho[i], i, 1, 3)) $ */
+print(perwheel(rho(i), i)) $
+
+print( perfree([i,j], i, j) ) $
+print( perfree(phi[i,j], i, j) ) $
