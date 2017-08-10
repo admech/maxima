@@ -1,5 +1,6 @@
 require@wheelutil() $
 require@omni_with_rollers_symbols() $
+require@omni_with_rollers_equations() $
 
 print( perwheel(x^2, x)  ) $
 print( perroller(y^3, y) ) $
@@ -30,11 +31,68 @@ printlist(
 	    ]
 ) $
 
+
+
 printlist(constraints) $
+
+
 
 display(_V) $
 
-tmp : submatrix(3, _M) $
-display(tmp) $ /* row 3 does not fit */
+
+
+_M_no_third_row : submatrix(3, _M) $
+display(_M_no_third_row) $ /* row 3 does not fit */
+display(_M[3]) $
+
+
+
+_M_star_3: apply(submatrix, append(
+	pers3(i, i),
+	[ _M_star ],
+	pers3(i, i)
+)) $
+display(_M_star_3) $
+print(
+	apply(submatrix, append(
+		perbignu(i, i),
+		[ _M_star ],
+		perbignu(i, i)
+	))
+) $
+print(
+	apply(submatrix, append(
+		pers3(i, i),
+		[ _M_star ],
+		perbignu(i, i)
+	))
+) $
+print(
+	apply(submatrix, append(
+		perbignu(i, i),
+		[ _M_star ],
+		pers3(i, i)
+	))
+) $
+
+
+
+display(L_star) $
+
+
+print(perq(p(i), i)) $
+print(pernu(P(i), i)) $
+print(_p) $
+printlist(_P) $
+printlist(_pnu) $
+
+display(z) $
+
+print(poiz(_P[1], _P[2])) $
+
+
+
+
+
 
 

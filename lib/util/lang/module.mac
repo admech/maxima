@@ -45,10 +45,11 @@ defstruct(
 		oscillator         = ([] -> load_with(import,    "model/exp/oscillator.mac"           )),
 		lotka_volterra     = ([] -> load_with(import,    "model/exp/lotka_volterra.mac"       )),
 
-		omni_with_rollers          = ([] -> load_with(import,    "model/omni/withrollers/vehicle.mac"    )),
-		omni_with_rollers_params   = ([] -> load_with(import,    "model/omni/withrollers/params.mac"     )),
-		omni_with_rollers_symbols  = ([] -> load_with(import,    "model/omni/withrollers/symbols.mac"    )),
-		wheelutil                  = ([] -> load_with(batchload, "model/omni/withrollers/wheelutil.mac"  ))
+		omni_with_rollers            = ([] -> load_with(import,    "model/omni/withrollers/vehicle.mac"    )),
+		omni_with_rollers_params     = ([] -> load_with(import,    "model/omni/withrollers/params.mac"     )),
+		omni_with_rollers_symbols    = ([] -> load_with(import,    "model/omni/withrollers/symbols.mac"    )),
+		omni_with_rollers_equations  = ([] -> load_with(import,    "model/omni/withrollers/equations.mac"  )),
+		wheelutil                    = ([] -> load_with(batchload, "model/omni/withrollers/wheelutil.mac"  ))
 	)
 ) $
 require : new(Require) $

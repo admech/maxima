@@ -1,6 +1,41 @@
-/* lambdas are just too verbose in Maxima */
-/* usage: [a1,a2,a3] -> (a1 + a2 + a3) */
+/*
+	lambdas are just too verbose in Maxima:
+		[a1,a2,a3] -> (a1 + a2 + a3)
+*/
 "->" (args, expr) ::= buildq([args, expr], lambda(args, expr)) $
 infix("->") $
 
-printlist(list) := for i in list do print(i) $
+/*
+	sugar for substitutions:
+		(a + b^c) where [ c = 3, b = log(epsilon) + 19, expand ]
+*/
+kill("where") $
+where(expr, equalities) := block([substequality, apply_fun_to_ex, process, proxy, is_fun],
+    substequality(ex, equality) := subst(second(equality), first(equality), ex),
+    apply_fun_to_ex(ex, fun) := fun(ex),
+    is_fun(item) := atom(item) or not is(op(item) = "="),
+    process(ex, item) := if is_fun(item) then apply_fun_to_ex(ex, item) else substequality(ex, item),
+    lreduce(process, append([expr], equalities))) $
+infix("where") $
+
+/*
+	Poisson:
+		{F, G} == pois(F, G, z)
+*/
+
+vecdiff(expr, vec) := transpose(makelist(diff(expr, var), var, vec)) $
+
+sympl_ident(n) := genmatrix(buildq([n], lambda([i,j],
+	/* don't use mat_unblocker - it's VERY slow */
+	if i <= n and j <= n or i > n and j > n then 0
+	else
+		if j > n then
+			if i = j-n then 1 else 0
+		else /* i > n */
+			if i-n = j then -1 else 0
+)), 2*n, 2*n) $
+
+pois(F, G, z) := if oddp(length(z)) then error(sconcat("LENGTH OF Z SHOULD BE EVEN, WAS: ", length(z))) 
+	else transpose(vecdiff(F, z)) . sympl_ident(length(z) / 2) . vecdiff(G, z) $
+
+
