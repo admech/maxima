@@ -63,3 +63,79 @@ s(i,j) :=
 $
 
 
+/*
+
+	INVERTING _M_star
+	(Actually, any matrix of the form:
+		[ a11 a12 a13 0      ... 0  ]
+		[ a12 a22 a23 0      ... 0  ]
+		[ a13 a23 a33 b1     ... bM ]
+		[ 0   0   b1  B  0 0 ... 0  ]
+		[ 0   0   b2  0  B 0 ... 0  ]
+		[             ...           ]
+		[             ...           ]
+		[             ...           ]
+		[ 0   0   bM  0    ...   B  ]
+	)
+
+*/
+
+/* helpers */
+
+/* generate identity and zero matrices */
+mat_E(n) := genmatrix(lambda([i,j], if i = j then 1 else 0), n) $
+mat_0(n,m) := genmatrix(lambda([i,j], 0), n, m) $
+
+/* multiply by this matrix from the left (this . yours) to get yours row n multiplied by mult */
+mult_row(mult, n, size) := mat_E(size) + ematrix(size, size, mult - 1, n, n) $
+
+/* add row n multiplied by mult to row m */
+add_row(mult, n, m, size) := mat_E(size) + ematrix(size, size, mult, m, n) $
+
+/*
+    A function to invert the M* matrix. Copied from 12_1_invert_M_star - see for details.
+*/
+invert_M(mat) := block(
+    [
+        size, B, bs,
+        step1, step2,
+        indices_to_remove, upper_left_corner
+    ],
+
+    size: length(mat),
+    B: mat[4,4], /* diagonal elements of the lower-right corner */
+    bs: makelist(mat[3,i], i, 4, size), /* elements of the third line (row) beyond the upper-left corner */
+    indices_to_remove: makelist(i, i, 4, size), /* so as to retain only the upper-left corner */
+
+    /* step 1: eliminate elements of line 3 (the 'bs') beyond the upper-left corner */
+    /*         to get a modified state of it needed in step 2                       */
+    step1: lreduce(             /* elementary transformations are encoded as matrices below and applied by multiplying by them from the left, */
+        lambda([a,b], a.b),     /* so code is executed in reverse order                                                                       */
+        append(
+            makelist(add_row(-bs[i]/B, i+3, 3, size), i, 1, size-3), /* to do so, add rows starting with 4 multiplied accordingly */
+            [ mat ]                                                  /* M* is being used here */
+        )
+    ),
+
+    /* we'll need to invert it in step 2... */
+    upper_left_corner: apply(submatrix, append(indices_to_remove, [step1], indices_to_remove)),
+
+    /* apply transformations to an identity matrix */
+    step2: /*ratsimp(*/ /* ratsimp takes LONG for a real matrix */
+    lreduce( /* remember, things happen in reverse order */
+        lambda([a,b], a.b),
+        append(
+            makelist(mult_row(1/B, i, size), i, 4, size),            /* last, unscale the lower-right corner */
+            makelist(add_row(-bs[i], 3, i+3, size), i, 1, size-3),   /* third, remove column 3 */
+            [                                                        /* second, multiply by the inverse upper-left corner */
+                mat_fullunblocker(matrix(
+                    [ invert(upper_left_corner), mat_0(3,size-3) ],
+                    [ mat_0(size-3,3),           mat_E(size-3)   ]
+                ))
+            ],
+            makelist(add_row(-bs[i]/B, i+3, 3, size), i, 1, size-3), /* first, eliminate row 3 again (now for E, not M*) */
+            [ mat_E(size) ]
+        )
+    )
+    /*)*/
+) $

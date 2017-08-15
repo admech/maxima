@@ -67,6 +67,7 @@ init() := block(
 	_p: perq(p(i), i),
 	_P: (_p . _V)[1],
 	_pnu: transpose(_M . _V . nu)[1],
+	subst_ps: perq(_p[i] = _pnu[i], i),
 
 	z: append(q, _p),
 

@@ -90,9 +90,19 @@ display(z) $
 
 print(poiz(_P[1], _P[2])) $
 
+log_3hr() $
+display(_D_M_star_dt_dot_nu) $
 
+log_3hr() $
+display(subst_ps) $
+display(_pois_P_L_star) $
+print(listofvars(_pois_P_L_star)) $
 
+log_3hr() $
+display(_sum_pois_P_alpha_P_mu_nu_mu) $
 
-
-
-
+log_3hr() $
+print(length(_rhs_nu)) $
+print(listofvars(_rhs_nu)) $
+display(_rhs_chi) $
+display(_rhs_coords) $

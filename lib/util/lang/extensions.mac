@@ -39,3 +39,7 @@ pois(F, G, z) := if oddp(length(z)) then error(sconcat("LENGTH OF Z SHOULD BE EV
 	else transpose(vecdiff(F, z)) . sympl_ident(length(z) / 2) . vecdiff(G, z) $
 
 
+/*
+	Lists
+*/
+sumlist(lst) := lreduce(lambda([a,b], a+b), lst) $

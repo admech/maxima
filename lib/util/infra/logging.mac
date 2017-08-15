@@ -76,3 +76,9 @@ log_program_error() := block(
 	print("VVVVVVVVVVVVVVVVVVVVVVVVVVVVVV"),
 	print("")
 ) $
+
+log_3hr() := block(
+	print(hr()),
+	print(hr()),
+	print(hr())
+) $

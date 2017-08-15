@@ -4,8 +4,9 @@ current_time() := elapsed_real_time() $
 
 timeit_start() := timeit_last : current_time() $
 
-timeit_show() := block([current_time],
-	current_time : current_time(),
-	timeit_last : current_time,
-	print("Took", current_time - timeit_last, "s.")
+timeit_show() := block([current_time, timeit_last_bak],
+	current_time    : current_time(),
+	timeit_last_bak : timeit_last,
+	timeit_last     : current_time,
+	print("Took", current_time - timeit_last_bak, "s.")
 ) $
