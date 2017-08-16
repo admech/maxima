@@ -20,6 +20,7 @@ log@debug(hr()) $
 
 require@lotka_volterra() $
 require@omni_with_rollers() $
+log@info("Done loading models.") $
 
 log_program_start() $
 
@@ -36,18 +37,19 @@ run(
 ) $
 */
 
-/*
+
 run(
 	OmniVehicle(), 
 	new(Pipeline(
-		solver@batch([ 1 ]),
-		plot@files_in(dir(out_dir))
+		solver@simple,
+		plot@console
 	))
 ) $
-*/
 
 
+/*
 batchload("model/exp/lang.mac") $
+*/
 
 log_program_finish() $
 

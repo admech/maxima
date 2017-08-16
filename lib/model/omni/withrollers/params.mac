@@ -12,8 +12,66 @@ init() := block(
 	params : new(Params),
 
 	len_q  : 3 + params@N_wheels * (params@n_rollers + 1),
-	len_nu : 3 + params@N_wheels * (params@n_rollers - 1)
+	len_nu : 3 + params@N_wheels * (params@n_rollers - 1),
 
 
+	real(params) := block([
+	        n_sharp_rollers, /* such n rollers that the full pack is only possible with sharp ones */
+	        r, /* radius of hub (dist from wheel axis to roller axis) */
+	        _chi_max_geom, /* half roller width angle if it were to have sharp ends */
+	        l, /* radius of wheel (distance from axis to ground) */
+	        I_S, /* total moi wrt vert axis */
+	        I_0_S, /* moi of platf and hubs wrt vert axis */
+	        A, /* moi roller wrt orthogonal axis */
+	        B, /* moi roller wrt roller axis */
+	        R, /* platform radius */
+	        m, /* roller mass */
+	        M_platf,
+	        M_hub,
+	        r_roller_moi,
+	        h_roller_moi,
+	        _chi_max_adjust, /* value of chi on which rollers switch - i.e. border of cut roller */
+	        J_0, /* moi hub wrt wheel axis */
+	        M /* total mass */
+	    ],
+	    n_sharp_rollers: params@n_rollers - 1,
+	    _chi_max_geom: %pi/n_sharp_rollers,
+	    l: r / cos(_chi_max_geom),
+	    I_0_S: M_platf*R^2/2 + params@N_wheels*(M_hub*R^2 + M_hub/12*(3*r^2 + 0.01^2)),
+	    r_roller_moi: (l - r)/2,
+	    _chi_max_adjust: %pi/params@n_rollers,
+	    h_roller_moi: 2*l*sin(_chi_max_adjust),
+	    A: 1/12 * m * (3*r_roller_moi^2 + h_roller_moi^2),
+	    B: (m*r_roller_moi^2)/2,
+	    I_S: I_0_S + params@N_wheels*params@n_rollers*((A+B)/2+m*R^2+m*r^2/2),
+	    J_0: (M_hub*r^2)/2,
+	    M: M_platf + params@N_wheels*M_hub + params@N_wheels*params@n_rollers*m,
+	    append(
+	        [ sin(theta)^2*'M*'R^2=1-cos(theta)^2*'M*'R^2 ], /* just in case some symbolic math systems don't handle this */
+	        flatten(makelist([
+	            alpha[i] = 2*%pi/params@N_wheels*(i-1) /* ,
+	            chis[i] = adjust(chis[i]) */ /* let's not adjust chi, but just terminate when they exceed */
+	        ], i, 1, params@N_wheels)),
+	        makelist(
+	            kappa[i] = 2*_chi_max_adjust*(i-1)
+	        , i, 1, params@n_rollers),
+	        [
+	            '_chi_max_adjust = _chi_max_adjust,
+	            'B = float(B),
+	            'R = R,
+	            'l = l,
+	            J = float(J_0 + params@n_rollers*(A+m*r^2)),
+	            'Lambda = float(I_S / (M*l^2)), /* dimensionless parameter defined as in paper */
+	            'I_S = float(I_S),
+	            'M = M,
+
+	            'r = params@r_hub,
+	            'M_hub = params@M_hub,
+	            'm = params@m_roller,
+	            'R = params@R_platf,
+	            'M_platf = params@M_platf
+	        ]
+	    )
+	)
 
 ) $

@@ -1,32 +1,38 @@
 require@model() $
+require@wheelutil() $
+require@omni_with_rollers_params() $
+require@omni_with_rollers_symbols() $
+require@omni_with_rollers_equations() $
 
 init() := block(
-	[
-		plot_vars
-	],
+
+	solvable_vars(params) := append(
+		pernu(nu[i] = concat(_rk_nu, "_", i), i),
+		perwheel(chi(i) = concat(_rk_chi, "_", i), i)
+	),
 
 	OmniVehicle() := new(Model(
 		"Omni vehicle with rollers",
 		new(RKAdapter(
-			[ y, -x ],
-			[ x, y  ],
-			[ 1, 0  ],
-			new(Domain( 0, 10, 0.01 ))
+			append( _rhs_nu,      _rhs_chi,             _rhs_coords   ) where append( real(params), solvable_vars(params) ),
+			append( nu,           perwheel(chi(i), i),  [x, y, theta] ) where solvable_vars(params),
+			append( pernu(0, i),  perwheel(0, i),       [0, 0, 0    ] ),
+			new(Domain( 0, 0.1, 0.01 ))
 		)),
 		[
 			new(PlotGroup(
 				"coords",
 				[
-					new(PlotVar("x(t)", [p] -> [ p[1], p[2] ])),
-					new(PlotVar("y(t)", [p] -> [ p[1], p[3] ]))
+					new(PlotVar("x(t)", [p] -> [ p[1], p[len_nu + params@N_wheels + 1] ])),
+					new(PlotVar("y(t)", [p] -> [ p[1], p[len_nu + params@N_wheels + 2] ]))
 				],
 				no_postamble,
 				[ "t", "coord" ]
 			)),
 			new(PlotGroup(
-				"phase",
+				"trajectory",
 				[
-					new(PlotVar("y(x)", [p] -> [ p[2], p[3] ]))
+					new(PlotVar("y(x)", [p] -> [ p[len_nu + params@N_wheels + 1], p[len_nu + params@N_wheels + 2] ]))
 				],
 				equal_axes,
 				[ "x", "y" ]

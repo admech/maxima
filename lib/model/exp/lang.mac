@@ -1,6 +1,8 @@
+require@timing() $
 require@wheelutil() $
 require@omni_with_rollers_symbols() $
 require@omni_with_rollers_equations() $
+require@omni_with_rollers() $
 
 print( perwheel(x^2, x)  ) $
 print( perroller(y^3, y) ) $
@@ -106,3 +108,18 @@ print(length(_rhs_nu)) $
 print(listofvars(_rhs_nu)) $
 display(_rhs_chi) $
 display(_rhs_coords) $
+
+
+log_3hr() $
+display(real(params)) $
+
+timeit_start() $
+vars_in_rhss: listofvars(
+	append( _rhs_nu,      _rhs_chi,             _rhs_coords   ) where real(params)
+) $
+print(vars_in_rhss) $
+timeit_show() $
+
+
+print(solvable_vars(params)) $
+print(vars_in_rhss where solvable_vars(params)) $
