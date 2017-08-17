@@ -11,13 +11,40 @@ init() := block(
 		perwheel(chi(i) = concat(_rk_chi, "_", i), i)
 	),
 
-	OmniVehicle() := new(Model(
-		"Omni vehicle with rollers",
+	defstruct(OmniInitials(
+		nu     = pernu(0, i),
+		chi    = perwheel(0, i),
+		coords = [ 0, 0, 0 ]
+	)),
+	defstruct(OmniCaseOfMotion(
+		still    = new(OmniInitials),
+		
+		straight =
+		[nu1] -> block([intls], intls: new(OmniInitials),
+			intls@nu[1]: nu1,
+		intls),
+		
+		self_rot =
+		[nu3] -> block([intls], intls: new(OmniInitials),
+			intls@nu[3]: nu3,
+		intls),
+
+		wrench =
+		[nu1, nu2, nu3] -> block([intls], intls: new(OmniInitials),
+			intls@nu[1]: nu1,
+			intls@nu[2]: nu2,
+			intls@nu[3]: nu3,
+		intls)
+	)),
+	case_of_motion: new(OmniCaseOfMotion),
+
+	OmniVehicle(params, initials, domain) := new(Model(
+		sconcat("Omni vehicle with rollers (params: ", params, ", initials: ", initials, ", domain: ", domain),
 		new(RKAdapter(
-			append( _rhs_nu,      _rhs_chi,             _rhs_coords   ) where append( real(params), solvable_vars(params) ),
-			append( nu,           perwheel(chi(i), i),  [x, y, theta] ) where solvable_vars(params),
-			append( pernu(0, i),  perwheel(0, i),       [0, 0, 0    ] ),
-			new(Domain( 0, 0.1, 0.01 ))
+			append( _rhs_nu,      _rhs_chi,             _rhs_coords     ) where append( real(params), solvable_vars(params) ),
+			append( nu,           perwheel(chi(i), i),  [x, y, theta]   ) where solvable_vars(params),
+			append( initials@nu,  initials@chi,         initials@coords ),
+			domain
 		)),
 		[
 			new(PlotGroup(
@@ -30,12 +57,32 @@ init() := block(
 				[ "t", "coord" ]
 			)),
 			new(PlotGroup(
+				"self rotation",
+				[
+					new(PlotVar("theta(t)", [p] -> [ p[1], p[len_nu + params@N_wheels + 3] ]))
+				],
+				no_postamble,
+				[ "t", "theta" ]
+			)),
+			new(PlotGroup(
 				"trajectory",
 				[
 					new(PlotVar("y(x)", [p] -> [ p[len_nu + params@N_wheels + 1], p[len_nu + params@N_wheels + 2] ]))
 				],
 				equal_axes,
 				[ "x", "y" ]
+			)),
+			new(PlotGroup(
+				"wheel angles",
+				perwheel(
+					new(PlotVar(
+						concat("chi_", i, "(t)"),
+						[p] -> [ p[1], p[len_nu + i] ]
+					)),
+					i
+				),
+				no_postamble,
+				[ "t", "chi" ]
 			))
 		]
 	))

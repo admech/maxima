@@ -3,7 +3,7 @@ require@file() $
 
 init() := block(
 	[
-		log : get_logger("plot", log_level_info)
+		log : get_logger("plot", log_level_debug)
 	],
 
 	defstruct(
@@ -79,11 +79,7 @@ init() := block(
 	window_num : 0,
 	next_window_num() := (window_num: window_num + 1),
 	window_term(group) := 
-		[ gnuplot_preamble, sconcat(
-				"set terminal qt ", next_window_num(),
-				" persist",
-				" title '", group@name, "'"
-		) ]
+		[ gnuplot_term, sconcat("qt ", next_window_num(), " persist title '", group@name, "'") ]
 	,
 
 	/* ASCII art in the console */
@@ -123,27 +119,32 @@ init() := block(
 		FUNTIONS THAT DO THE ACTUAL PLOTTING
 	*/
 
-	plot_groups_separately(msg, term) := block(
+	plot_groups_separately(msg, term) := block([teh_term],
 		log@info(msg),
-		for group in plot_groups do
+		for group in plot_groups do (
+			teh_term: term(group),
 			plot_to_terminal(
 				sol, group@vars,
-				term(group),
+				teh_term,
 				group@postamble
 			)
+		)
 	),
 
 	plot_to_terminal : buildq([log], lambda([sol, plot_vars, terminal, postamble],
-		log@debug(terminal),
-		plot2d (
-			makelist(
+		log@debug(terminal[2], plot_vars),
+		series_to_plot: makelist(
 				[ discrete, makelist(var@get(p), p, sol) ],
 				var, plot_vars
-			),
-			cons(
+		),
+		legend_to_show: cons(
 				legend,
 				makelist(var@name, var, plot_vars)
-			),
+		),
+		plot2d (
+			series_to_plot,
+			legend_to_show,
+			[plot_format, gnuplot],
 			terminal,
 			postamble,
 			[ xlabel, group@xy_labels[1] ],

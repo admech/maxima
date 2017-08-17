@@ -58,7 +58,6 @@ init() := block(
 	        [
 	            '_chi_max_adjust = _chi_max_adjust,
 	            'B = float(B),
-	            'R = R,
 	            'l = l,
 	            J = float(J_0 + params@n_rollers*(A+m*r^2)),
 	            'Lambda = float(I_S / (M*l^2)), /* dimensionless parameter defined as in paper */

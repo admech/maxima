@@ -13,12 +13,13 @@ batchload("util/lang/module.mac") $
 
 require@logging() $
 require@pipeline() $
+require@model() $
 
 log : get_logger("main", log_level_info) $
 
 log@debug(hr()) $
 
-require@lotka_volterra() $
+/* require@lotka_volterra() $ */
 require@omni_with_rollers() $
 log@info("Done loading models.") $
 
@@ -38,13 +39,21 @@ run(
 */
 
 
+log@info("Initializing model...") $
+omni_vehicle: OmniVehicle(
+	params,
+	case_of_motion@self_rot(1),
+	new(Domain( 0, 0.1, 0.01 ))
+) $
+log@info("Done initializing model.") $
 run(
-	OmniVehicle(), 
+	omni_vehicle, 
 	new(Pipeline(
 		solver@simple,
-		plot@console
+		plot@windows
 	))
 ) $
+
 
 
 /*
