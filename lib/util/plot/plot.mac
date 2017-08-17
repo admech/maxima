@@ -3,7 +3,7 @@ require@file() $
 
 init() := block(
 	[
-		log : get_logger("plot", log_level_debug)
+		log : get_logger("plot", log_level_info)
 	],
 
 	defstruct(
@@ -70,7 +70,7 @@ init() := block(
 		buildq([log],
 			lambda([sol, plot_groups],
 				plot_groups_separately(
-					"Gnuplotting to QT window...", /* FOR SOME REASON ONLY THE LAST WINDOW STICKS...*/
+					"Gnuplotting to QT windows...",
 					window_term
 				)
 			)
@@ -99,7 +99,7 @@ init() := block(
 	/* file */
 	file_term(target_dir) := buildq([target_dir], lambda([group], block([target_file],
 		target_file : concat(target_dir, "/", group@name, ".eps"),
-		log@info("[ plot ] Plotting", group@name, "to", target_file),
+		log@info("[ plot ] Plotting to", target_file),
 		set_plot_option([gnuplot_out_file, target_file]),
 		[ gnuplot_term, ps ]
 	))),
@@ -133,6 +133,7 @@ init() := block(
 
 	plot_to_terminal : buildq([log], lambda([sol, plot_vars, terminal, postamble],
 		log@debug(terminal[2], plot_vars),
+		log@info("Plotting", group@name, ":", rreduce(sconcat, rest(rreduce(append, makelist([var@name, ", "], var, plot_vars)), -1))),
 		series_to_plot: makelist(
 				[ discrete, makelist(var@get(p), p, sol) ],
 				var, plot_vars
