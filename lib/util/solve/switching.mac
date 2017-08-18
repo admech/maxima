@@ -1,0 +1,98 @@
+require@logging() $
+
+init() := block(
+	slog : get_logger("switching", log_level_info),
+
+	/* ALLOWING RIGHT-HAND SIDES OF EQUATIONS TO NOTIFY SOLVER */
+
+	beyond(threshold) ::= buildq([threshold], [var] -> (abs(var) > threshold)),
+
+	defstruct(SwitchDump(
+		stop_reason,
+		t_dump,
+		vars_dump
+	)),
+	DONE : new(SwitchDump("DONE", "o tempora", "o mores")),
+
+	dump_vars_if(should_switch, var) ::= buildq([should_switch, var], [rhs] -> (
+		if should_switch(var) then 
+			switch_dump: new(SwitchDump(
+				stop_reason: "switching",
+				t_dump: t,
+				vars_dump: all_vars_solved_for()
+			))
+		else rhs
+	)),
+	get_switch_dump() := switch_dump,
+
+	switching(rhss, vars, should_switch) := makelist(
+		dump_vars_if(should_switch, vars[i])(rhss[i]),
+		i, 1, length(rhss)
+	),
+
+	/* ALLOWING SOLVER TO ADJUST INITIALS AND CONTINUE */
+
+	defstruct(
+		SwitchingModel(
+			name,
+			rk_adapter,
+			switcher,
+			plot_groups
+		)
+	),
+
+	from_t_with_initials(switching_model, t, initials) := new(SwitchingModel(
+		switching_model@name,
+		new(RKAdapter(
+			switching_model@rk_adapter@rhss,
+			switching_model@rk_adapter@vars,
+			initials, /* <------------------------- override initials   */
+			new(Domain(
+				t, /* <---------------------------- override start time */
+				switching_model@rk_adapter@domain@finish,
+				switching_model@rk_adapter@domain@stp
+			))
+		)),
+		switching_model@switcher,
+		switching_model@plot_groups
+	)),
+
+	iterate(solver, switcher, iter_num, previous_sol, model) := block(
+		[
+			sol,
+			full_sol
+		],
+		slog@info(
+			"Starting iteration", iter_num,
+			"at", model@rk_adapter@domain@start,
+			"with initials", model@rk_adapter@initials
+		),
+		sol: solver(model),
+		full_sol: append(previous_sol, rest(sol, -1)), /* cut off last point because switch happens at the same instant */
+		if (get_switch_dump() = DONE) then (
+			slog@info("Finished solving at", time(last(sol)), "with", coords(last(sol))),
+			full_sol
+		) else (
+			switch_dump: DONE,
+			iterate(
+				solver, switcher, iter_num + 1, full_sol,
+				from_t_with_initials(
+					model,
+					time(last(sol)),
+					switcher(coords(last(sol)))
+				)
+			)
+		)
+	),
+
+	with_switcher(solver, switcher) ::= block(
+		buildq([solver, switcher], [model] -> (
+					slog@info("Using switcher:", switcher),
+					iterate(solver, switcher, 1, [], model)
+		))
+	)
+
+) $
+
+
+

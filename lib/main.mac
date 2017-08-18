@@ -20,7 +20,8 @@ log : get_logger("main", log_level_info) $
 log@debug(hr()) $
 
 /* require@lotka_volterra() $ */
-require@omni_with_rollers() $
+/* require@omni_with_rollers() $ */
+require@billiard() $
 log@info("Done loading models.") $
 
 log_program_start() $
@@ -38,7 +39,7 @@ run(
 ) $
 */
 
-
+/*
 log@info("Initializing model...") $
 omni_vehicle: OmniVehicle(
 	params,
@@ -53,13 +54,26 @@ run(
 		plot@windows
 	))
 ) $
-
+*/
 
 
 /*
 batchload("model/exp/lang.mac") $
 */
 
+
 log_program_finish() $
+
+/*               viscosity, wall_coord,  v0,   t1,  t_step   */
+model: Billiard( 0.05,      100,         100,  120, 0.01    ) $
+run(
+	model,
+	new(Pipeline(
+		with_switcher(solver@simple, model@switcher),
+		plot@windows
+	))
+) $
+print(get_switch_dump()) $
+
 
 

@@ -1,4 +1,5 @@
 require@model() $
+require@switching() $
 require@wheelutil() $
 require@omni_with_rollers_params() $
 require@omni_with_rollers_symbols() $
@@ -6,10 +7,19 @@ require@omni_with_rollers_equations() $
 
 init() := block(
 
-	solvable_vars(params) := append(
+	/* TECHNICAL STUFF */
+
+	solvable_vars() := append(
 		pernu(nu[i] = concat(_rk_nu, "_", i), i),
 		perwheel(chi(i) = concat(_rk_chi, "_", i), i)
 	),
+
+	all_vars_solved_for() := append(
+		map(second, solvable_vars()),
+		[x, y, theta]
+	),
+
+	/* INITIALS, TIME RANGE AND PRECISION OPTIONS */
 
 	defstruct(OmniInitials(
 		nu     = pernu(0, i),
@@ -38,11 +48,21 @@ init() := block(
 	)),
 	case_of_motion: new(OmniCaseOfMotion),
 
+	/* SWITCHING ROLLERS */
+
+	_rhs_chi_switching: switching(
+		_rhs_chi,
+		perwheel(chi(i), i) where solvable_vars(),
+		beyond(_chi_max_adjust)
+	),
+
+	/* DECLARING THE MODEL: RHSS, REAL PARAMS AND PLOT VARS */
+
 	OmniVehicle(params, initials, domain) := new(Model(
 		sconcat("Omni vehicle with rollers (params: ", params, ", initials: ", initials, ", domain: ", domain),
 		new(RKAdapter(
-			append( _rhs_nu,      _rhs_chi,             _rhs_coords     ) where append( real(params), solvable_vars(params) ),
-			append( nu,           perwheel(chi(i), i),  [x, y, theta]   ) where solvable_vars(params),
+			append( _rhs_nu,      _rhs_chi_switching,   _rhs_coords     ) where append( real(params), solvable_vars(params) ),
+			append( nu,           perwheel(chi(i), i),  [x, y, theta]   ) where solvable_vars(),
 			append( initials@nu,  initials@chi,         initials@coords ),
 			domain
 		)),

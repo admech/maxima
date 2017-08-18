@@ -13,6 +13,7 @@ init() := block(
 
 	len_q  : 3 + params@N_wheels * (params@n_rollers + 1),
 	len_nu : 3 + params@N_wheels * (params@n_rollers - 1),
+    _chi_max_adjust: %pi/params@n_rollers, /* value of chi on which rollers switch - i.e. border of cut roller */
 
 
 	real(params) := block([
@@ -30,7 +31,6 @@ init() := block(
 	        M_hub,
 	        r_roller_moi,
 	        h_roller_moi,
-	        _chi_max_adjust, /* value of chi on which rollers switch - i.e. border of cut roller */
 	        J_0, /* moi hub wrt wheel axis */
 	        M /* total mass */
 	    ],
@@ -39,7 +39,6 @@ init() := block(
 	    l: r / cos(_chi_max_geom),
 	    I_0_S: M_platf*R^2/2 + params@N_wheels*(M_hub*R^2 + M_hub/12*(3*r^2 + 0.01^2)),
 	    r_roller_moi: (l - r)/2,
-	    _chi_max_adjust: %pi/params@n_rollers,
 	    h_roller_moi: 2*l*sin(_chi_max_adjust),
 	    A: 1/12 * m * (3*r_roller_moi^2 + h_roller_moi^2),
 	    B: (m*r_roller_moi^2)/2,

@@ -1,0 +1,67 @@
+require@logging() $
+require@model() $
+require@switching() $
+
+init() := block(
+	[
+		plot_vars
+	],
+	blog: get_logger("billiard", log_level_info),
+
+	/* WALLS */
+
+	walls(rhs_v, wall_coord) := switching(
+		[ rhs_v ],
+		[ x ],
+		beyond(wall_coord)
+	)[1],
+
+	all_vars_solved_for() := [ x, v ],
+
+	bounce_off_walls(rhss) := block(
+		[
+			rhs_x: rhss[1],
+			rhs_v: rhss[2],
+			next_rhss
+		],
+		next_rhss: [ rhs_x, -rhs_v ],
+		blog@info("Switching from", rhss, "to", next_rhss),
+		next_rhss
+	),
+
+	/* THE MODEL */
+
+	Billiard(
+		viscosity, wall_coord,
+		v0, t1, t_step
+	) := new(SwitchingModel(
+		"One-dimensional billiard with viscous friction",
+		new(RKAdapter(
+			[ v, walls(-viscosity*v, wall_coord) ],
+			[ x, v                               ],
+			[ 0, v0                              ],
+			new(Domain( 0, t1, t_step ))
+		)),
+		bounce_off_walls,
+		[
+			new(PlotGroup(
+				"coords",
+				[
+					new(PlotVar("x(t)", [p] -> [ p[1], p[2] ])),
+					new(PlotVar("v(t)", [p] -> [ p[1], p[3] ]))
+				],
+				no_postamble,
+				[ "t", "coord" ]
+			)),
+			new(PlotGroup(
+				"phase",
+				[
+					new(PlotVar("v(x)", [p] -> [ p[2], p[3] ]))
+				],
+				equal_axes,
+				[ "x", "v" ]
+			))
+		]
+	))
+
+) $

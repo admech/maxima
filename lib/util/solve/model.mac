@@ -35,3 +35,5 @@ simulate_with(Mdl, initials, domain) := block([rka],
 	rk(rka@rhss, rka@vars, initials, [ t, domain@start, domain@finish, domain@stp ])
 ) $
 
+time(p) := first(p) $
+coords(p) := rest(p, 1) $
