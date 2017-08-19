@@ -112,14 +112,14 @@ init() := block(
 	OmniVehicle(params, initials, domain) := new(SwitchingModel(
 		sconcat("Omni vehicle with rollers (params: ", params, ", initials: ", initials, ", domain: ", domain),
 		new(RKAdapter(
-			append( _rhs_nu,      _rhs_chi_switching,   perfree(0, i, j),                  _rhs_coords     ) where append( real(params), solvable_vars() ),
+			append( _rhs_nu,      _rhs_chi_switching,   _rhs_phi,                          _rhs_coords     ) where append( real(params), solvable_vars() ),
 			append( nu,           perwheel(chi(i), i),  perfree(freephi(i, j), i, j),      [x, y, theta]   ) where solvable_vars(),
 			append( initials@nu,  initials@chi,         perfree(0, i, j),                  initials@coords ),
 			domain
 		)),
 		new(Switcher(
 			renumber_rollers,
-			append( _rhs_nu,      _rhs_chi,             perfree(0, i, j),                  _rhs_coords     ) where append( real(params), solvable_vars() )
+			append( _rhs_nu,      _rhs_chi,             _rhs_phi,                          _rhs_coords     ) where append( real(params), solvable_vars() )
 		)),
 		append(
 			[
