@@ -30,7 +30,7 @@ init() := block(
 
 	_rhs_chi: perwheel((_V . nu)[3+i][1], i),
 
-	_rhs_phi: pers(nu[s], s),
+	_rhs_phi: pers3(nu[s], s),
 
 	_rhs_coords: perbignu((_V . nu)[i][1], i),
 
