@@ -61,7 +61,7 @@ init() := block(
 	OmniVehicle(params, initials, domain) := new(Model(
 		sconcat("Omni vehicle with rollers (params: ", params, ", initials: ", initials, ", domain: ", domain),
 		new(RKAdapter(
-			append( _rhs_nu,      _rhs_chi_switching,   _rhs_coords     ) where append( real(params), solvable_vars(params) ),
+			append( _rhs_nu,      _rhs_chi,   _rhs_coords     ) where append( real(params), solvable_vars() ),
 			append( nu,           perwheel(chi(i), i),  [x, y, theta]   ) where solvable_vars(),
 			append( initials@nu,  initials@chi,         initials@coords ),
 			domain
@@ -70,8 +70,8 @@ init() := block(
 			new(PlotGroup(
 				"coords",
 				[
-					new(PlotVar("x(t)", [p] -> [ p[1], p[len_nu + params@N_wheels + 1] ])),
-					new(PlotVar("y(t)", [p] -> [ p[1], p[len_nu + params@N_wheels + 2] ]))
+					new(PlotVar("x(t)", [p] -> [ p[1], p[1 + len_nu + params@N_wheels + 1] ])),
+					new(PlotVar("y(t)", [p] -> [ p[1], p[1 + len_nu + params@N_wheels + 2] ]))
 				],
 				no_postamble,
 				[ "t", "coord" ]
@@ -79,7 +79,7 @@ init() := block(
 			new(PlotGroup(
 				"self rotation",
 				[
-					new(PlotVar("theta(t)", [p] -> [ p[1], p[len_nu + params@N_wheels + 3] ]))
+					new(PlotVar("theta(t)", [p] -> [ p[1], p[1 + len_nu + params@N_wheels + 3] ]))
 				],
 				no_postamble,
 				[ "t", "theta" ]
@@ -87,7 +87,7 @@ init() := block(
 			new(PlotGroup(
 				"trajectory",
 				[
-					new(PlotVar("y(x)", [p] -> [ p[len_nu + params@N_wheels + 1], p[len_nu + params@N_wheels + 2] ]))
+					new(PlotVar("y(x)", [p] -> [ p[1 + len_nu + params@N_wheels + 1], p[1 + len_nu + params@N_wheels + 2] ]))
 				],
 				equal_axes,
 				[ "x", "y" ]
@@ -97,7 +97,7 @@ init() := block(
 				perwheel(
 					new(PlotVar(
 						concat("chi_", i, "(t)"),
-						[p] -> [ p[1], p[len_nu + i] ]
+						[p] -> [ p[1], p[1 + len_nu + i] ]
 					)),
 					i
 				),
