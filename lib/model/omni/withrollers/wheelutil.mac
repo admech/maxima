@@ -46,6 +46,7 @@ pers3('expr, free_roller_var) := per_element(expr, free_roller_var, 4, 3 + param
 perq('expr, var) := per_element(expr, var, 1, len_q) $
 pernu('expr, var) := per_element(expr, var, 1, len_nu) $
 perbignu('expr, var) := per_element(expr, var, 1, 3) $
+perfreenu('expr, var) := per_element(expr, var, 4, len_nu) $
 perfree('expr, wheel_var, roller_var) := per_two_elements(expr, wheel_var, 1, params@N_wheels, roller_var, 2, params@n_rollers) $
 
 /* NUMERATION */

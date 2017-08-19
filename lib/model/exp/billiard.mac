@@ -42,7 +42,9 @@ init() := block(
 			[ 0, v0                              ],
 			new(Domain( 0, t1, t_step ))
 		)),
-		bounce_off_walls,
+		/* actually, stepover is not needed in this model (nor supported in bounce_off_walls),
+		   but don't wanna spend time implementing it */
+		new(Switcher(bounce_off_walls, [ v, -viscosity*v ])),
 		[
 			new(PlotGroup(
 				"coords",

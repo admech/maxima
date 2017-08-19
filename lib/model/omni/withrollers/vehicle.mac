@@ -1,3 +1,4 @@
+require@logging() $
 require@model() $
 require@switching() $
 require@wheelutil() $
@@ -7,6 +8,7 @@ require@omni_with_rollers_equations() $
 require@omni_with_rollers_cases() $
 
 init() := block(
+	vlog: get_logger("vehicle", log_level_info),
 
 	/* TECHNICAL STUFF */
 
@@ -28,15 +30,85 @@ init() := block(
 		beyond(_chi_max_adjust)
 	),
 
+	extract_big_nus(coords)  := perbignu(  coords[i],                    i),
+	extract_free_nus(coords) := perfreenu( coords[i],                    i),
+	extract_chis(coords)     := perwheel(  coords[len_nu + i],           i),
+	extract_coords(coords)   := perbignu(  coords[length(coords) - 3 + i], i),
+
+	permut_list(l, perm) := makelist(l[i], i, perm),
+	lshift(l) := permut_list(l, endcons(1, makelist(i, i, 2, length(l)))),
+	rshift(l) := permut_list(l, cons(length(l), makelist(i, i, 1, length(l) - 1))),
+
+	extract_free_nus_for_wheel(free_nus, i) := per_free_roller(free_nus[(i - 1)*(params@n_rollers - 1) + j-1], j),
+	split_to_wheels(free_nus) := perwheel(extract_free_nus_for_wheel(free_nus, i), i),
+	shift_rollers_on_wheel(nus_on_wheel, chi, speed_of_roller_in_contact) := block(
+		[ shifted_nus ],
+		vlog@info("is this wheel switching? chi =", chi, "chi_max =", float(_chi_max_adjust)),
+		if chi > _chi_max_adjust then (
+		    vlog@info("wheel rotates counter-clockwise, therefore the freed-up roller will have #=1, others shifted forward, last - dropped."),
+		    shifted_nus: rshift(nus_on_wheel),
+		    shifted_nus[1]: speed_of_roller_in_contact
+		) else if chi < -_chi_max_adjust then (
+		    vlog@info("wheel rotates clockwise, therefore the freed-up roller will have #=n, others shifted backward, first - dropped."),
+		    shifted_nus: lshift(nus_on_wheel),
+		    shifted_nus[length(shifted_nus)]: speed_of_roller_in_contact
+		) else (
+		    vlog@info("this wheel is not switching"),
+		    shifted_nus: nus_on_wheel
+		),
+		shifted_nus
+	),
+	calculate_speed_of_roller_in_contact(coords) := block(
+		[ nu1_from_eqs, nu2_from_eqs, chis_from_eqs ],
+		nu1_from_eqs  : extract_big_nus(coords)[1],
+		nu2_from_eqs  : extract_big_nus(coords)[2],
+		chis_from_eqs : extract_chis(coords),
+	    perwheel(
+	    	(_V . nu)[3 + params@N_wheels + i][1], /* we just need the values of constraints for \phi_{1..N_wheels, 1} */
+	    	i
+	    ) where append(
+	        real(params),
+	        [ nu[1] = nu1_from_eqs, nu[2] = nu2_from_eqs ],
+	        perwheel(chi(i) = chis_from_eqs[i], i)
+	    )
+	),
+	shift_rollers(coords) ::= buildq([coords], [free_nus] -> block(
+		[ wheels, chis, phi_rhss ],
+		wheels: split_to_wheels(free_nus),
+		chis: extract_chis(coords),
+		phi_rhss: calculate_speed_of_roller_in_contact(coords),
+		lreduce(append, perwheel((
+			vlog@info("considering wheel #", i),
+			shift_rollers_on_wheel(wheels[i], chis[i], phi_rhss[i])
+		), i))
+	)),
+
+	adjust(chi) := mod(chi - _chi_max_adjust, 2*_chi_max_adjust) - _chi_max_adjust,
+	adjust_chis(chis) := map(adjust, chis),
+
+	renumber_rollers(coords) := block(
+		vlog@info("switching"),
+		append(
+			extract_big_nus(coords),
+			extract_free_nus(coords) where [ shift_rollers(coords) ],
+			extract_chis(coords) where [ adjust_chis ],
+			extract_coords(coords)
+		)
+	),
+
 	/* DECLARING THE MODEL: RHSS, REAL PARAMS AND PLOT VARS */
 
-	OmniVehicle(params, initials, domain) := new(Model(
+	OmniVehicle(params, initials, domain) := new(SwitchingModel(
 		sconcat("Omni vehicle with rollers (params: ", params, ", initials: ", initials, ", domain: ", domain),
 		new(RKAdapter(
 			append( _rhs_nu,      _rhs_chi_switching,   _rhs_coords     ) where append( real(params), solvable_vars() ),
 			append( nu,           perwheel(chi(i), i),  [x, y, theta]   ) where solvable_vars(),
 			append( initials@nu,  initials@chi,         initials@coords ),
 			domain
+		)),
+		new(Switcher(
+			renumber_rollers,
+			append( _rhs_nu,      _rhs_chi,             _rhs_coords     ) where append( real(params), solvable_vars() )
 		)),
 		[
 			new(PlotGroup(
@@ -49,12 +121,12 @@ init() := block(
 				[ "t", "coord" ]
 			)),
 			new(PlotGroup(
-				"self rotation",
+				"self rotation", /* θ - not supported in console */
 				[
-					new(PlotVar("θ(t)", [p] -> [ p[1], p[1 + len_nu + params@N_wheels + 3] ]))
+					new(PlotVar("theta(t)", [p] -> [ p[1], p[1 + len_nu + params@N_wheels + 3] ]))
 				],
 				no_postamble,
-				[ "t", "θ" ]
+				[ "t", "theta" ]
 			)),
 			new(PlotGroup(
 				"trajectory",
@@ -65,22 +137,22 @@ init() := block(
 				[ "x", "y" ]
 			)),
 			new(PlotGroup(
-				"wheel angles",
+				"wheel angles", /* χ - not supported in console */
 				append(
 					perwheel(
 						new(PlotVar(
-							concat("χ_", i, "(t)"),
+							concat("chi_", i, "(t)"),
 							[p] -> [ p[1], p[1 + len_nu + i] ]
 						)),
 						i
 					),
 					[
-						new(PlotVar("+ χ_{max}", [p] -> [ p[1],  _chi_max_adjust ])),
-						new(PlotVar("- χ_{max}", [p] -> [ p[1], -_chi_max_adjust ]))
+						new(PlotVar("+ chi_{max}", [p] -> [ p[1],  _chi_max_adjust ])),
+						new(PlotVar("- chi_{max}", [p] -> [ p[1], -_chi_max_adjust ]))
 					]
 				),
 				no_postamble,
-				[ "t", "χ" ]
+				[ "t", "chi" ]
 			))
 		]
 	))

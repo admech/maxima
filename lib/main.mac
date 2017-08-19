@@ -43,22 +43,22 @@ run(
 	model,
 	new(Pipeline(
 		with_switcher(solver@simple, model@switcher),
-		plot@windows
+		plot@console
 	))
 ) $
 */
-
 
 
 log@info("Loading model...") $
 require@omni_with_rollers() $
 log@info("Done loading model.") $
 
+
 log@info("Initializing model...") $
 omni_vehicle: OmniVehicle(
 	params,
-	case_of_motion@wrench(1, 0, 1) where [ gonna_switch_in(0.25) ],
-	new(Domain( 0, 0.01, 0.01 ))
+	case_of_motion@self_rot(-1) where [ gonna_switch_in(0.1) ],
+	new(Domain( 0, 1, 0.01 ))
 ) $
 log@info("Done initializing model.") $
 
@@ -66,13 +66,33 @@ log@info("Done initializing model.") $
 run(
 	omni_vehicle, 
 	new(Pipeline(
-		solver@simple,
+		with_switcher(solver@simple, omni_vehicle@switcher),
 		plot@windows
 	))
 ) $
 
 
+/*
+rhss: all_vars_solved_for() $
+print(extract_big_nus(rhss)) $
+print(extract_free_nus(rhss)) $
+print(extract_chis(rhss)) $
+print(extract_coords(rhss)) $
 
+print() $
+print(shift(extract_free_nus(rhss))) $
+the_chis: [ %pi/6, %pi/2 - 0.1, -%pi/4-0.01 ] $
+map(print, adjust(the_chis)) $
+
+print() $
+wheels: split_to_wheels(extract_free_nus(rhss)) $
+print(wheels) $
+print("", shift_rollers_on_wheel(wheels[1], %pi/3, 10)) $ 
+
+print() $
+_rk_chi_1: the_chis[1] $ _rk_chi_2: the_chis[2] $ _rk_chi_3: the_chis[3] $
+print(shift_rollers(rhss)(extract_free_nus(rhss))) $
+*/
 
 /*
 batchload("model/exp/lang.mac") $

@@ -1,4 +1,5 @@
 require@logging() $
+require@model() $
 
 init() := block(
 	slog : get_logger("switching", log_level_info),
@@ -41,6 +42,13 @@ init() := block(
 		)
 	),
 
+	defstruct(
+		Switcher(
+			transition,    /* [pre-switch rhss values] -> [post-switch rhss values] */
+			stepover_rhss  /* should not signal switch */
+		)
+	),
+
 	from_t_with_initials(switching_model, t, initials) := new(SwitchingModel(
 		switching_model@name,
 		new(RKAdapter(
@@ -57,6 +65,29 @@ init() := block(
 		switching_model@plot_groups
 	)),
 
+	step_over_switch(model, stepover_rhss, point_where_switch_was_detected) := block(
+		[
+			p : point_where_switch_was_detected,
+			stp: model@rk_adapter@domain@stp,
+			stepover_sol
+		],
+		slog@info("stepping over the switch - acquiring one point into the prohibited zone..."),
+		stepover_sol: simulate(
+			new(Model(
+				model@name,
+				new(RKAdapter(
+					stepover_rhss,
+					model@rk_adapter@vars,
+					coords(p),
+					new(Domain(time(p), time(p) + stp, stp))
+				)),
+				model@plot_groups
+			))
+		),
+		slog@info("acquired stepover, length=", length(stepover_sol), "returning point from prohibited area", last(stepover_sol)),
+		last(stepover_sol)
+	),
+
 	iterate(solver, switcher, iter_num, previous_sol, model) := block(
 		[
 			sol,
@@ -68,18 +99,19 @@ init() := block(
 			"with initials", model@rk_adapter@initials
 		),
 		sol: solver(model),
-		full_sol: append(previous_sol, rest(sol, -1)), /* cut off last point because switch happens at the same instant */
+		full_sol: append(previous_sol, sol), /* rest(sol, -1)),  cut off last point because switch happens at the same instant */
 		if (get_switch_dump() = DONE) then (
 			slog@info("Finished solving at", time(last(sol)), "with", coords(last(sol))),
 			full_sol
 		) else (
 			switch_dump: DONE,
+			one_step_further: step_over_switch(model, switcher@stepover_rhss, last(sol)),
 			iterate(
 				solver, switcher, iter_num + 1, full_sol,
 				from_t_with_initials(
 					model,
-					time(last(sol)),
-					switcher(coords(last(sol)))
+					time(one_step_further),
+					switcher@transition(coords(one_step_further))
 				)
 			)
 		)
@@ -87,7 +119,7 @@ init() := block(
 
 	with_switcher(solver, switcher) ::= block(
 		buildq([solver, switcher], [model] -> (
-					slog@info("Using switcher:", switcher),
+					slog@info("Using switcher:", switcher@transition),
 					iterate(solver, switcher, 1, [], model)
 		))
 	)
