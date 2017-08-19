@@ -20,6 +20,8 @@ init() := block(
 			switch_dump: new(SwitchDump(
 				stop_reason: "switching",
 				t_dump: t,
+				/* actually this is not used as it does not produce any meaningful values.
+				   if we could fix it though, we could eliminate stepover. */
 				vars_dump: all_vars_solved_for()
 			))
 		else rhs
@@ -84,7 +86,7 @@ init() := block(
 				model@plot_groups
 			))
 		),
-		slog@info("acquired stepover, length=", length(stepover_sol), "returning point from prohibited area", last(stepover_sol)),
+		slog@info("acquired stepover, length =", length(stepover_sol), "returning point from prohibited area", last(stepover_sol)),
 		last(stepover_sol)
 	),
 
@@ -104,7 +106,7 @@ init() := block(
 			slog@info("Finished solving at", time(last(sol)), "with", coords(last(sol))),
 			full_sol
 		) else (
-			/* why stepover if we have switch_dump ?! */
+			/* we would not need stepover if we could dump variables, but alas, rk may produce unpredictable results, not to speak of the variables not being available at the point of dumping */
 			switch_dump: DONE,
 			one_step_further: step_over_switch(model, switcher@stepover_rhss, last(sol)),
 			iterate(
