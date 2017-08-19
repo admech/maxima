@@ -104,6 +104,7 @@ init() := block(
 			slog@info("Finished solving at", time(last(sol)), "with", coords(last(sol))),
 			full_sol
 		) else (
+			/* why stepover if we have switch_dump ?! */
 			switch_dump: DONE,
 			one_step_further: step_over_switch(model, switcher@stepover_rhss, last(sol)),
 			iterate(
