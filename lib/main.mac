@@ -58,7 +58,7 @@ log@info("Initializing model...") $
 omni_vehicle: OmniVehicle(
 	params,
 	case_of_motion@self_rot(-1) where [ gonna_switch_in(0.1) ],
-	new(Domain( 0, 1, 0.01 ))
+	new(Domain( 0, 0.2, 0.01 ))
 ) $
 log@info("Done initializing model.") $
 
@@ -67,7 +67,7 @@ run(
 	omni_vehicle, 
 	new(Pipeline(
 		with_switcher(solver@simple, omni_vehicle@switcher),
-		plot@windows
+		plot@console
 	))
 ) $
 

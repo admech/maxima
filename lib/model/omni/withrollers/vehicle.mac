@@ -30,10 +30,17 @@ init() := block(
 		beyond(_chi_max_adjust)
 	),
 
-	extract_big_nus(coords)  := perbignu(  coords[i],                    i),
-	extract_free_nus(coords) := perfreenu( coords[i],                    i),
-	extract_chis(coords)     := perwheel(  coords[len_nu + i],           i),
-	extract_coords(coords)   := perbignu(  coords[length(coords) - 3 + i], i),
+	extract_big_nu(  i, coords) := coords[i],
+	extract_free_nu( s, coords) := coords[3 + s],
+	extract_chi(     i, coords) := coords[len_nu + i],
+	extract_x(    coords) := coords[length(coords) - 2],
+	extract_y(    coords) := coords[length(coords) - 1],
+	extract_theta(coords) := coords[length(coords)    ],
+
+	extract_big_nus(coords)  := perbignu(  extract_big_nu(  i, coords), i),
+	extract_free_nus(coords) := pers(      extract_free_nu( s, coords), s),
+	extract_chis(coords)     := perwheel(  extract_chi(     i, coords), i),
+	extract_coords(coords)   := [ extract_x(coords), extract_y(coords), extract_theta(coords) ],
 
 	permut_list(l, perm) := makelist(l[i], i, perm),
 	lshift(l) := permut_list(l, endcons(1, makelist(i, i, 2, length(l)))),
@@ -114,8 +121,8 @@ init() := block(
 			new(PlotGroup(
 				"coords",
 				[
-					new(PlotVar("x(t)", [p] -> [ p[1], p[1 + len_nu + params@N_wheels + 1] ])),
-					new(PlotVar("y(t)", [p] -> [ p[1], p[1 + len_nu + params@N_wheels + 2] ]))
+					new(PlotVar("x(t)", [p] -> [ time(p), extract_x(coords(p)) ])),
+					new(PlotVar("y(t)", [p] -> [ time(p), extract_y(coords(p)) ]))
 				],
 				no_postamble,
 				[ "t", "coord" ]
@@ -123,7 +130,7 @@ init() := block(
 			new(PlotGroup(
 				"self rotation", /* θ - not supported in console */
 				[
-					new(PlotVar("theta(t)", [p] -> [ p[1], p[1 + len_nu + params@N_wheels + 3] ]))
+					new(PlotVar("theta(t)", [p] -> [ time(p), extract_theta(coords(p)) ]))
 				],
 				no_postamble,
 				[ "t", "theta" ]
@@ -131,7 +138,7 @@ init() := block(
 			new(PlotGroup(
 				"trajectory",
 				[
-					new(PlotVar("y(x)", [p] -> [ p[1 + len_nu + params@N_wheels + 1], p[1 + len_nu + params@N_wheels + 2] ]))
+					new(PlotVar("y(x)", [p] -> [ extract_x(coords(p)), extract_y(coords(p)) ]))
 				],
 				equal_axes,
 				[ "x", "y" ]
@@ -142,13 +149,13 @@ init() := block(
 					perwheel(
 						new(PlotVar(
 							concat("chi_", i, "(t)"),
-							[p] -> [ p[1], p[1 + len_nu + i] ]
+							[p] -> [ time(p), extract_chi(i, coords(p)) ]
 						)),
 						i
 					),
 					[
-						new(PlotVar("+ chi_{max}", [p] -> [ p[1],  _chi_max_adjust ])),
-						new(PlotVar("- chi_{max}", [p] -> [ p[1], -_chi_max_adjust ]))
+						new(PlotVar("+ chi_{max}", [p] -> [ time(p),  _chi_max_adjust ])),
+						new(PlotVar("- chi_{max}", [p] -> [ time(p), -_chi_max_adjust ]))
 					]
 				),
 				no_postamble,
