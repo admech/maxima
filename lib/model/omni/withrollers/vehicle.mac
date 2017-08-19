@@ -33,6 +33,7 @@ init() := block(
 	extract_big_nu(  i, coords) := coords[i],
 	extract_free_nu( s, coords) := coords[3 + s],
 	extract_chi(     i, coords) := coords[len_nu + i],
+	extract_free_phi(s, coords) := coords[len_nu + params@N_wheels + s],
 	extract_x(    coords) := coords[length(coords) - 2],
 	extract_y(    coords) := coords[length(coords) - 1],
 	extract_theta(coords) := coords[length(coords)    ],
@@ -99,6 +100,7 @@ init() := block(
 			extract_big_nus(coords),
 			extract_free_nus(coords) where [ shift_rollers(coords) ],
 			extract_chis(coords) where [ adjust_chis ],
+			perfree(0, i, j),
 			extract_coords(coords)
 		)
 	),
@@ -108,14 +110,14 @@ init() := block(
 	OmniVehicle(params, initials, domain) := new(SwitchingModel(
 		sconcat("Omni vehicle with rollers (params: ", params, ", initials: ", initials, ", domain: ", domain),
 		new(RKAdapter(
-			append( _rhs_nu,      _rhs_chi_switching,   _rhs_coords     ) where append( real(params), solvable_vars() ),
-			append( nu,           perwheel(chi(i), i),  [x, y, theta]   ) where solvable_vars(),
-			append( initials@nu,  initials@chi,         initials@coords ),
+			append( _rhs_nu,      _rhs_chi_switching,   perfree(0, i, j),                  _rhs_coords     ) where append( real(params), solvable_vars() ),
+			append( nu,           perwheel(chi(i), i),  perfree(concat(tmp, i, j), i, j),  [x, y, theta]   ) where solvable_vars(),
+			append( initials@nu,  initials@chi,         perfree(0, i, j),                  initials@coords ),
 			domain
 		)),
 		new(Switcher(
 			renumber_rollers,
-			append( _rhs_nu,      _rhs_chi,             _rhs_coords     ) where append( real(params), solvable_vars() )
+			append( _rhs_nu,      _rhs_chi,             perfree(0, i, j),                  _rhs_coords     ) where append( real(params), solvable_vars() )
 		)),
 		[
 			new(PlotGroup(
