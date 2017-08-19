@@ -14,7 +14,8 @@ init() := block(
 
 	solvable_vars() := append(
 		pernu(nu[i] = concat(_rk_nu, "_", i), i),
-		perwheel(chi(i) = concat(_rk_chi, "_", i), i)
+		perwheel(chi(i) = concat(_rk_chi, "_", i), i),
+		perfree(freephi(i,j) = concat(_rk_phi, "_", i, "_", j), i, j)
 	),
 
 	all_vars_solved_for() := append(
@@ -111,7 +112,7 @@ init() := block(
 		sconcat("Omni vehicle with rollers (params: ", params, ", initials: ", initials, ", domain: ", domain),
 		new(RKAdapter(
 			append( _rhs_nu,      _rhs_chi_switching,   perfree(0, i, j),                  _rhs_coords     ) where append( real(params), solvable_vars() ),
-			append( nu,           perwheel(chi(i), i),  perfree(concat(tmp, i, j), i, j),  [x, y, theta]   ) where solvable_vars(),
+			append( nu,           perwheel(chi(i), i),  perfree(freephi(i, j), i, j),      [x, y, theta]   ) where solvable_vars(),
 			append( initials@nu,  initials@chi,         perfree(0, i, j),                  initials@coords ),
 			domain
 		)),
