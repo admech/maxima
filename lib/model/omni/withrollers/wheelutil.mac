@@ -58,10 +58,13 @@ $
 
 s(i,j) := 
 	3 /* skip big nu */
-	+ (i-1)*(params@n_rollers-1) /* skip rollers on previous wheels */
-	+ j-1 /* start indexing free rollers on the current wheel from 1, not 2 */
+	+ free_s(i,j)
 $
 
+free_s(i,j) :=
+      (i-1)*(params@n_rollers-1) /* skip rollers on previous wheels */
+	+ j-1 /* start indexing free rollers on the current wheel from 1, not 2 */
+$
 
 /*
 
