@@ -88,6 +88,8 @@ init() := block(
 		freed_values
 	)),
 	rollers() := new(WhatToShift("rollers", calculate_speed_of_roller_in_contact)),
+	/* don't want to track the angle of the roller in contact - just start with zero every time */
+	phis()    := new(WhatToShift("phis",    [coords] -> makelist(0, c, coords)  )), 
 	shift_vars(what_to_shift, coords) ::= buildq([what_to_shift, coords], [free_nus] -> block(
 		[ wheels, chis, phi_rhss ],
 		vlog@info("shifting", what_to_shift@name),
@@ -109,7 +111,7 @@ init() := block(
 			extract_big_nus(coords),
 			extract_free_nus(coords) where [ shift_vars(rollers(), coords) ],
 			extract_chis(coords) where [ adjust_chis ],
-			extract_free_phis(coords),
+			extract_free_phis(coords) where [ shift_vars(phis(), coords) ],
 			extract_coords(coords)
 		)
 	),
