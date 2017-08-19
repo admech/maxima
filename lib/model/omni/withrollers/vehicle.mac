@@ -40,10 +40,11 @@ init() := block(
 	extract_y(    coords) := coords[length(coords) - 1],
 	extract_theta(coords) := coords[length(coords)    ],
 
-	extract_big_nus(coords)  := perbignu(  extract_big_nu(  i, coords), i),
-	extract_free_nus(coords) := pers(      extract_free_nu( s, coords), s),
-	extract_chis(coords)     := perwheel(  extract_chi(     i, coords), i),
-	extract_coords(coords)   := [ extract_x(coords), extract_y(coords), extract_theta(coords) ],
+	extract_big_nus(coords)   := perbignu(  extract_big_nu(  i, coords), i),
+	extract_free_nus(coords)  := pers(      extract_free_nu( s, coords), s),
+	extract_chis(coords)      := perwheel(  extract_chi(     i, coords), i),
+	extract_free_phis(coords) := pers(      extract_s_phi(   s, coords), s),
+	extract_coords(coords)    := [ extract_x(coords), extract_y(coords), extract_theta(coords) ],
 
 	permut_list(l, perm) := makelist(l[i], i, perm),
 	lshift(l) := permut_list(l, endcons(1, makelist(i, i, 2, length(l)))),
@@ -102,7 +103,7 @@ init() := block(
 			extract_big_nus(coords),
 			extract_free_nus(coords) where [ shift_rollers(coords) ],
 			extract_chis(coords) where [ adjust_chis ],
-			perfree(0, i, j),
+			extract_free_phis(coords),
 			extract_coords(coords)
 		)
 	),
