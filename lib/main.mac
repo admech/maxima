@@ -57,8 +57,8 @@ log@info("Done loading model.") $
 log@info("Initializing model...") $
 omni_vehicle: OmniVehicle(
 	params,
-	case_of_motion@self_rot(1),
-	new(Domain( 0, 0.1, 0.01 ))
+	case_of_motion@wrench(1, 0, 1) where [ gonna_switch_in(0.25) ],
+	new(Domain( 0, 0.01, 0.01 ))
 ) $
 log@info("Done initializing model.") $
 

@@ -4,6 +4,7 @@ require@wheelutil() $
 require@omni_with_rollers_params() $
 require@omni_with_rollers_symbols() $
 require@omni_with_rollers_equations() $
+require@omni_with_rollers_cases() $
 
 init() := block(
 
@@ -19,35 +20,6 @@ init() := block(
 		[x, y, theta]
 	),
 
-	/* INITIALS, TIME RANGE AND PRECISION OPTIONS */
-
-	defstruct(OmniInitials(
-		nu     = pernu(0, i),
-		chi    = perwheel(0, i),
-		coords = [ 0, 0, 0 ]
-	)),
-	defstruct(OmniCaseOfMotion(
-		still    = new(OmniInitials),
-		
-		straight =
-		[nu1] -> block([intls], intls: new(OmniInitials),
-			intls@nu[1]: nu1,
-		intls),
-		
-		self_rot =
-		[nu3] -> block([intls], intls: new(OmniInitials),
-			intls@nu[3]: nu3,
-		intls),
-
-		wrench =
-		[nu1, nu2, nu3] -> block([intls], intls: new(OmniInitials),
-			intls@nu[1]: nu1,
-			intls@nu[2]: nu2,
-			intls@nu[3]: nu3,
-		intls)
-	)),
-	case_of_motion: new(OmniCaseOfMotion),
-
 	/* SWITCHING ROLLERS */
 
 	_rhs_chi_switching: switching(
@@ -61,7 +33,7 @@ init() := block(
 	OmniVehicle(params, initials, domain) := new(Model(
 		sconcat("Omni vehicle with rollers (params: ", params, ", initials: ", initials, ", domain: ", domain),
 		new(RKAdapter(
-			append( _rhs_nu,      _rhs_chi,   _rhs_coords     ) where append( real(params), solvable_vars() ),
+			append( _rhs_nu,      _rhs_chi_switching,   _rhs_coords     ) where append( real(params), solvable_vars() ),
 			append( nu,           perwheel(chi(i), i),  [x, y, theta]   ) where solvable_vars(),
 			append( initials@nu,  initials@chi,         initials@coords ),
 			domain
@@ -79,10 +51,10 @@ init() := block(
 			new(PlotGroup(
 				"self rotation",
 				[
-					new(PlotVar("theta(t)", [p] -> [ p[1], p[1 + len_nu + params@N_wheels + 3] ]))
+					new(PlotVar("θ(t)", [p] -> [ p[1], p[1 + len_nu + params@N_wheels + 3] ]))
 				],
 				no_postamble,
-				[ "t", "theta" ]
+				[ "t", "θ" ]
 			)),
 			new(PlotGroup(
 				"trajectory",
@@ -94,15 +66,21 @@ init() := block(
 			)),
 			new(PlotGroup(
 				"wheel angles",
-				perwheel(
-					new(PlotVar(
-						concat("chi_", i, "(t)"),
-						[p] -> [ p[1], p[1 + len_nu + i] ]
-					)),
-					i
+				append(
+					perwheel(
+						new(PlotVar(
+							concat("χ_", i, "(t)"),
+							[p] -> [ p[1], p[1 + len_nu + i] ]
+						)),
+						i
+					),
+					[
+						new(PlotVar("+ χ_{max}", [p] -> [ p[1],  _chi_max_adjust ])),
+						new(PlotVar("- χ_{max}", [p] -> [ p[1], -_chi_max_adjust ]))
+					]
 				),
 				no_postamble,
-				[ "t", "chi" ]
+				[ "t", "χ" ]
 			))
 		]
 	))
