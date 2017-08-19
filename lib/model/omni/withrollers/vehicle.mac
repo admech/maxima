@@ -52,7 +52,7 @@ init() := block(
 
 	extract_free_nus_for_wheel(free_nus, i) := per_free_roller(free_nus[(i - 1)*(params@n_rollers - 1) + j-1], j),
 	split_to_wheels(free_nus) := perwheel(extract_free_nus_for_wheel(free_nus, i), i),
-	shift_rollers_on_wheel(nus_on_wheel, chi, speed_of_roller_in_contact) := block(
+	shift_vars_on_wheel(nus_on_wheel, chi, speed_of_roller_in_contact) := block(
 		[ shifted_nus ],
 		vlog@info("is this wheel switching? chi =", chi, "chi_max =", float(_chi_max_adjust)),
 		if chi > _chi_max_adjust then (
@@ -83,14 +83,20 @@ init() := block(
 	        perwheel(chi(i) = chis_from_eqs[i], i)
 	    )
 	),
-	shift_rollers(coords) ::= buildq([coords], [free_nus] -> block(
+	defstruct(WhatToShift(
+		name,
+		freed_values
+	)),
+	rollers() := new(WhatToShift("rollers", calculate_speed_of_roller_in_contact)),
+	shift_vars(what_to_shift, coords) ::= buildq([what_to_shift, coords], [free_nus] -> block(
 		[ wheels, chis, phi_rhss ],
+		vlog@info("shifting", what_to_shift@name),
 		wheels: split_to_wheels(free_nus),
 		chis: extract_chis(coords),
-		phi_rhss: calculate_speed_of_roller_in_contact(coords),
+		phi_rhss: what_to_shift@freed_values(coords),
 		lreduce(append, perwheel((
 			vlog@info("considering wheel #", i),
-			shift_rollers_on_wheel(wheels[i], chis[i], phi_rhss[i])
+			shift_vars_on_wheel(wheels[i], chis[i], phi_rhss[i])
 		), i))
 	)),
 
@@ -101,7 +107,7 @@ init() := block(
 		vlog@info("switching"),
 		append(
 			extract_big_nus(coords),
-			extract_free_nus(coords) where [ shift_rollers(coords) ],
+			extract_free_nus(coords) where [ shift_vars(rollers(), coords) ],
 			extract_chis(coords) where [ adjust_chis ],
 			extract_free_phis(coords),
 			extract_coords(coords)
