@@ -21,8 +21,10 @@ clean_and_run () {
     local scenario=$1
     echo "[$scenario] Starting scenario..."
     echo "[$scenario] Cleaning out dir..."
+    mv `pwd`/../sol/$scenario/out/notes.md `pwd`/../sol/$scenario/notes.md
     rm `pwd`/../sol/$scenario/out/*
-    echo "[$scenario] Launching Maxima..."
+    mv `pwd`/../sol/$scenario/notes.md `pwd`/../sol/$scenario/out/notes.md 
+    echo "[$scenario] Running Maxima..."
     maxima --batch-string="\
         sol_dir: \"$scenario\" $\
         root_dir: \"`pwd`/..\" $\
@@ -38,7 +40,7 @@ for scenario in "$@"
 do
     clean_and_run "$scenario" &
 done
-wait
+# wait
 
 cd ..
 printf "\n\nDone.\n\n"
