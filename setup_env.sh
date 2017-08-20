@@ -2,6 +2,9 @@
 
 # run this on a fresh env to get everything for sumulation
 
+sudo apt-get install sbcl
+# sudo apt-get install clisp -- this one is said to be slow
+sudo apt-get install gnuplot
 sudo apt-get install maxima
 sudo apt-get install git
 
