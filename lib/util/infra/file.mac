@@ -15,7 +15,7 @@ init() := block(
 	save_sol : buildq([log],
 		lambda([sol, file_name],
 			block([full_file_name],
-				full_file_name : file(dir(out_dir), file_name, "lisp"),
+				full_file_name : file(out_dir, file_name, "lisp"),
 				log@info("Saving solution to", full_file_name),
 				save(full_file_name, sol)
 			)
