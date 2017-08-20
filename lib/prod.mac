@@ -35,7 +35,7 @@ DEFAULT_SIMULATION_PARAMETERS : [
 ] $
 
 linel : 16000 $
-log@info("Setting line width to", linel) $
+gnuplot_command : "gnuplot" $
 
 log@info("Loading model...") $
 load_simulation_parameters_from_file() $
