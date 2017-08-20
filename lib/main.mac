@@ -53,15 +53,15 @@ run(
 
 
 log@info("Loading model...") $
+load_simulation_parameters_from_file() $
 require@omni_with_rollers() $
 log@info("Done loading model.") $
-
 
 log@info("Initializing model...") $
 omni_vehicle: OmniVehicle(
 	params,
 	case_of_motion@self_rot(-1) where [ gonna_switch_in(0.1) ],
-	new(Domain( 0, 0.2, 0.01 ))
+	new(Domain( 0, 0.2, get_global("step") ))
 ) $
 log@info("Done initializing model.") $
 
@@ -70,10 +70,10 @@ run(
 	omni_vehicle, 
 	new(Pipeline(
 		solver@batch(
-			[ 0.1, 0.2 ],
+			get_global("batches"),
 			with_switcher(omni_vehicle@switcher)
 		),
-		plot@console
+		plot@windows
 	))
 ) $
 
@@ -82,7 +82,6 @@ run(
 	TODO:
 		* expose params
 		* arrange the layout: where goes the lib, where the params files, where the results (the latter two - together ?)
-		* check that we can actually set a different number of rollers / wheels
 */
 
 /*
