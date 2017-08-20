@@ -66,10 +66,10 @@ DEFAULT_SIMULATION_PARAMETERS : [
 ] $
 
 log@info("Loading model...") $
-use_default_simulation_parameters() $
 /*
-load_simulation_parameters_from_file() $
+use_default_simulation_parameters() $
 */
+load_simulation_parameters_from_file() $
 require@omni_with_rollers() $
 log@info("Done loading model.") $
 
