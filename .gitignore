@@ -1,2 +1,3 @@
 sol/*/out/**
+!sol/*/out/notes.md
 maxima_tempdir/**
