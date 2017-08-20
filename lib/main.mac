@@ -42,7 +42,10 @@ model: Billiard( 0.05,      100,         100,  120, 0.01    ) $
 run(
 	model,
 	new(Pipeline(
-		with_switcher(solver@simple, model@switcher),
+		solver@batch(
+			[ 20, 50, 120 ],
+			with_switcher(model@switcher)
+		),
 		plot@windows
 	))
 ) $

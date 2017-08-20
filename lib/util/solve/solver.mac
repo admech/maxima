@@ -4,7 +4,7 @@ require@model() $
 
 init() := block(
 	[
-		batch_simulate
+		batch_solve
 	],
 	solog : get_logger("solver", log_level_info),
 
@@ -18,7 +18,7 @@ init() := block(
 
 	solver@simple : simulate,
 
-	batch_simulate(batches) := buildq([batches], lambda([model], block(
+	batch_solve(batches, solver) := buildq([batches, solver], lambda([model], block(
 		[
 			sol: [],
 			last_point : [],
@@ -31,7 +31,7 @@ init() := block(
 			domain@finish : batch, /* then set t1 to the batch, but leave initials and t0 as is */
 
 			timeit_start(),
-			sol_batch : simulate_with(model, initials, domain),
+			sol_batch : solve_with(model, initials, domain, solver),
 			timeit_show(),
 			save_sol(sol, concat("batch_", ssubst("_", ".", string(batch)))),
 
@@ -46,6 +46,6 @@ init() := block(
 		),
 		sol : append(sol, [ last_point ]) /* finally, restore the last point as there are no more next batches */
 	))),
-	solver@batch : batch_simulate
+	solver@batch : batch_solve
 
 ) $

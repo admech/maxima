@@ -120,10 +120,10 @@ init() := block(
 		)
 	),
 
-	with_switcher(solver, switcher) ::= block(
-		buildq([solver, switcher], [model] -> (
+	with_switcher(switcher) ::= block(
+		buildq([switcher], [model] -> (
 					slog@info("Using switcher:", switcher@transition),
-					iterate(solver, switcher, 1, [], model)
+					iterate(simulate, switcher, 1, [], model)
 		))
 	)
 
