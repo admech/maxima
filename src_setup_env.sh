@@ -20,7 +20,7 @@ cd maxima-5.40.0
 ./configure --enable-sbcl
 make
 make check
-make install
+sudo make install
 
 cd ~
 
