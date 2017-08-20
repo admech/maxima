@@ -60,6 +60,16 @@ init() := block(
 		append(
 			[
 				new(PlotGroup(
+					"kinetic energy",
+					[
+						new(PlotVar("energy", [p] -> [ time(p), kin_en(extract_nus(coords(p)), extract_chis(coords(p))) ]))
+					],
+					no_postamble,
+					[ "t", "energy" ]
+				))
+			],
+			[
+				new(PlotGroup(
 					"coords",
 					[
 						new(PlotVar("x(t)", [p] -> [ time(p), extract_x(coords(p)) ])),

@@ -73,25 +73,9 @@ run(
 
 
 /*
-rhss: all_vars_solved_for() $
-print(extract_big_nus(rhss)) $
-print(extract_free_nus(rhss)) $
-print(extract_chis(rhss)) $
-print(extract_coords(rhss)) $
-
-print() $
-print(shift(extract_free_nus(rhss))) $
-the_chis: [ %pi/6, %pi/2 - 0.1, -%pi/4-0.01 ] $
-map(print, adjust(the_chis)) $
-
-print() $
-wheels: split_to_wheels(extract_free_nus(rhss)) $
-print(wheels) $
-print("", shift_rollers_on_wheel(wheels[1], %pi/3, 10)) $ 
-
-print() $
-_rk_chi_1: the_chis[1] $ _rk_chi_2: the_chis[2] $ _rk_chi_3: the_chis[3] $
-print(shift_rollers(rhss)(extract_free_nus(rhss))) $
+	TODO:
+		* expose params
+		* batch
 */
 
 /*

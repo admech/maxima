@@ -72,6 +72,12 @@ init() := block(
 	z: append(q, _p),
 
 	our_sympl_ident: sympl_ident(len_q),
-	poiz(F, G) := transpose(vecdiff(F, z)) . our_sympl_ident . vecdiff(G, z)
+	poiz(F, G) := transpose(vecdiff(F, z)) . our_sympl_ident . vecdiff(G, z),
+
+	kin_en(nus, chis) := L_star where append(
+		real(params),
+		pernu(nu[i] = nus[i], i),
+		perwheel(chi(i) = chis[i], i)
+	)
 
 ) $
