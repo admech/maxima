@@ -36,19 +36,19 @@ run(
 */
 
 /*               viscosity, wall_coord,  v0,   t1,  t_step   */
-/*
+
 require@billiard() $
 model: Billiard( 0.05,      100,         100,  120, 0.01    ) $
 run(
 	model,
 	new(Pipeline(
 		with_switcher(solver@simple, model@switcher),
-		plot@console
+		plot@windows
 	))
 ) $
-*/
 
 
+/*
 log@info("Loading model...") $
 require@omni_with_rollers() $
 log@info("Done loading model.") $
@@ -70,7 +70,7 @@ run(
 		plot@console
 	))
 ) $
-
+*/
 
 /*
 	TODO:

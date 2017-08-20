@@ -4,9 +4,9 @@ require@model() $
 
 init() := block(
 	[
-		log : get_logger("solver", log_level_info),
 		batch_simulate
 	],
+	solog : get_logger("solver", log_level_info),
 
 	defstruct(
 		Solver(
@@ -27,7 +27,7 @@ init() := block(
 			domain : model@rk_adapter@domain
 		],
 		for batch in batches do (
-			log@info("[ solver ] Solving batch", batch), /* as in plot, not clear how to use the private logger here */
+			solog@info("Solving batch", batch),
 			domain@finish : batch, /* then set t1 to the batch, but leave initials and t0 as is */
 
 			timeit_start(),
@@ -44,7 +44,7 @@ init() := block(
 			/* while dropping the last point as it will be the initial for the next batch */
 			sol : append(sol, rest(sol_batch, -1))
 		),
-		sol : append(sol, [ last_point ]) /* finally, restore the last point as there is are no more next batches */
+		sol : append(sol, [ last_point ]) /* finally, restore the last point as there are no more next batches */
 	))),
 	solver@batch : batch_simulate
 

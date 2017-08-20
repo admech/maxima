@@ -18,16 +18,20 @@ init() := block(
 
 	all_vars_solved_for() := [ x, v ],
 
-	bounce_off_walls(rhss) := block(
+	bounce_off(x, wall_coord) :=
+		if x > wall_coord then wall_coord - (x - wall_coord)
+		else if x < -wall_coord then -wall_coord + (-wall_coord - x)
+		else x,
+	bounce_off_walls(wall_coord) := buildq([wall_coord], lambda([initials], block(
 		[
-			rhs_x: rhss[1],
-			rhs_v: rhss[2],
-			next_rhss
+			x_val: initials[1],
+			v_val: initials[2],
+			next_initials
 		],
-		next_rhss: [ rhs_x, -rhs_v ],
-		blog@info("Switching from", rhss, "to", next_rhss),
-		next_rhss
-	),
+		next_initials: [ bounce_off(x_val, wall_coord), -v_val ],
+		blog@info("Switching from", initials, "to", next_initials),
+		next_initials
+	))),
 
 	/* THE MODEL */
 
@@ -42,9 +46,7 @@ init() := block(
 			[ 0, v0                              ],
 			new(Domain( 0, t1, t_step ))
 		)),
-		/* actually, stepover is not needed in this model (nor supported in bounce_off_walls),
-		   but don't wanna spend time implementing it */
-		new(Switcher(bounce_off_walls, [ v, -viscosity*v ])),
+		new(Switcher(bounce_off_walls(wall_coord), [ v, -viscosity*v ])),
 		[
 			new(PlotGroup(
 				"coords",
