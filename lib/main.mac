@@ -89,14 +89,13 @@ run(
 			get_global("batches"),
 			with_switcher(omni_vehicle@switcher)
 		),
-		plot@windows
+		plot@files_in(dir(out_dir))
 	))
 ) $
 
 
 /*
 	TODO:
-		* expose params
 		* arrange the layout: where goes the lib, where the params files, where the results (the latter two - together ?)
 */
 

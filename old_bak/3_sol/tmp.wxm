@@ -1,0 +1,65 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: input   start ] */
+vprint([args]) := if verbose then apply(print, args) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+verbose: false;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+switch(c) := buildq([c], lambda(
+    [var], 
+    if c(var) then (
+        vprint("condition is not met! ", var),
+        last_point: cons(t, ''vars)
+    ) else var
+)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+msg(message) := buildq([message], lambda([var], vprint(message, ": ", ''var), var)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+msgvars(message) := buildq([message], lambda([var], vprint(message, ": ", ''var, "; txyz=", t, x, y, z), var)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+vars: [a,b,c] ;
+switch(lambda([var], var > 1))(2) $
+vprint(last_point) $
+kill(vars) ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+never(var) := false $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+greater_than(n) := buildq([n], lambda([var], var > n)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+verbose:true;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+kill(last_point) $
+vars: [ x, y, z ] $
+sol: rk(
+    /* [ 'msg("x'")(y), switch(greater_than(1.000004))('msg("y'")(z)), 'msg("z'")(sin(t)) ], */
+    [ 'msgvars("x'")(y), switch(greater_than(4e-4))('msgvars("y'")(z)), 'msgvars("z'")(sin(t)) ],
+    vars,
+    [ 1, 1, 0      ],
+    [ t, 0, 0.05, 0.01 ]
+) $
+for p in sol do print(p) $
+print("---") $
+print(last_point) $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$
