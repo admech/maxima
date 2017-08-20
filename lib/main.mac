@@ -36,7 +36,7 @@ run(
 */
 
 /*               viscosity, wall_coord,  v0,   t1,  t_step   */
-
+/*
 require@billiard() $
 model: Billiard( 0.05,      100,         100,  120, 0.01    ) $
 run(
@@ -49,9 +49,9 @@ run(
 		plot@windows
 	))
 ) $
+*/
 
 
-/*
 log@info("Loading model...") $
 require@omni_with_rollers() $
 log@info("Done loading model.") $
@@ -69,16 +69,20 @@ log@info("Done initializing model.") $
 run(
 	omni_vehicle, 
 	new(Pipeline(
-		with_switcher(solver@simple, omni_vehicle@switcher),
+		solver@batch(
+			[ 0.1, 0.2 ],
+			with_switcher(omni_vehicle@switcher)
+		),
 		plot@console
 	))
 ) $
-*/
+
 
 /*
 	TODO:
 		* expose params
-		* batch
+		* arrange the layout: where goes the lib, where the params files, where the results (the latter two - together ?)
+		* check that we can actually set a different number of rollers / wheels
 */
 
 /*
