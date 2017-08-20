@@ -24,21 +24,6 @@ init() := block(
 		[x, y, theta]
 	),
 
-	/* DEFAULTS */
-
-	DEFAULT_SIMULATION_PARAMETERS : [
-		[ " batches   ", " [ 0.1, 0.2 ] " ],
-		[ " step      ", " 0.01         " ],
-
-		[ " N_wheels  ", " 3            " ],
-		[ " n_rollers ", " 4            " ],
-		[ " r_hub     ", " 0.05         " ],
-		[ " M_hub     ", " 0.15         " ],
-		[ " m_roller  ", " 0.05         " ],
-		[ " R_platf   ", " 0.15         " ],
-		[ " M_platf   ", " 1            " ]
-	],
-
 	/* SWITCHING ROLLERS */
 
 	_rhs_chi_switching: switching(

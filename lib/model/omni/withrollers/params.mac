@@ -1,16 +1,13 @@
 init() := block(
 
-	/* THIS MODULE DEFINES THE SET OF PARAMETERS AND RELATIONS BETWEEN THEM
-	   SEE vehicle.mac OR PARAMS FILES FOR DEFAULTS */
-
 	defstruct(Params(
-		N_wheels,
-		n_rollers,
-		r_hub,
-		M_hub,
-		m_roller,
-		R_platf,
-		M_platf
+		N_wheels = get_global("N_wheels"),
+		n_rollers = get_global("n_rollers"),
+		r_hub = get_global("r_hub"),
+		M_hub = get_global("M_hub"),
+		m_roller = get_global("m_roller"),
+		R_platf = get_global("R_platf"),
+		M_platf = get_global("M_platf")
 	)),
 	parse_global_simulation_parameters() := new(Params(
 		get_global("N_wheels"),
@@ -21,7 +18,7 @@ init() := block(
 		get_global("R_platf"),
 		get_global("M_platf")
 	)),
-	params : parse_global_simulation_parameters(), /* new(Params) */
+	params : /*parse_global_simulation_parameters(), */new(Params),
 
 	len_q  : 3 + params@N_wheels * (params@n_rollers + 1),
 	len_nu : 3 + params@N_wheels * (params@n_rollers - 1),
