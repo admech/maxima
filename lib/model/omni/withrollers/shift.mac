@@ -1,6 +1,7 @@
 require@logging() $
 require@wheelutil() $
-
+require@omni_with_rollers_params() $
+require@omni_with_rollers_symbols() $
 
 init() := block(
 
@@ -12,7 +13,6 @@ init() := block(
 
 	extract_free_vars_for_wheel(free_vars, i) := per_free_roller(free_vars[(i - 1)*(params@n_rollers - 1) + j-1], j),
 	split_to_wheels(free_vars) := perwheel(extract_free_vars_for_wheel(free_vars, i), i),
-
 	shift_vars_on_wheel(vars_on_wheel, chi, speed_of_roller_in_contact) := block(
 		[ shifted_vars ],
 		shlog@info("is this wheel switching? chi =", chi, "chi_max =", float(_chi_max_adjust)),
@@ -30,7 +30,6 @@ init() := block(
 		),
 		shifted_vars
 	),
-
 	calculate_speed_of_roller_in_contact(coords) := block(
 		[ nu1_from_eqs, nu2_from_eqs, chis_from_eqs ],
 		nu1_from_eqs  : extract_big_nus(coords)[1],
@@ -45,7 +44,6 @@ init() := block(
 	        perwheel(chi(i) = chis_from_eqs[i], i)
 	    )
 	),
-
 	defstruct(WhatToShift(
 		name,
 		freed_values
@@ -53,7 +51,6 @@ init() := block(
 	rollers() := new(WhatToShift("rollers", calculate_speed_of_roller_in_contact)),
 	/* don't want to track the angle of the roller in contact - just start with zero every time */
 	phis()    := new(WhatToShift("phis",    [coords] -> makelist(0, c, coords)  )), 
-	
 	shift_vars(what_to_shift, coords) ::= buildq([what_to_shift, coords], [free_vars] -> block(
 		[ wheels, chis, phi_rhss ],
 		shlog@info("shifting", what_to_shift@name),
