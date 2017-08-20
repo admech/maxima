@@ -34,6 +34,9 @@ DEFAULT_SIMULATION_PARAMETERS : [
 	[ " M_platf   ", " 1                               " ]
 ] $
 
+linel : 16000 $
+log@info("Setting line width to", linel) $
+
 log@info("Loading model...") $
 load_simulation_parameters_from_file() $
 require@omni_with_rollers() $
