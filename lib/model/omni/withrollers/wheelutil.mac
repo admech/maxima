@@ -66,6 +66,23 @@ free_s(i,j) :=
 	+ j-1 /* start indexing free rollers on the current wheel from 1, not 2 */
 $
 
+extract_big_nu(  i,    coords) := coords[i] $
+extract_free_nu( s,    coords) := coords[3 + s] $
+extract_chi(     i,    coords) := coords[len_nu + i] $
+extract_s_phi(   s,    coords) := coords[len_nu + params@N_wheels + s] $
+extract_free_phi(i, j, coords) := extract_s_phi(free_s(i, j), coords) $
+extract_x(             coords) := coords[length(coords) - 2] $
+extract_y(             coords) := coords[length(coords) - 1] $
+extract_theta(         coords) := coords[length(coords)    ] $
+
+extract_big_nus(coords)   := perbignu(  extract_big_nu(  i, coords), i) $
+extract_free_nus(coords)  := pers(      extract_free_nu( s, coords), s) $
+extract_chis(coords)      := perwheel(  extract_chi(     i, coords), i) $
+extract_free_phis(coords) := pers(      extract_s_phi(   s, coords), s) $
+extract_coords(coords)    := [ extract_x(coords), extract_y(coords), extract_theta(coords) ] $
+
+
+
 /*
 
 	INVERTING _M_star

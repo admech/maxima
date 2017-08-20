@@ -67,7 +67,7 @@ run(
 	omni_vehicle, 
 	new(Pipeline(
 		with_switcher(solver@simple, omni_vehicle@switcher),
-		plot@windows
+		plot@console
 	))
 ) $
 
