@@ -29,6 +29,7 @@ git config --global user.email "kiriger@gmail.com"
 git config --global user.name "Kirill V. Gerasimov"
 
 cd maxima
+chmod 777 run.sh
 
 echo "   " >> ~/.bashrc
 echo "# a handy function for viewing simulation logs" >> ~/.bashrc
