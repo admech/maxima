@@ -34,7 +34,7 @@ init() := block(
 			sol_batch : solve_with(model, initials, domain, solver),
 			solog@info("Solved batch", batch),
 			timeit_show(),
-			save_sol(sol, concat("batch_", ssubst("_", ".", string(batch)))),
+			save_sol(sol_batch, concat("batch_", ssubst("_", ".", string(batch)))),
 
 			/* after obtaining the solution for the batch, take next initials and t0 from its last point */
 			last_point : last(sol_batch),

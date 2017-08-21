@@ -25,13 +25,13 @@ init() := block( /* module declaration */
 				timeit_show(),
 				log@info("Done solving."),
 
-				log@info("Plotting..."),
-				P@plotter@show(sol, model@plot_groups),
-				log@info("Done plotting."),
-
 				log@info("Saving solution..."),
 				save_sol(sol, "sol"),
 				log@info("Done saving solution."),
+
+				log@info("Plotting..."),
+				P@plotter@show(sol, model@plot_groups),
+				log@info("Done plotting."),
 				sol
 			)
 		)
