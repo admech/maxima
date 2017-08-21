@@ -73,7 +73,7 @@ init() := block(
 			stp: model@rk_adapter@domain@stp,
 			stepover_sol
 		],
-		slog@info("stepping over the switch - acquiring one point into the prohibited zone..."),
+		slog@info("stepping over the switch at", time(p), "- acquiring one point into the prohibited zone..."),
 		stepover_sol: simulate(
 			new(Model(
 				model@name,
