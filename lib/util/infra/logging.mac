@@ -28,7 +28,8 @@ log_error(logger) := buildq([logger], lambda([[args]],
 
 /* PRINTING FUNCTIONS */
 print_log_message(level, logger, args) := if level >= logger@level then printf(true,
-	"~f~t~t[ ~a ]~t[ ~a ]~t~a~%",
+	"~a~t--~t~f~t~t[ ~a ]~t[ ~a ]~t~a~%",
+	timedate(),
 	current_time(),
 	level_as_string(level),
 	logger@name,

@@ -32,6 +32,7 @@ init() := block(
 
 			timeit_start(),
 			sol_batch : solve_with(model, initials, domain, solver),
+			solog@info("Solved batch", batch),
 			timeit_show(),
 			save_sol(sol, concat("batch_", ssubst("_", ".", string(batch)))),
 
@@ -42,7 +43,9 @@ init() := block(
 
 			/* last, add the solution for the batch to the full solution, */
 			/* while dropping the last point as it will be the initial for the next batch */
-			sol : append(sol, rest(sol_batch, -1))
+			solog@info("Appending batch", batch),
+			sol : append(sol, rest(sol_batch, -1)),
+			solog@info("Appended batch", batch)
 		),
 		sol : append(sol, [ last_point ]) /* finally, restore the last point as there are no more next batches */
 	))),
