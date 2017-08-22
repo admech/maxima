@@ -41,11 +41,11 @@ echo 'what() { for pid in `ps -o pid= -C sbcl`; do grep -ao "sol_dir[^$]*" /proc
 
 echo >> ~/.bashrc
 echo "# go to solution out dir" >> ~/.bashrc
-echo "cdo() { cd ~/maxima/sol/$1/out; }" >> ~/.bashrc
+echo "cdo() { cd ~/maxima/sol/\$1/out; }" >> ~/.bashrc
 
 echo >> ~/.bashrc
 echo "# go to solution in dir" >> ~/.bashrc
-echo "cdi() { cd ~/maxima/sol/$1/in; }" >> ~/.bashrc
+echo "cdi() { cd ~/maxima/sol/\$1/in; }" >> ~/.bashrc
 
 echo >> ~/.bashrc
 echo "# go to root dir" >> ~/.bashrc
