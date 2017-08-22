@@ -37,3 +37,16 @@ echo "view() { less ~/maxima/sol/\$1/out/run.log; }" >> ~/.bashrc
 
 echo "# show currently running solutions" >> ./bashrc
 echo 'what() { for pid in `ps -o pid= -C sbcl`; do grep -ao "sol_dir[^$]*" /proc/$pid/cmdline | sed "s/.*: \"//" | sed "s/\".*//"; done; }' >> ~/.bashrc
+
+echo >> ~/.bashrc
+echo "# go to solution out dir" >> ~/.bashrc
+echo "cdo() { cd ~/maxima/sol/$1/out; }" >> ~/.bashrc
+
+echo >> ~/.bashrc
+echo "# go to solution in dir" >> ~/.bashrc
+echo "cdi() { cd ~/maxima/sol/$1/in; }" >> ~/.bashrc
+
+echo >> ~/.bashrc
+echo "# go to root dir" >> ~/.bashrc
+echo "cdm() { cd ~/maxima; }" >> ~/.bashrc
+
