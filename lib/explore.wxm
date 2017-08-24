@@ -1,0 +1,25 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: input   start ] */
+batchload("explore.mac");
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+load_sol("smoke") $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+show(smoke, "kin_en") $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plotter: plot@windows $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+show(smoke, "kin_en") $
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

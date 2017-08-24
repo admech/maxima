@@ -36,11 +36,16 @@ DEFAULT_SIMULATION_PARAMETERS : [
 
 log@info("Loading model...") $
 use_default_simulation_parameters() $
+/* load_params_from_file("???/simulation_parameters.mac") */
 require@omni_with_rollers() $
 log@info("Done loading model.") $
 
-
-
+plotter : plot@console $
+show(sol, plot_group_name) := plotter@show(sol, [ eval_string(concat("omni_plot@", plot_group_name)) ]) $
+load_sol(name) := block(
+	load(concat("../gcp_sol/", name, "/sol.lisp")),
+	eval_string(concat(name, ": sol"))
+) $
 
 log_program_finish() $
 

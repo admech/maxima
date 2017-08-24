@@ -27,6 +27,16 @@ init() := block(
 					no_postamble,
 					[ "t", "coord" ]
 				)),
+			nu12 =
+				new(PlotGroup(
+					"speed x and y",
+					[
+						new(PlotVar("nu_1(t)", [p] -> [ time(p), extract_nu(1, coords(p)) ])),
+						new(PlotVar("nu_2(t)", [p] -> [ time(p), extract_nu(2, coords(p)) ]))
+					],
+					no_postamble,
+					[ "t", "nu_1, nu_2" ]
+				)),
 			theta =
 				new(PlotGroup(
 					"self rotation", /* θ - not supported in console */
@@ -36,6 +46,15 @@ init() := block(
 					no_postamble,
 					[ "t", "theta" ]
 				)),
+			nu3 =
+				new(PlotGroup(
+					"speed of self rotation",
+					[
+						new(PlotVar("nu_3(t)", [p] -> [ time(p), extract_nu(3, coords(p)) ]))
+					],
+					no_postamble,
+					[ "t", "nu_3" ]
+				)),
 			trajectory =
 				new(PlotGroup(
 					"trajectory",
@@ -44,6 +63,15 @@ init() := block(
 					],
 					equal_axes,
 					[ "x", "y" ]
+				)),
+			speed_of_mass_center =
+				new(PlotGroup(
+					"speed of center of mass",
+					[
+						new(PlotVar("speed", [p] -> [ time(p), sqrt(extract_nu(1, coords(p))^2 + extract_nu(2, coords(p))^2) ]))
+					],
+					equal_axes,
+					[ "t", "speed" ]
 				)),
 			wheel_angles =
 				new(PlotGroup(
