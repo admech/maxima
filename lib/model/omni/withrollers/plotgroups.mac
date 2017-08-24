@@ -1,0 +1,83 @@
+require@plot() $
+require@model() $
+require@wheelutil() $
+require@omni_with_rollers_params() $
+
+
+init() := block(
+
+
+	defstruct(OmniPlot(
+			kin_en = 
+				new(PlotGroup(
+					"kinetic energy",
+					[
+						new(PlotVar("energy", [p] -> [ time(p), kin_en(extract_nus(coords(p)), extract_chis(coords(p))) ]))
+					],
+					no_postamble,
+					[ "t", "energy" ]
+				)),
+			coords =
+				new(PlotGroup(
+					"coords",
+					[
+						new(PlotVar("x(t)", [p] -> [ time(p), extract_x(coords(p)) ])),
+						new(PlotVar("y(t)", [p] -> [ time(p), extract_y(coords(p)) ]))
+					],
+					no_postamble,
+					[ "t", "coord" ]
+				)),
+			theta =
+				new(PlotGroup(
+					"self rotation", /* θ - not supported in console */
+					[
+						new(PlotVar("theta(t)", [p] -> [ time(p), extract_theta(coords(p)) ]))
+					],
+					no_postamble,
+					[ "t", "theta" ]
+				)),
+			trajectory =
+				new(PlotGroup(
+					"trajectory",
+					[
+						new(PlotVar("y(x)", [p] -> [ extract_x(coords(p)), extract_y(coords(p)) ]))
+					],
+					equal_axes,
+					[ "x", "y" ]
+				)),
+			wheel_angles =
+				new(PlotGroup(
+					"wheel angles", /* χ - not supported in console */
+					append(
+						perwheel(
+							new(PlotVar(
+								concat("chi_", i, "(t)"),
+								[p] -> [ time(p), extract_chi(i, coords(p)) ]
+							)),
+							i
+						),
+						[
+							new(PlotVar("+ chi_{max}", [p] -> [ time(p),  _chi_max_adjust ])),
+							new(PlotVar("- chi_{max}", [p] -> [ time(p), -_chi_max_adjust ]))
+						]
+					),
+					no_postamble,
+					[ "t", "chi" ]
+				)),
+			free_rollers =
+			perwheel(
+				new(PlotGroup(
+					concat("free rollers of wheel ", i),
+					per_free_roller(
+						new(PlotVar(concat("phi_{", i, ", ", j, "}(t)"), [p] -> [ time(p), extract_free_phi(i, j, coords(p)) ])),
+						j
+					),
+					no_postamble,
+					[ "t", "phi" ]
+				)),
+				i
+			)
+	)),
+	omni_plot: new(OmniPlot)
+
+) $

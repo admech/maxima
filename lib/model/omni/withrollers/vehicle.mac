@@ -7,6 +7,7 @@ require@omni_with_rollers_symbols() $
 require@omni_with_rollers_equations() $
 require@omni_with_rollers_cases() $
 require@omni_with_rollers_shift() $
+require@omni_with_rollers_plotgroups() $
 
 init() := block(
 	vlog: get_logger("vehicle", log_level_info),
@@ -59,72 +60,13 @@ init() := block(
 		)),
 		append(
 			[
-				new(PlotGroup(
-					"kinetic energy",
-					[
-						new(PlotVar("energy", [p] -> [ time(p), kin_en(extract_nus(coords(p)), extract_chis(coords(p))) ]))
-					],
-					no_postamble,
-					[ "t", "energy" ]
-				))
+				omni_plot@kin_en,
+				omni_plot@coords,
+				omni_plot@theta,
+				omni_plot@trajectory,
+				omni_plot@wheel_angles
 			],
-			[
-				new(PlotGroup(
-					"coords",
-					[
-						new(PlotVar("x(t)", [p] -> [ time(p), extract_x(coords(p)) ])),
-						new(PlotVar("y(t)", [p] -> [ time(p), extract_y(coords(p)) ]))
-					],
-					no_postamble,
-					[ "t", "coord" ]
-				)),
-				new(PlotGroup(
-					"self rotation", /* θ - not supported in console */
-					[
-						new(PlotVar("theta(t)", [p] -> [ time(p), extract_theta(coords(p)) ]))
-					],
-					no_postamble,
-					[ "t", "theta" ]
-				)),
-				new(PlotGroup(
-					"trajectory",
-					[
-						new(PlotVar("y(x)", [p] -> [ extract_x(coords(p)), extract_y(coords(p)) ]))
-					],
-					equal_axes,
-					[ "x", "y" ]
-				)),
-				new(PlotGroup(
-					"wheel angles", /* χ - not supported in console */
-					append(
-						perwheel(
-							new(PlotVar(
-								concat("chi_", i, "(t)"),
-								[p] -> [ time(p), extract_chi(i, coords(p)) ]
-							)),
-							i
-						),
-						[
-							new(PlotVar("+ chi_{max}", [p] -> [ time(p),  _chi_max_adjust ])),
-							new(PlotVar("- chi_{max}", [p] -> [ time(p), -_chi_max_adjust ]))
-						]
-					),
-					no_postamble,
-					[ "t", "chi" ]
-				))
-			],
-			perwheel(
-				new(PlotGroup(
-					concat("free rollers of wheel ", i),
-					per_free_roller(
-						new(PlotVar(concat("phi_{", i, ", ", j, "}(t)"), [p] -> [ time(p), extract_free_phi(i, j, coords(p)) ])),
-						j
-					),
-					no_postamble,
-					[ "t", "phi" ]
-				)),
-				i
-			)
+			omni_plot@free_rollers
 		)
 	))
 
