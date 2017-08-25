@@ -47,6 +47,13 @@ load_sol(name) := block(
 	eval_string(concat(name, ": sol"))
 ) $
 
+set_prod() := block(
+	root_dir     : "../",
+	sol_base_dir : concat(root_dir, "/sol"),
+	gnuplot_command : "gnuplot",
+	maxima_tempdir  : concat(root_dir, "/maxima_tempdir")
+) $
+
 log_program_finish() $
 
 
