@@ -31,6 +31,7 @@ git config --global user.name "Kirill V. Gerasimov"
 cd maxima
 chmod 777 run.sh
 chmod 777 bak.sh
+chmod 777 explore.sh
 
 echo "   " >> ~/.bashrc
 echo "# a handy function for viewing simulation logs" >> ~/.bashrc
