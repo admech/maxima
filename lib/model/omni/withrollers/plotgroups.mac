@@ -48,7 +48,7 @@ init() := block(
 				)),
 			nu3 =
 				new(PlotGroup(
-					"speed of self rotation",
+					"velocity of self rotation",
 					[
 						new(PlotVar("nu_3(t)", [p] -> [ time(p), extract_nu(3, coords(p)) ]))
 					],
@@ -92,13 +92,29 @@ init() := block(
 					no_postamble,
 					[ "t", "chi" ]
 				)),
-			all_rollers =
+			all_rollers_angles =
 			perwheel(
 				new(PlotGroup(
-					concat("rollers of wheel ", i),
+					concat("angles of rollers of wheel ", i),
 					perroller(
 						new(PlotVar(concat("phi_{", i, ", ", j, "}(t)"), [p] -> [ time(p), extract_phi(i, j, coords(p)) ])),
 						j
+					),
+					no_postamble,
+					[ "t", "phi" ]
+				)),
+				i
+			),
+			all_rollers_speeds =
+			perwheel(
+				new(PlotGroup(
+					concat("velocities of rollers of wheel ", i),
+					cons(
+						new(PlotVar(concat("dphi_{", i, ", ", 1, "}/dt(t)"), [p] -> [ time(p), dphi1(i, coords(p)) ])),
+						per_free_roller(
+							new(PlotVar(concat("dphi_{", i, ", ", j, "}/dt(t)"), [p] -> [ time(p), extract_nu(s(i, j), coords(p)) ])),
+							j
+						)
 					),
 					no_postamble,
 					[ "t", "phi" ]

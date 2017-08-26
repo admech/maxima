@@ -28,20 +28,7 @@ init() := block(
 		),
 		shifted_vars
 	),
-	calculate_speeds_of_rollers_in_contact(coords) := block(
-		[ nu1_from_eqs, nu2_from_eqs, chis_from_eqs ],
-		nu1_from_eqs  : extract_big_nus(coords)[1],
-		nu2_from_eqs  : extract_big_nus(coords)[2],
-		chis_from_eqs : extract_chis(coords),
-	    perwheel(
-	    	(_V . nu)[3 + params@N_wheels + i][1], /* we just need the values of constraints for \phi_{1..N_wheels, 1} */
-	    	i
-	    ) where append(
-	        real(params),
-	        [ nu[1] = nu1_from_eqs, nu[2] = nu2_from_eqs ],
-	        perwheel(chi(i) = chis_from_eqs[i], i)
-	    )
-	),
+	calculate_speeds_of_rollers_in_contact(coords) := perwheel(dphi1(i, coords), i),
 	calculate_angles_of_rollers_in_contact(coords) := perwheel(extract_phi(i, 1, coords), i),
 	defstruct(WhatToShift(
 		name,

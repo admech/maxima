@@ -53,7 +53,7 @@ run(
 
 
 DEFAULT_SIMULATION_PARAMETERS : [
-	[ " batches   ", " makelist(0.1*i, i, 1, 2)       " ],
+	[ " batches   ", " makelist(0.1*i, i, 1, 2)        " ],
 	[ " step      ", " 0.01                            " ],
 
 	[ " nu_0      ", " [ 0, 0, -1 ]                    " ],
@@ -101,7 +101,7 @@ run(
 			with_switcher(omni_vehicle@switcher)
 		),
 		/* plot@files_in(out_dir) */
-		plot@console
+		plot@windows
 	))
 ) $
 

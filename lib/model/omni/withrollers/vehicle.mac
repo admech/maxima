@@ -68,7 +68,8 @@ init() := block(
 				omni_plot@wheel_angles,
 				omni_plot@coords
 			],
-			omni_plot@all_rollers
+			omni_plot@all_rollers_angles,
+			omni_plot@all_rollers_speeds
 		)
 	))
 

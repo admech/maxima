@@ -78,6 +78,13 @@ init() := block(
 		real(params),
 		pernu(nu[i] = nus[i], i),
 		perwheel(chi(i) = chis[i], i)
-	)
+	),
+	dphi1(wheel_index, coords) := 
+		((_V . nu)[3 + params@N_wheels + wheel_index][1]) /* we just need the values of constraints for \phi_{1..N_wheels, 1} */
+	    where append(
+	        real(params),
+	        [ nu[1] = extract_big_nus(coords)[1], nu[2] = extract_big_nus(coords)[2] ],
+	        perwheel(chi(j) = extract_chis(coords)[j], j)
+	    )
 
 ) $
