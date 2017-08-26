@@ -37,7 +37,7 @@ echo "   " >> ~/.bashrc
 echo "# a handy function for viewing simulation logs" >> ~/.bashrc
 echo "view() { less ~/maxima/sol/\$1/out/run.log; }" >> ~/.bashrc
 
-echo "# show currently running solutions" >> ./bashrc
+echo "# show currently running solutions" >> ~/.bashrc
 echo 'what() { for pid in `ps -o pid= -C sbcl`; do grep -ao "sol_dir[^$]*" /proc/$pid/cmdline | sed "s/.*: \"//" | sed "s/\".*//"; done; }' >> ~/.bashrc
 
 echo >> ~/.bashrc
