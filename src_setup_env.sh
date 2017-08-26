@@ -3,13 +3,13 @@
 # run this on a fresh env to get everything for sumulation
 # Maxima is being built from source with SBCL - the fast LISP.
 
-sudo apt-get install sbcl
-sudo apt-get install make
-sudo apt-get install autotools-dev
-sudo apt-get install texinfo
+sudo apt-get --yes install sbcl
+sudo apt-get --yes install make
+sudo apt-get --yes install autotools-dev
+sudo apt-get --yes install texinfo
 
-sudo apt-get install gnuplot
-sudo apt-get install git
+sudo apt-get --yes install gnuplot
+sudo apt-get --yes install git
 
 mkdir src_maxima
 cd src_maxima
