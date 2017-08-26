@@ -53,7 +53,7 @@ run(
 
 
 DEFAULT_SIMULATION_PARAMETERS : [
-	[ " batches   ", " makelist(0.1*i, i, 1, 10)       " ],
+	[ " batches   ", " makelist(0.1*i, i, 1, 2)       " ],
 	[ " step      ", " 0.01                            " ],
 
 	[ " nu_0      ", " [ 0, 0, -1 ]                    " ],

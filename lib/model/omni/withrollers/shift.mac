@@ -11,24 +11,24 @@ init() := block(
 	lshift(l) := permut_list(l, endcons(1, makelist(i, i, 2, length(l)))),
 	rshift(l) := permut_list(l, cons(length(l), makelist(i, i, 1, length(l) - 1))),
 
-	shift_vars_on_wheel(vars_on_wheel, chi, speed_of_roller_in_contact) := block(
+	shift_vars_on_wheel(vars_on_wheel, chi, override_first, override_last) := block(
 		[ shifted_vars ],
 		shlog@info("is this wheel switching? chi =", chi, "chi_max =", float(_chi_max_adjust)),
 		if chi > _chi_max_adjust then (
 		    shlog@info("wheel rotates counter-clockwise, therefore the freed-up roller will have #=1, others shifted forward, last - dropped."),
 		    shifted_vars: rshift(vars_on_wheel),
-		    shifted_vars[1]: speed_of_roller_in_contact
+		    shifted_vars[1]: override_first(shifted_vars[1])
 		) else if chi < -_chi_max_adjust then (
 		    shlog@info("wheel rotates clockwise, therefore the freed-up roller will have #=n, others shifted backward, first - dropped."),
 		    shifted_vars: lshift(vars_on_wheel),
-		    shifted_vars[length(shifted_vars)]: speed_of_roller_in_contact
+		    shifted_vars[length(shifted_vars)]: override_last(shifted_vars[length(shifted_vars)])
 		) else (
 		    shlog@info("this wheel is not switching"),
 		    shifted_vars: vars_on_wheel
 		),
 		shifted_vars
 	),
-	calculate_speed_of_roller_in_contact(coords) := block(
+	calculate_speeds_of_rollers_in_contact(coords) := block(
 		[ nu1_from_eqs, nu2_from_eqs, chis_from_eqs ],
 		nu1_from_eqs  : extract_big_nus(coords)[1],
 		nu2_from_eqs  : extract_big_nus(coords)[2],
@@ -42,24 +42,40 @@ init() := block(
 	        perwheel(chi(i) = chis_from_eqs[i], i)
 	    )
 	),
+	calculate_angles_of_rollers_in_contact(coords) := perwheel(extract_phi(i, 1, coords), i),
 	defstruct(WhatToShift(
 		name,
-		freed_values,
-		wheel_splitter
+		contact_values,
+		wheel_splitter,
+		override_first,
+		override_last
 	)),
-	rollers() := new(WhatToShift("ROLLERS", calculate_speed_of_roller_in_contact, split_to_wheels)),
+	rollers() := new(WhatToShift(
+		"ROLLERS", calculate_speeds_of_rollers_in_contact, split_to_wheels,
+		/* set the provided value to the freed roller after shifting */
+		[ speed_of_roller_in_contact ] -> buildq([speed_of_roller_in_contact], [nu_edge] -> speed_of_roller_in_contact),
+		[ speed_of_roller_in_contact ] -> buildq([speed_of_roller_in_contact], [nu_edge] -> speed_of_roller_in_contact)
+	)),
 	/* don't want to track the angle of the roller in contact - just start with zero every time */
-	phis()    := new(WhatToShift("PHIS",    [coords] -> makelist(0, c, coords),   split_all_to_wheels)), 
+	phis()    := new(WhatToShift(
+		"PHIS",    calculate_angles_of_rollers_in_contact /* not needed though */, split_all_to_wheels,
+		/* just keep phis as is after shifting */
+		[ not_used ] -> ([phi_edge] -> phi_edge),
+		[ not_used ] -> ([phi_edge] -> phi_edge)
+	)), 
 	shift_vars(what_to_shift, coords) ::= buildq([what_to_shift, coords], [vars] -> block(
-		[ wheels, chis, freed_values, result ],
+		[ wheels, chis, contact_values, result ],
 		shlog@info("shifting", what_to_shift@name),
 		wheels: what_to_shift@wheel_splitter(vars),
 		chis: extract_chis(coords),
-		freed_values: what_to_shift@freed_values(coords),
+		contact_values: what_to_shift@contact_values(coords),
 		lreduce(append, perwheel((
 			shlog@info("considering wheel #", i),
 			shlog@info("was:", wheels[i]),
-			result: shift_vars_on_wheel(wheels[i], chis[i], freed_values[i]),
+			result: map(ev, shift_vars_on_wheel(
+				wheels[i], chis[i], 
+				what_to_shift@override_first(contact_values[i]), what_to_shift@override_last(contact_values[i])
+			)),
 			shlog@info("will be:", result),
 			result
 		), i))
