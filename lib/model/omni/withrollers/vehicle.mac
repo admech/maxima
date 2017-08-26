@@ -60,11 +60,13 @@ init() := block(
 		)),
 		append(
 			[
-				omni_plot@kin_en,
-				omni_plot@coords,
-				omni_plot@theta,
 				omni_plot@trajectory,
-				omni_plot@wheel_angles
+				omni_plot@theta,
+				omni_plot@speed_of_mass_center,
+				omni_plot@nu3,
+				omni_plot@kin_en,
+				omni_plot@wheel_angles,
+				omni_plot@coords
 			],
 			omni_plot@free_rollers
 		)

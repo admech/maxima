@@ -32,6 +32,11 @@ simulate(model) := block([rka],
 	rka : model@rk_adapter,
 	rk(rka@rhss, rka@vars, rka@initials, [ t, rka@domain@start, rka@domain@finish, rka@domain@stp ])
 ) $
+load(rkf45) $
+simulate_rkf45(model) := block([rka],
+	rka : model@rk_adapter,
+	rkf45(rka@rhss, rka@vars, rka@initials, [ t, rka@domain@start, rka@domain@finish ])
+) $
 
 /* BEWARE - THIS CHANGES THE MODEL
    (otherwise would have to code in a conditional checking whether it is a switching model) */
