@@ -11,8 +11,6 @@ init() := block(
 	lshift(l) := permut_list(l, endcons(1, makelist(i, i, 2, length(l)))),
 	rshift(l) := permut_list(l, cons(length(l), makelist(i, i, 1, length(l) - 1))),
 
-	extract_free_vars_for_wheel(free_vars, i) := per_free_roller(free_vars[(i - 1)*(params@n_rollers - 1) + j-1], j),
-	split_to_wheels(free_vars) := perwheel(extract_free_vars_for_wheel(free_vars, i), i),
 	shift_vars_on_wheel(vars_on_wheel, chi, speed_of_roller_in_contact) := block(
 		[ shifted_vars ],
 		shlog@info("is this wheel switching? chi =", chi, "chi_max =", float(_chi_max_adjust)),
@@ -46,20 +44,24 @@ init() := block(
 	),
 	defstruct(WhatToShift(
 		name,
-		freed_values
+		freed_values,
+		wheel_splitter
 	)),
-	rollers() := new(WhatToShift("rollers", calculate_speed_of_roller_in_contact)),
+	rollers() := new(WhatToShift("ROLLERS", calculate_speed_of_roller_in_contact, split_to_wheels)),
 	/* don't want to track the angle of the roller in contact - just start with zero every time */
-	phis()    := new(WhatToShift("phis",    [coords] -> makelist(0, c, coords)  )), 
-	shift_vars(what_to_shift, coords) ::= buildq([what_to_shift, coords], [free_vars] -> block(
-		[ wheels, chis, phi_rhss ],
+	phis()    := new(WhatToShift("PHIS",    [coords] -> makelist(0, c, coords),   split_all_to_wheels)), 
+	shift_vars(what_to_shift, coords) ::= buildq([what_to_shift, coords], [vars] -> block(
+		[ wheels, chis, freed_values, result ],
 		shlog@info("shifting", what_to_shift@name),
-		wheels: split_to_wheels(free_vars),
+		wheels: what_to_shift@wheel_splitter(vars),
 		chis: extract_chis(coords),
-		phi_rhss: what_to_shift@freed_values(coords),
+		freed_values: what_to_shift@freed_values(coords),
 		lreduce(append, perwheel((
 			shlog@info("considering wheel #", i),
-			shift_vars_on_wheel(wheels[i], chis[i], phi_rhss[i])
+			shlog@info("was:", wheels[i]),
+			result: shift_vars_on_wheel(wheels[i], chis[i], freed_values[i]),
+			shlog@info("will be:", result),
+			result
 		), i))
 	)),
 

@@ -17,7 +17,7 @@ init() := block(
 	solvable_vars() := append(
 		pernu(nu[i] = concat(_rk_nu, "_", i), i),
 		perwheel(chi(i) = concat(_rk_chi, "_", i), i),
-		perfree(freephi(i,j) = concat(_rk_phi, "_", i, "_", j), i, j)
+		perall(phi[i,j] = concat(_rk_phi, "_", i, "_", j), i, j)
 	),
 
 	all_vars_solved_for() := append(
@@ -39,7 +39,7 @@ init() := block(
 			extract_big_nus(coords),
 			extract_free_nus(coords) where [ shift_vars(rollers(), coords) ],
 			extract_chis(coords) where [ adjust_chis ],
-			extract_free_phis(coords) where [ shift_vars(phis(), coords) ],
+			extract_phis(coords) where [ shift_vars(phis(), coords) ],
 			extract_coords(coords)
 		)
 	),
@@ -50,8 +50,8 @@ init() := block(
 		sconcat("Omni vehicle with rollers (params: ", params, ", initials: ", initials, ", domain: ", domain),
 		new(RKAdapter(
 			append( _rhs_nu,      _rhs_chi_switching,   _rhs_phi,                          _rhs_coords     ) where append( real(params), solvable_vars() ),
-			append( nu,           perwheel(chi(i), i),  perfree(freephi(i, j), i, j),      [x, y, theta]   ) where solvable_vars(),
-			append( initials@nu,  initials@chi,         perfree(0, i, j),                  initials@coords ),
+			append( nu,           perwheel(chi(i), i),  perall(freephi(i, j), i, j),       [x, y, theta]   ) where solvable_vars(),
+			append( initials@nu,  initials@chi,         perall(0, i, j),                   initials@coords ),
 			domain
 		)),
 		new(Switcher(
@@ -68,7 +68,7 @@ init() := block(
 				omni_plot@wheel_angles,
 				omni_plot@coords
 			],
-			omni_plot@free_rollers
+			omni_plot@all_rollers
 		)
 	))
 

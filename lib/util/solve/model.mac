@@ -2,6 +2,8 @@ require@plot() $
 require@logging() $
 
 molog : get_logger("model", log_level_info) $
+custom_p_printer(p) := UNDEFINED $
+custom_c_printer(c) := UNDEFINED $
 
 defstruct(
 	Model(
@@ -30,18 +32,20 @@ defstruct(
 
 simulate(model) := block([rka],
 	rka : model@rk_adapter,
+	molog@info("simulating with rk..."),
 	rk(rka@rhss, rka@vars, rka@initials, [ t, rka@domain@start, rka@domain@finish, rka@domain@stp ])
 ) $
 load(rkf45) $
 simulate_rkf45(model) := block([rka],
 	rka : model@rk_adapter,
+	molog@info("simulating with rkf45..."),
 	rkf45(rka@rhss, rka@vars, rka@initials, [ t, rka@domain@start, rka@domain@finish ])
 ) $
 
 /* BEWARE - THIS CHANGES THE MODEL
    (otherwise would have to code in a conditional checking whether it is a switching model) */
 solve_with(model, initials, domain, solver) := block([rka],
-	molog@info("overriding initials and domain to", initials, domain),
+	molog@info("overriding initials and domain to", custom_c_printer(initials), domain),
 	model@rk_adapter@initials : initials,
 	model@rk_adapter@domain   : domain,
 	solver(model)

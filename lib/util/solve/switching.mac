@@ -26,6 +26,7 @@ init() := block(
 			))
 		else rhs
 	)),
+	switch_dump: DONE,
 	get_switch_dump() := switch_dump,
 
 	switching(rhss, vars, should_switch) := makelist(
@@ -86,7 +87,7 @@ init() := block(
 				model@plot_groups
 			))
 		),
-		slog@info("acquired stepover, length =", length(stepover_sol), "returning point from prohibited area", last(stepover_sol)),
+		slog@info("acquired stepover, length =", length(stepover_sol), "returning point from prohibited area", custom_p_printer(last(stepover_sol))),
 		last(stepover_sol)
 	),
 
@@ -98,12 +99,12 @@ init() := block(
 		slog@info(
 			"Starting iteration", iter_num,
 			"at", model@rk_adapter@domain@start,
-			"with initials", model@rk_adapter@initials
+			"with initials", custom_c_printer(model@rk_adapter@initials)
 		),
 		sol: solver(model),
 		full_sol: append(previous_sol, sol), /* rest(sol, -1)),  cut off last point because switch happens at the same instant */
 		if (get_switch_dump() = DONE) then (
-			slog@info("Finished solving at", time(last(sol)), "with", coords(last(sol))),
+			slog@info("Finished solving at", time(last(sol)), "with", custom_c_printer(coords(last(sol)))),
 			full_sol
 		) else (
 			/* we would not need stepover if we could dump variables, but alas, rk may produce unpredictable results, not to speak of the variables not being available at the point of dumping */

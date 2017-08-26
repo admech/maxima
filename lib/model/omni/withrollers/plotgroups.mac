@@ -92,12 +92,12 @@ init() := block(
 					no_postamble,
 					[ "t", "chi" ]
 				)),
-			free_rollers =
+			all_rollers =
 			perwheel(
 				new(PlotGroup(
-					concat("free rollers of wheel ", i),
-					per_free_roller(
-						new(PlotVar(concat("phi_{", i, ", ", j, "}(t)"), [p] -> [ time(p), extract_free_phi(i, j, coords(p)) ])),
+					concat("rollers of wheel ", i),
+					perroller(
+						new(PlotVar(concat("phi_{", i, ", ", j, "}(t)"), [p] -> [ time(p), extract_phi(i, j, coords(p)) ])),
 						j
 					),
 					no_postamble,
