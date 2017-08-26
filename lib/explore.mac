@@ -40,14 +40,16 @@ use_default_simulation_parameters() $
 require@omni_with_rollers() $
 log@info("Done loading model.") $
 
+/*
 plotter : plot@console $
 show(sol, plot_group_name) := plotter@show(sol, [ eval_string(concat("omni_plot@", plot_group_name)) ]) $
 load_sol(name) := block(
 	load(concat("../gcp_sol/", name, "/sol.lisp")),
 	eval_string(concat(name, ": sol"))
 ) $
+*/
 
 log_program_finish() $
 
-log@warn("ARE YOU SURE YOU ARE USING THE SIMULATION PARAMETERS APPROPRIATE FOR YOUR MODEL ???") $
+log@info("ARE YOU SURE YOU ARE USING THE SIMULATION PARAMETERS APPROPRIATE FOR YOUR MODEL ???") $
 
