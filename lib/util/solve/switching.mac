@@ -29,6 +29,8 @@ init() := block(
 	switch_dump: DONE,
 	get_switch_dump() := switch_dump,
 
+	switch_instants: [],
+
 	switching(rhss, vars, should_switch) := makelist(
 		dump_vars_if(should_switch, vars[i])(rhss[i]),
 		i, 1, length(rhss)
@@ -75,6 +77,7 @@ init() := block(
 			stepover_sol
 		],
 		slog@info("stepping over the switch at", time(p), "- acquiring one point into the prohibited zone..."),
+		switch_instants: endcons(time(p), switch_instants),
 		stepover_sol: simulate(
 			new(Model(
 				model@name,

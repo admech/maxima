@@ -18,7 +18,8 @@ init() := block(
 					new(PlotVar("predators(t)", [p] -> [ p[1], p[3] ]))
 				],
 				no_postamble,
-				[ "t", "number" ]
+				[ "t", "number" ],
+				[l] -> l
 			)),
 			new(PlotGroup(
 				"phase",
@@ -26,7 +27,8 @@ init() := block(
 					new(PlotVar("predators(prey)", [p] -> [ p[2], p[3] ]))
 				],
 				equal_axes,
-				[ "prey", "predators" ]
+				[ "prey", "predators" ],
+				[l] -> l
 			))
 		]
 	))

@@ -2,6 +2,7 @@ require@plot() $
 require@model() $
 require@wheelutil() $
 require@omni_with_rollers_params() $
+require@omni_with_rollers_shift() $
 
 
 init() := block(
@@ -15,7 +16,8 @@ init() := block(
 						new(PlotVar("energy", [p] -> [ time(p), kin_en(extract_nus(coords(p)), extract_chis(coords(p))) ]))
 					],
 					no_postamble,
-					[ "t", "energy" ]
+					[ "t", "energy" ],
+					[l] -> l
 				)),
 			coords =
 				new(PlotGroup(
@@ -25,7 +27,8 @@ init() := block(
 						new(PlotVar("y(t)", [p] -> [ time(p), extract_y(coords(p)) ]))
 					],
 					no_postamble,
-					[ "t", "coord" ]
+					[ "t", "coord" ],
+					[l] -> l
 				)),
 			nu12 =
 				new(PlotGroup(
@@ -35,7 +38,8 @@ init() := block(
 						new(PlotVar("nu_2(t)", [p] -> [ time(p), extract_nu(2, coords(p)) ]))
 					],
 					no_postamble,
-					[ "t", "nu_1, nu_2" ]
+					[ "t", "nu_1, nu_2" ],
+					[l] -> l
 				)),
 			theta =
 				new(PlotGroup(
@@ -44,7 +48,8 @@ init() := block(
 						new(PlotVar("theta(t)", [p] -> [ time(p), extract_theta(coords(p)) ]))
 					],
 					no_postamble,
-					[ "t", "theta" ]
+					[ "t", "theta" ],
+					[l] -> l
 				)),
 			nu3 =
 				new(PlotGroup(
@@ -53,7 +58,8 @@ init() := block(
 						new(PlotVar("nu_3(t)", [p] -> [ time(p), extract_nu(3, coords(p)) ]))
 					],
 					no_postamble,
-					[ "t", "nu_3" ]
+					[ "t", "nu_3" ],
+					[l] -> l
 				)),
 			trajectory =
 				new(PlotGroup(
@@ -62,7 +68,8 @@ init() := block(
 						new(PlotVar("y(x)", [p] -> [ extract_x(coords(p)), extract_y(coords(p)) ]))
 					],
 					equal_axes,
-					[ "x", "y" ]
+					[ "x", "y" ],
+					[l] -> l
 				)),
 			speed_of_mass_center =
 				new(PlotGroup(
@@ -71,7 +78,8 @@ init() := block(
 						new(PlotVar("speed", [p] -> [ time(p), sqrt(extract_nu(1, coords(p))^2 + extract_nu(2, coords(p))^2) ]))
 					],
 					equal_axes,
-					[ "t", "speed" ]
+					[ "t", "speed" ],
+					[l] -> l
 				)),
 			wheel_angles =
 				new(PlotGroup(
@@ -90,7 +98,8 @@ init() := block(
 						]
 					),
 					no_postamble,
-					[ "t", "chi" ]
+					[ "t", "chi" ],
+					[l] -> l
 				)),
 			all_rollers_angles =
 			perwheel(
@@ -101,7 +110,8 @@ init() := block(
 						j
 					),
 					no_postamble,
-					[ "t", "phi" ]
+					[ "t", "phi" ],
+					restore_shifts(i)
 				)),
 				i
 			),
@@ -117,7 +127,8 @@ init() := block(
 						)
 					),
 					no_postamble,
-					[ "t", "phi" ]
+					[ "t", "dphi/dt" ],
+					restore_shifts(i)
 				)),
 				i
 			)

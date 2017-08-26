@@ -7,26 +7,33 @@ init() := block(
 
 	shlog: get_logger("shifting", log_level_info), 
 
+	shift_restore_functions: perwheel([], i),
+	get_shift_restore_function(i) := shift_restore_functions[i],
+	add_restore_function_for_wheel(i, fun) := shift_restore_functions[i]: endcons(fun, shift_restore_functions[i]),
+
 	permut_list(l, perm) := makelist(l[i], i, perm),
 	lshift(l) := permut_list(l, endcons(1, makelist(i, i, 2, length(l)))),
 	rshift(l) := permut_list(l, cons(length(l), makelist(i, i, 1, length(l) - 1))),
 
 	shift_vars_on_wheel(vars_on_wheel, chi, override_first, override_last) := block(
-		[ shifted_vars ],
+		[ shifted_vars, restore ],
 		shlog@info("is this wheel switching? chi =", chi, "chi_max =", float(_chi_max_adjust)),
 		if chi > _chi_max_adjust then (
-		    shlog@info("wheel rotates counter-clockwise, therefore the freed-up roller will have #=1, others shifted forward, last - dropped."),
+		    shlog@info("wheel rotates counter-clockwise, therefore the freed-up roller will have #=1, others shifted right."),
 		    shifted_vars: rshift(vars_on_wheel),
-		    shifted_vars[1]: override_first(shifted_vars[1])
+		    shifted_vars[1]: override_first(shifted_vars[1]),
+		    restore: lshift
 		) else if chi < -_chi_max_adjust then (
-		    shlog@info("wheel rotates clockwise, therefore the freed-up roller will have #=n, others shifted backward, first - dropped."),
+		    shlog@info("wheel rotates clockwise, therefore the freed-up roller will have #=n, others shifted left."),
 		    shifted_vars: lshift(vars_on_wheel),
-		    shifted_vars[length(shifted_vars)]: override_last(shifted_vars[length(shifted_vars)])
+		    shifted_vars[length(shifted_vars)]: override_last(shifted_vars[length(shifted_vars)]),
+		    restore: rshift
 		) else (
 		    shlog@info("this wheel is not switching"),
-		    shifted_vars: vars_on_wheel
+		    shifted_vars: vars_on_wheel,
+		    restore: [l] -> l
 		),
-		shifted_vars
+		[ shifted_vars, restore ]
 	),
 	calculate_speeds_of_rollers_in_contact(coords) := perwheel(dphi1(i, coords), i),
 	calculate_angles_of_rollers_in_contact(coords) := perwheel(extract_phi(i, 1, coords), i),
@@ -43,7 +50,6 @@ init() := block(
 		[ speed_of_roller_in_contact ] -> buildq([speed_of_roller_in_contact], [nu_edge] -> speed_of_roller_in_contact),
 		[ speed_of_roller_in_contact ] -> buildq([speed_of_roller_in_contact], [nu_edge] -> speed_of_roller_in_contact)
 	)),
-	/* don't want to track the angle of the roller in contact - just start with zero every time */
 	phis()    := new(WhatToShift(
 		"PHIS",    calculate_angles_of_rollers_in_contact /* not needed though */, split_all_to_wheels,
 		/* just keep phis as is after shifting */
@@ -51,7 +57,7 @@ init() := block(
 		[ not_used ] -> ([phi_edge] -> phi_edge)
 	)), 
 	shift_vars(what_to_shift, coords) ::= buildq([what_to_shift, coords], [vars] -> block(
-		[ wheels, chis, contact_values, result ],
+		[ wheels, chis, contact_values, result_and_restore_function, result ],
 		shlog@info("shifting", what_to_shift@name),
 		wheels: what_to_shift@wheel_splitter(vars),
 		chis: extract_chis(coords),
@@ -59,16 +65,55 @@ init() := block(
 		lreduce(append, perwheel((
 			shlog@info("considering wheel #", i),
 			shlog@info("was:", wheels[i]),
-			result: map(ev, shift_vars_on_wheel(
+			result_and_restore_function: shift_vars_on_wheel(
 				wheels[i], chis[i], 
 				what_to_shift@override_first(contact_values[i]), what_to_shift@override_last(contact_values[i])
-			)),
-			shlog@info("will be:", result),
+			),
+			add_restore_function_for_wheel(i, second(result_and_restore_function)),
+			result: map(ev, first(result_and_restore_function)),
+			shlog@info("will be:", result, ", restore function:", second(result_and_restore_function)),
 			result
 		), i))
 	)),
 
 	adjust(chi) := mod(chi - _chi_max_adjust, 2*_chi_max_adjust) - _chi_max_adjust,
-	adjust_chis(chis) := map(adjust, chis)
+	adjust_chis(chis) := map(adjust, chis),
+
+	restore_shifts(wheel_index) ::= buildq([wheel_index],
+		[series_of_time_and_coord_points] -> block(
+			[
+				all_series: series_of_time_and_coord_points, /* [ [[t1,x1], [t2,x2], ...], [[t1,y1], [t2,y2], ...], ... ] */
+				fst: first(series_of_time_and_coord_points), /*   [[t1,x1], [t2,x2], ...] */
+				zipped: [],                                  /* [ [t1, [x1,y1,...]], [t2, [x2,y2,...]], ... ] */
+				instant_index: 1,
+				restore: [ [l] -> l ],
+				restored: [],
+				restore_functions: get_shift_restore_function(wheel_index),
+				unzipped
+			],
+			shlog@info("restoring based on", restore_functions, switch_instants),
+			shlog@info("restoring something that has", length(all_series), "series of lengths", map(length, all_series), "and first points", map(first, all_series)),
+			shlog@info("zipping..."),
+			zipped: makelist([ first(fst[i]), makelist(second(all_series[j][i]), j, 1, length(all_series)) ], i, 1, length(fst)),
+			shlog@info("zipped and got a series of length", length(zipped), "and first point", first(zipped)),
+			shlog@info("restoring..."),
+			for i:1 thru length(fst) do (
+				if instant_index <= length(switch_instants) and first(zipped[i]) > switch_instants[instant_index] then (
+					instant_index: instant_index+1,
+					shlog@info("reached next switch instant -", instant_index),
+					restore: endcons(restore_functions[(instant_index-1)*2], restore), /* because both rollers and phis are there, but they are same */
+					shlog@info("added", last(restore), "to restore chain")
+				),
+				restored: endcons([first(zipped[i]), second(zipped[i]) where restore], restored)
+			),
+			shlog@info("restored and got a series of length", length(restored), "and first point", first(restored)),
+			unzipped: makelist(
+				makelist([ first(restored[j]), second(restored[j])[i] ], j, 1, length(restored)),
+				i, 1, length(all_series)
+			),
+			shlog@info("unzipped and got something that has", length(unzipped), "series of lengths", map(length, unzipped), "and first points", map(first, unzipped)),
+			unzipped
+		)
+	)
 
 ) $

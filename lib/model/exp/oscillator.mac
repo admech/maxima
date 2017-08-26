@@ -21,7 +21,8 @@ init() := block(
 					new(PlotVar("y(t)", [p] -> [ p[1], p[3] ]))
 				],
 				no_postamble,
-				[ "t", "coord" ]
+				[ "t", "coord" ],
+				[l] -> l
 			)),
 			new(PlotGroup(
 				"phase",
@@ -29,7 +30,8 @@ init() := block(
 					new(PlotVar("y(x)", [p] -> [ p[2], p[3] ]))
 				],
 				equal_axes,
-				[ "x", "y" ]
+				[ "x", "y" ],
+				[l] -> l
 			))
 		]
 	))

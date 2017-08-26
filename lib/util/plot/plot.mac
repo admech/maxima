@@ -26,10 +26,11 @@ init() := block(
 
 	defstruct( /* a figure */
 		PlotGroup(
-			name,      /* plot title */
-			vars,      /* list of PlotVars */
-			postamble, /* e.g. scale axes equally */
-			xy_labels  /* [ xlabel, ylabel ] */
+			name,         /* plot title */
+			vars,         /* list of PlotVars */
+			postamble,    /* e.g. scale axes equally */
+			xy_labels,    /* [ xlabel, ylabel ] */
+			post_process  /* [ [[ax1,ay1], [ax2,ay2], ...], ... ] -> <same> ; e.g. restore omni rollers' shifts */
 		)
 	),
 
@@ -71,7 +72,8 @@ init() := block(
 			lambda([sol, plot_groups],
 				plot_groups_separately(
 					"Gnuplotting to QT windows...",
-					window_term
+					window_term,
+					plot_groups
 				)
 			)
 		)
@@ -89,7 +91,8 @@ init() := block(
 			lambda([sol, plot_groups],
 				plot_groups_separately(
 					"Gnuplotting to console...", 
-					console_term
+					console_term,
+					plot_groups
 				)
 			)
 		)
@@ -109,7 +112,8 @@ init() := block(
 			lambda([sol, plot_groups],
 				plot_groups_separately(
 					"Gnuplotting to files...", 
-					file_term(target_dir)
+					file_term(target_dir),
+					plot_groups
 				)
 			)
 		)
@@ -119,35 +123,38 @@ init() := block(
 		FUNTIONS THAT DO THE ACTUAL PLOTTING
 	*/
 
-	plot_groups_separately(msg, term) := block([teh_term],
+	plot_groups_separately(msg, term, plot_groups) := block([teh_term],
 		log@info(msg),
 		for group in plot_groups do (
 			teh_term: term(group),
 			plot_to_terminal(
-				sol, group@vars,
+				sol,
 				teh_term,
-				group@postamble
+				group
 			)
 		)
 	),
 
-	plot_to_terminal : buildq([log], lambda([sol, plot_vars, terminal, postamble],
-		log@debug(terminal[2], plot_vars),
-		log@info("Plotting", group@name, ":", rreduce(sconcat, rest(rreduce(append, makelist([var@name, ", "], var, plot_vars)), -1))),
-		series_to_plot: makelist(
-				[ discrete, makelist(var@get(p), p, sol) ],
-				var, plot_vars
+	plot_to_terminal : buildq([log], lambda([sol, terminal, group],
+		log@debug(terminal[2], group@vars),
+		log@info("Plotting", group@name, ":", rreduce(sconcat, rest(rreduce(append, makelist([var@name, ", "], var, group@vars)), -1))),
+		series_of_2d_points: makelist(
+			makelist(var@get(p), p, sol),
+			var, group@vars
 		),
+		log@info("Post-processing..."),
+		post_processed_series_of_2d_points: group@post_process(series_of_2d_points),
+		log@info("Done post-processing"),
 		legend_to_show: cons(
 				legend,
-				makelist(var@name, var, plot_vars)
+				makelist(var@name, var, group@vars)
 		),
 		plot2d (
-			series_to_plot,
+			map([series] -> [ discrete, series ], post_processed_series_of_2d_points),
 			legend_to_show,
 			[plot_format, gnuplot],
 			terminal,
-			postamble,
+			group@postamble,
 			[ xlabel, group@xy_labels[1] ],
 			[ ylabel, group@xy_labels[2] ]
 		)

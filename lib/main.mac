@@ -53,7 +53,7 @@ run(
 
 
 DEFAULT_SIMULATION_PARAMETERS : [
-	[ " batches   ", " makelist(0.1*i, i, 1, 2)        " ],
+	[ " batches   ", " makelist(0.1*i, i, 1, 30)       " ],
 	[ " step      ", " 0.01                            " ],
 
 	[ " nu_0      ", " [ 0, 0, -1 ]                    " ],
@@ -77,12 +77,10 @@ use_default_simulation_parameters() $
 require@omni_with_rollers() $
 log@info("Done loading model.") $
 
+
 log@info("Initializing model...") $
 omni_vehicle: OmniVehicle(
 	params,
-	/*
-	case_of_motion@self_rot(-1) where [ gonna_switch_in(0.1) ],
-	*/
 	new(OmniInitials(
 		append(get_global("nu_0"), makelist(0, i, len_nu - 3)),
 		get_global("chi_0"),
@@ -105,6 +103,11 @@ run(
 	))
 ) $
 
+
+/*
+shift_restore_functions: [ [lshift], [[l] -> l], [rshift] ] $
+print(restore_shifts(1)) $
+*/
 
 /*
 batchload("model/exp/lang.mac") $

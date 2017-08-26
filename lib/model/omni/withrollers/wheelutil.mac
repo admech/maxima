@@ -100,7 +100,7 @@ extract_all_vars_for_wheel(all_vars, i) := perroller(all_vars[index_of_roller(i,
 split_all_to_wheels(all_vars) := perwheel(extract_all_vars_for_wheel(all_vars, i), i) $
 
 defstruct(OmniPoint(
-	time,
+	time_point,
 	big_nus,
 	free_nus,
 	chis,
@@ -108,7 +108,7 @@ defstruct(OmniPoint(
 	coords
 )) $
 omni_p(p) := block([c: coords(p)], new(OmniPoint(
-	time = time(p),
+	time_point = time(p),
 	big_nus = extract_big_nus(c),
 	free_nus = split_to_wheels(extract_free_nus(c)),
 	chis = extract_chis(c),
