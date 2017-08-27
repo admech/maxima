@@ -1,8 +1,7 @@
 require@plot() $
 require@model() $
-require@omni_with_rollers_wheelutil() $
-require@omni_with_rollers_params() $
-require@omni_with_rollers_shift() $
+require@omni_no_rollers_wheelutil() $
+require@omni_no_rollers_params() $
 
 
 init() := block(
@@ -100,38 +99,7 @@ init() := block(
 					no_postamble,
 					[ "t", "chi" ],
 					[l] -> l
-				)),
-			all_rollers_angles =
-			perwheel(
-				new(PlotGroup(
-					concat("angles of rollers of wheel ", i),
-					perroller(
-						new(PlotVar(concat("phi_{", i, ", ", j, "}(t)"), [p] -> [ time(p), extract_phi(i, j, coords(p)) ])),
-						j
-					),
-					no_postamble,
-					[ "t", "phi" ],
-					restore_shifts(i)
-				)),
-				i
-			),
-			all_rollers_speeds =
-			perwheel(
-				new(PlotGroup(
-					concat("velocities of rollers of wheel ", i),
-					cons(
-						new(PlotVar(concat("dphi_{", i, ", ", 1, "}/dt(t)"), [p] -> [ time(p), dphi1(i, coords(p)) ])),
-						per_free_roller(
-							new(PlotVar(concat("dphi_{", i, ", ", j, "}/dt(t)"), [p] -> [ time(p), extract_nu(s(i, j), coords(p)) ])),
-							j
-						)
-					),
-					no_postamble,
-					[ "t", "dphi/dt" ],
-					restore_shifts(i)
-				)),
-				i
-			)
+				))
 	)),
 	omni_plot: new(OmniPlot)
 

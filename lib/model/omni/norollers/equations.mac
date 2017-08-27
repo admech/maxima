@@ -1,6 +1,6 @@
-require@omni_with_rollers_params() $
-require@omni_with_rollers_wheelutil() $
-require@omni_with_rollers_symbols() $
+require@omni_no_rollers_params() $
+require@omni_no_rollers_wheelutil() $
+require@omni_no_rollers_symbols() $
 require@timing() $
 
 init() := block(
@@ -24,15 +24,11 @@ init() := block(
 
 	_rhs_nu_noinvert: (-_D_M_star_dt_dot_nu - _pois_P_L_star + _sum_pois_P_alpha_P_mu_nu_mu),
 
-	_M_star_inverse: invert_M(_M_star),
+	_M_star_inverse: invert(_M_star),
 
 	_rhs_nu: transpose(_M_star_inverse . _rhs_nu_noinvert)[1],
 
 	_rhs_chi: perwheel((_V . nu)[3+i][1], i),
-
-	_rhs_contact_phi: perwheel((_V . nu)[3+params@N_wheels+i][1], i),
-	_rhs_free_phi: pers3(nu[s], s),
-	_rhs_phi: list_all_phi(_rhs_contact_phi, _rhs_free_phi),
 
 	_rhs_coords: perbignu((_V . nu)[i][1], i),
 

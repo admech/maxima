@@ -1,0 +1,64 @@
+require@omni_no_rollers_params() $
+require@omni_no_rollers_wheelutil() $
+
+init() := block(
+
+	for var in [x, y, theta, chi, p, P] do depends(var, t),
+	depends(nu, t),
+
+	chi(i) := chi[i],
+	rho(i) := l*cos(chi[i]) - r,
+
+	q : append(
+		[ x, y, theta ],
+		perwheel(chi(i), i)
+	),
+	nu : perbignu(nu[i], i),
+
+	p(i) := p[q[i]],
+	P(i) := P[i],
+
+	constraints: append(
+	    [
+	        diff(x, t) = R*cos(theta)*nu[1] - R*sin(theta)*nu[2],
+	        diff(y, t) = R*sin(theta)*nu[1] + R*cos(theta)*nu[2],
+	        diff(theta, t) = 1/Lambda * nu[3]
+	    ],
+	    perwheel(diff(chi(i), t) = R/l*sin(alpha[i])*nu[1] - R/l*cos(alpha[i])*nu[2] - R/(l*Lambda)*nu[3], i)
+	),
+
+	_V: genmatrix(lambda([i,j],
+	    diff(second(constraints[i]), nu[j])
+	), len_q, len_nu),
+
+	_M: genmatrix(lambda([i,j], 
+	    if i = j then
+	        if i <= 2 then M
+	        else if i = 3 then I_S
+	        else if i <= 3 + params@N_wheels then J
+	        else 0
+	    else 0
+	), len_q, len_q),
+
+	_M_star: (transpose(_V) . _M . _V),
+	for i:1 thru 2 do _M_star[i][i]: _M_star[i][i] - (sin(theta)^2*M*R^2+cos(theta)^2*M*R^2) + M*R^2,
+
+	L_star: 1/2 * (nu . _M_star . nu) where [ expand ],
+
+	_p: perq(p(i), i),
+	_P: (_p . _V)[1],
+	_pnu: transpose(_M . _V . nu)[1],
+	subst_ps: perq(_p[i] = _pnu[i], i),
+
+	z: append(q, _p),
+
+	our_sympl_ident: sympl_ident(len_q),
+	poiz(F, G) := transpose(vecdiff(F, z)) . our_sympl_ident . vecdiff(G, z),
+
+	kin_en(nus, chis) := L_star where append(
+		real(params),
+		pernu(nu[i] = nus[i], i),
+		perwheel(chi(i) = chis[i], i)
+	)
+
+) $

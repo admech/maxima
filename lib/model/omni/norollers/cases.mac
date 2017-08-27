@@ -1,0 +1,38 @@
+init() := block(
+
+
+	defstruct(OmniInitials(
+		nu     = pernu(0, i),
+		chi    = perwheel(0, i),
+		coords = [ 0, 0, 0 ]
+	)),
+
+	gonna_switch_in(how_soon) ::= buildq([how_soon], [initials] -> new(OmniInitials(
+		initials@nu,
+		perwheel(_chi_max_adjust - how_soon, i),
+		initials@coords
+	))),
+
+	defstruct(OmniCaseOfMotion(
+		still    = new(OmniInitials),
+		
+		straight =
+		[nu1] -> block([intls], intls: new(OmniInitials),
+			intls@nu[1]: nu1,
+		intls),
+		
+		self_rot =
+		[nu3] -> block([intls], intls: new(OmniInitials),
+			intls@nu[3]: nu3,
+		intls),
+
+		wrench =
+		[nu1, nu2, nu3] -> block([intls], intls: new(OmniInitials),
+			intls@nu[1]: nu1,
+			intls@nu[2]: nu2,
+			intls@nu[3]: nu3,
+		intls)
+	)),
+	case_of_motion: new(OmniCaseOfMotion)
+
+) $

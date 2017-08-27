@@ -1,0 +1,69 @@
+require@logging() $
+require@model() $
+require@switching() $
+require@omni_no_rollers_wheelutil() $
+require@omni_no_rollers_params() $
+require@omni_no_rollers_symbols() $
+require@omni_no_rollers_equations() $
+require@omni_no_rollers_cases() $
+require@omni_no_rollers_shift() $
+require@omni_no_rollers_plotgroups() $
+
+init() := block(
+	vlog: get_logger("vehicle", log_level_info),
+
+	/* TECHNICAL STUFF */
+
+	solvable_vars() := append(
+		pernu(nu[i] = concat(_rk_nu, "_", i), i),
+		perwheel(chi(i) = concat(_rk_chi, "_", i), i)
+	),
+
+	all_vars_solved_for() := append(
+		map(second, solvable_vars()),
+		[x, y, theta]
+	),
+
+	/* SWITCHING ROLLERS (left here for consistency of chi graphs with the model with rollers) */
+
+	_rhs_chi_switching: switching(
+		_rhs_chi,
+		perwheel(chi(i), i) where solvable_vars(),
+		beyond(_chi_max_adjust)
+	),
+
+	only_adjust_chi(coords) := block(
+		vlog@info("switching"),
+		append(
+			extract_big_nus(coords),
+			extract_chis(coords) where [ adjust_chis ],
+			extract_coords(coords)
+		)
+	),
+
+	/* DECLARING THE MODEL: RHSS, REAL PARAMS AND PLOT VARS */
+
+	OmniVehicle(params, initials, domain) := new(SwitchingModel(
+		sconcat("Omni vehicle with NO rollers (params: ", params, ", initials: ", initials, ", domain: ", domain),
+		new(RKAdapter(
+			append( _rhs_nu,      _rhs_chi_switching,   _rhs_coords     ) where append( real(params), solvable_vars() ),
+			append( nu,           perwheel(chi(i), i),  [x, y, theta]   ) where solvable_vars(),
+			append( initials@nu,  initials@chi,         initials@coords ),
+			domain
+		)),
+		new(Switcher(
+			only_adjust_chi,
+			append( _rhs_nu,      _rhs_chi,             _rhs_coords     ) where append( real(params), solvable_vars() )
+		)),
+		[
+			omni_plot@trajectory,
+			omni_plot@theta,
+			omni_plot@speed_of_mass_center,
+			omni_plot@nu3,
+			omni_plot@kin_en,
+			omni_plot@wheel_angles,
+			omni_plot@coords
+		]
+	))
+
+) $

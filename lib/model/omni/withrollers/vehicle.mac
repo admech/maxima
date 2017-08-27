@@ -1,7 +1,7 @@
 require@logging() $
 require@model() $
 require@switching() $
-require@wheelutil() $
+require@omni_with_rollers_wheelutil() $
 require@omni_with_rollers_params() $
 require@omni_with_rollers_symbols() $
 require@omni_with_rollers_equations() $
