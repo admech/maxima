@@ -18,6 +18,8 @@ log@debug(hr()) $
 log_program_start() $
 
 DEFAULT_SIMULATION_PARAMETERS : [
+	[ " model     ", " omni_with_rollers               " ],
+
 	[ " batches   ", " [ 0.1, 0.2 ]                    " ],
 	[ " step      ", " 0.01                            " ],
 
@@ -34,22 +36,104 @@ DEFAULT_SIMULATION_PARAMETERS : [
 	[ " M_platf   ", " 1                               " ]
 ] $
 
-log@info("Loading model...") $
-use_default_simulation_parameters() $
-/* load_params_from_file("???/simulation_parameters.mac") */
-require@omni_with_rollers() $
-log@info("Done loading model.") $
-
-/*
 plotter : plot@console $
 show(sol, plot_group_name) := plotter@show(sol, [ eval_string(concat("omni_plot@", plot_group_name)) ]) $
-load_sol(name) := block(
-	load(concat("../gcp_sol/", name, "/sol.lisp")),
-	eval_string(concat(name, ": sol"))
+load_sol(file, sol_var_name) := block(
+	log@info("Loading", sol_var_name, "..."),
+	load(file),
+	log@info("Done loading."),
+	eval_string(concat(sol_var_name, ": sol"))
 ) $
-*/
+use_simulation_parameters_from_dir(absolute_dir) := load_params_from_file(concat(absolute_dir, "/", "simulation_parameters.mac")) $
 
+
+load_gcp_sol_on_local(name) := block(
+	sol_name_to_explore: name,
+
+	dir_with_solutions_on_local_machine: "/Users/data/Yandex.Disk/work/aspa/zobova/maxima/gcp_sol",
+	dir_with_solution: concat(dir_with_solutions_on_local_machine, "/", sol_name_to_explore),
+	use_simulation_parameters_from_dir(dir_with_solution),
+
+	eval_string(concat("require@", get_global("model"), "()")),
+
+	load_sol(concat(dir_with_solution, "/sol.lisp"), sol_name_to_explore),
+	plotter : plot@windows,
+	plot_to_files : plot@files_in(dir_with_solution),
+	print(""),
+	print("Loaded", name, "and set plotter to windows. To send to file in the same dir, use:"),
+	print(""),
+	print("    plot_to_files"),
+	print(""),
+	print("Use this to show particular plot groups:"),
+	print(""),
+	print("    show(", name, ", \"trajectory\") $"),
+	print(""),
+	print("Remember, plotting to windows works only in wxMaxima for some reason, not in console even on the local machine."),
+	print("")
+) $
+
+load_sol_on_prod(name) := block(
+	sol_name_to_explore: name,
+
+	dir_with_solutions_on_prod: "~/maxima/sol",
+	dir_with_solution: concat(dir_with_solutions_on_local_machine, "/", sol_name_to_explore),
+	use_simulation_parameters_from_dir(concat(dir_with_solution, "/in")),
+
+	eval_string(concat("require@", get_global("model"), "()")),
+
+	load_sol(concat(dir_with_solution, "/sol.lisp"), sol_name_to_explore),
+	plotter : plot@console,
+	plot_to_files : plot@files_in(concat(dir_with_solution, "/out")),
+	print(""),
+	print("Loaded", name, "and set plotter to console. To send to file in the same dir, use:"),
+	print(""),
+	print("    plot_to_files"),
+	print(""),
+	print("Use this to show particular plot groups:"),
+	print(""),
+	print("    show(", name, ", \"trajectory\") $"),
+	print("")
+) $
+
+print("") $
+print("") $
+print("USAGE:") $
+print("") $
+print("") $
+print("Please first choose where to take params: either defaults:") $
+print("") $
+print("    use_default_simulation_parameters() $") $
+print("") $
+print("or from file simulation_parameters.mac in a directory:") $
+print("") $
+print("    use_simulation_parameters_from_dir(\"/ABSOLUTE/PATH/TO/YOUR/DIR\") $") $
+print("") $
+print("Then to choose your model, run either of these:") $
+print("") $
+print("    require@omni_with_rollers() $") $
+print("    require@omni_no_rollers() $") $
+print("    eval_string(concat(\"require@\", get_global(\"model\"), \"()\")) $") $
+print("") $
+print("Afterwards, to choose how to plot vars use either of:") $
+print("") $
+print("    plotter : plot@console $") $
+print("    plotter : plot@windows $") $
+print("    plotter : plot@files_in(\"/ABSOLUTE/PATH/TO/YOUR/DIR\") $") $
+print("") $
+print("(defatults to console).") $
+print("") $
+print("Then load a solution to explore (mind that the parameters you loaded before can influence everything):") $
+print("") $
+print("    load_sol(\"/ABSOLUTE/PATH/TO/YOUR/file.lisp\", \"sol_var_name_you_want\") $") $
+print("") $
+print("And finally, use this to show particular plot groups:") $
+print("") $
+print("    show(sol_var_name_you_want, \"trajectory\") $") $
+print("") $
+print("Or just use one of these:") $
+print("") $
+print("    load_gcp_sol_on_local(\"sol_name\") $") $
+print("    load_sol_on_prod(\"sol_name\") $") $
+print("") $
 log_program_finish() $
-
-log@info("ARE YOU SURE YOU ARE USING THE SIMULATION PARAMETERS APPROPRIATE FOR YOUR MODEL ???") $
 

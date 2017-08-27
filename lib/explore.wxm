@@ -2,23 +2,22 @@
 /* [ Created with wxMaxima version 15.04.0 ] */
 
 /* [wxMaxima: input   start ] */
-batchload("explore.mac");
+batchload("explore.mac") $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-load_sol("smoke") $
+load_gcp_sol_on_local("withrol_long_straight") $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-show(smoke, "kin_en") $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
+/*
+plotter: plot_to_files $
 plotter: plot@windows $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-show(smoke, "kin_en") $
+*/
+show(withrol_long_straight, "trajectory") $
+show(withrol_long_straight, "theta") $
+show(withrol_long_straight, "speed_of_mass_center") $
+show(withrol_long_straight, "nu3") $
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
