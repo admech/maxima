@@ -138,13 +138,15 @@ init() := block(
 	plot_to_terminal : buildq([log], lambda([sol, terminal, group],
 		log@debug(terminal[2], group@vars),
 		log@info("Plotting", group@name, ":", rreduce(sconcat, rest(rreduce(append, makelist([var@name, ", "], var, group@vars)), -1))),
+		log@info("Calculating data points..."),
 		series_of_2d_points: makelist(
 			makelist(var@get(p), p, sol),
 			var, group@vars
 		),
+		log@info("Done calculating data points."),
 		log@info("Post-processing..."),
 		post_processed_series_of_2d_points: group@post_process(series_of_2d_points),
-		log@info("Done post-processing"),
+		log@info("Done post-processing."),
 		legend_to_show: cons(
 				legend,
 				makelist(var@name, var, group@vars)
@@ -159,7 +161,7 @@ init() := block(
 			[ xlabel, group@xy_labels[1] ],
 			[ ylabel, group@xy_labels[2] ]
 		),
-		log@info("Done plotting."),
+		log@info("Done plotting.")
 	)),
 
 	/* POSTAMBLES */
