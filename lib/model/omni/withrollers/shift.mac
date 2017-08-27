@@ -7,13 +7,23 @@ init() := block(
 
 	shlog: get_logger("shifting", log_level_info), 
 
-	shift_restore_functions: perwheel([], i),
+	shift_restore_functions: perwheel([ 0 ], i), /* be sure to remove this zero when restoring */
 	get_shift_restore_function(i) := shift_restore_functions[i],
-	add_restore_function_for_wheel(i, fun) := shift_restore_functions[i]: endcons(fun, shift_restore_functions[i]),
+	add_restore_function_for_wheel(i, fun) := block(
+		[ funs_for_wheel: shift_restore_functions[i] ],
+		shift_restore_functions[i]: endcons(fun + last(funs_for_wheel), funs_for_wheel)
+	),
 
-	permut_list(l, perm) := makelist(l[i], i, perm),
-	lshift(l) := permut_list(l, endcons(1, makelist(i, i, 2, length(l)))),
-	rshift(l) := permut_list(l, cons(length(l), makelist(i, i, 1, length(l) - 1))),
+	permut_list(l, perm) := makelist(l[i], i, perm), /* use nshift */
+	nshift(l, n) := block(
+		[len: length(l)], 
+		makelist(
+			l[ mod(i, len) + 1 ],
+			i, -n, -n + len - 1
+		)
+	),
+	lshift(l) := nshift(l, -1),
+	rshift(l) := nshift(l, +1),
 
 	shift_vars_on_wheel(vars_on_wheel, chi, override_first, override_last) := block(
 		[ shifted_vars, restore ],
@@ -22,16 +32,16 @@ init() := block(
 		    shlog@info("wheel rotates counter-clockwise, therefore the freed-up roller will have #=1, others shifted right."),
 		    shifted_vars: rshift(vars_on_wheel),
 		    shifted_vars[1]: override_first(shifted_vars[1]),
-		    restore: lshift
+		    restore: -1
 		) else if chi < -_chi_max_adjust then (
 		    shlog@info("wheel rotates clockwise, therefore the freed-up roller will have #=n, others shifted left."),
 		    shifted_vars: lshift(vars_on_wheel),
 		    shifted_vars[length(shifted_vars)]: override_last(shifted_vars[length(shifted_vars)]),
-		    restore: rshift
+		    restore: +1
 		) else (
 		    shlog@info("this wheel is not switching"),
 		    shifted_vars: vars_on_wheel,
-		    restore: [l] -> l
+		    restore: 0
 		),
 		[ shifted_vars, restore ]
 	),
@@ -42,19 +52,22 @@ init() := block(
 		contact_values,
 		wheel_splitter,
 		override_first,
-		override_last
+		override_last,
+		add_restore_for_wheel
 	)),
 	rollers() := new(WhatToShift(
 		"ROLLERS", calculate_speeds_of_rollers_in_contact, split_to_wheels,
 		/* set the provided value to the freed roller after shifting */
 		[ speed_of_roller_in_contact ] -> buildq([speed_of_roller_in_contact], [nu_edge] -> speed_of_roller_in_contact),
-		[ speed_of_roller_in_contact ] -> buildq([speed_of_roller_in_contact], [nu_edge] -> speed_of_roller_in_contact)
+		[ speed_of_roller_in_contact ] -> buildq([speed_of_roller_in_contact], [nu_edge] -> speed_of_roller_in_contact),
+		add_restore_function_for_wheel
 	)),
 	phis()    := new(WhatToShift(
 		"PHIS",    calculate_angles_of_rollers_in_contact /* not needed though */, split_all_to_wheels,
 		/* just keep phis as is after shifting */
 		[ not_used ] -> ([phi_edge] -> phi_edge),
-		[ not_used ] -> ([phi_edge] -> phi_edge)
+		[ not_used ] -> ([phi_edge] -> phi_edge),
+		[ neednt, dothis ] -> [ as_rollers_already_did ]
 	)), 
 	shift_vars(what_to_shift, coords) ::= buildq([what_to_shift, coords], [vars] -> block(
 		[ wheels, chis, contact_values, result_and_restore_function, result ],
@@ -69,7 +82,7 @@ init() := block(
 				wheels[i], chis[i], 
 				what_to_shift@override_first(contact_values[i]), what_to_shift@override_last(contact_values[i])
 			),
-			add_restore_function_for_wheel(i, second(result_and_restore_function)),
+			what_to_shift@add_restore_for_wheel(i, second(result_and_restore_function)),
 			result: map(ev, first(result_and_restore_function)),
 			shlog@info("will be:", result, ", restore function:", second(result_and_restore_function)),
 			result
@@ -86,9 +99,9 @@ init() := block(
 				fst: first(series_of_time_and_coord_points), /*   [[t1,x1], [t2,x2], ...] */
 				zipped: [],                                  /* [ [t1, [x1,y1,...]], [t2, [x2,y2,...]], ... ] */
 				instant_index: 1,
-				restore: [ [l] -> l ],
+				restore: 0,
 				restored: [],
-				restore_functions: get_shift_restore_function(wheel_index),
+				restore_functions: rest(get_shift_restore_function(wheel_index), 1), /* remove the leading zero */
 				unzipped
 			],
 			shlog@info("restoring based on", restore_functions, switch_instants),
@@ -99,12 +112,11 @@ init() := block(
 			shlog@info("restoring..."),
 			for i:1 thru length(fst) do (
 				if instant_index <= length(switch_instants) and first(zipped[i]) > switch_instants[instant_index] then (
-					instant_index: instant_index+1,
-					shlog@info("reached next switch instant -", instant_index),
-					restore: endcons(restore_functions[(instant_index-1)*2], restore), /* because both rollers and phis are there, but they are same */
-					shlog@info("added", last(restore), "to restore chain")
+					restore: restore_functions[ instant_index ],
+					shlog@info("reached next switch instant #", instant_index, "at", switch_instants[instant_index], ", will now restore by shifting by", restore),
+					instant_index: instant_index+1
 				),
-				restored: endcons([first(zipped[i]), second(zipped[i]) where restore], restored)
+				restored: endcons([first(zipped[i]), nshift(second(zipped[i]), restore)], restored)
 			),
 			shlog@info("restored and got a series of length", length(restored), "and first point", first(restored)),
 			unzipped: makelist(
