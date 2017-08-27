@@ -55,10 +55,10 @@ run(
 DEFAULT_SIMULATION_PARAMETERS : [
 	[ " model     ", " omni_with_rollers               " ],
 
-	[ " batches   ", " makelist(0.1*i, i, 1, 30)       " ],
+	[ " batches   ", " makelist(0.1*i, i, 1, 1000)     " ],
 	[ " step      ", " 0.01                            " ],
 
-	[ " nu_0      ", " [ -1, 0, -1 ]                   " ],
+	[ " nu_0      ", " [ 0, 0, 1 ]                     " ],
 	[ " chi_0     ", " makelist( %pi/4 - 0.1, i, 1, 3) " ],
 	[ " coords_0  ", " [ 0, 0, 0 ]                     " ],
 
@@ -73,9 +73,9 @@ DEFAULT_SIMULATION_PARAMETERS : [
 
 log@info("Loading model...") $
 /*
-load_simulation_parameters_from_file() $
-*/
 use_default_simulation_parameters() $
+*/
+load_simulation_parameters_from_file() $
 eval_string(concat("require@", get_global("model"), "()")) $
 log@info("Done loading model.") $
 
@@ -91,13 +91,6 @@ omni_vehicle: OmniVehicle(
 	new(Domain( 0, 0.2, get_global("step") ))
 ) $
 log@info("Done initializing model.") $
-
-map([it] -> print(listofvars(it)), [
-	_rhs_nu,
-	_rhs_chi,
-	_rhs_coords
-]) $
-
 
 run(
 	omni_vehicle, 
