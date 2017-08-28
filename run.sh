@@ -23,6 +23,7 @@ clean_and_run () {
     echo "[$scenario] Cleaning out dir..."
     mv `pwd`/../sol/$scenario/out/batches/notes.md `pwd`/../sol/$scenario/notes.md
     rm `pwd`/../sol/$scenario/out/*
+    rm `pwd`/../sol/$scenario/out/batches/*
     mv `pwd`/../sol/$scenario/notes.md `pwd`/../sol/$scenario/out/batches/notes.md 
     echo "[$scenario] Running Maxima..."
     # -X "--dynamic-space-size 8192"
