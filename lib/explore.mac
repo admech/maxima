@@ -76,10 +76,15 @@ load_sol_on_prod(name) := block(
 	sol_name_to_explore: name,
 
 	dir_with_solutions_on_prod: "~/maxima/sol",
-	dir_with_solution: concat(dir_with_solutions_on_local_machine, "/", sol_name_to_explore),
+	dir_with_solution: concat(dir_with_solutions_on_prod, "/", sol_name_to_explore),
 	use_simulation_parameters_from_dir(concat(dir_with_solution, "/in")),
 
+	gnuplot_command : "gnuplot",
+
+/*
 	eval_string(concat("require@", get_global("model"), "()")),
+*/
+	require@omni_with_rollers(),
 
 	load_sol(concat(dir_with_solution, "/out/sol.lisp"), sol_name_to_explore),
 	plotter : plot@console,

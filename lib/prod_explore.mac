@@ -1,18 +1,20 @@
 for sol_name in [
 
-    "norol_long_self_rot",
-    "norol_long_straight",
-    "norol_long_wrench"
+    "long_self_rot_5rol",
+    "long_self_rot_5rol_sqrt2",
+    "long_straight_5rol",
+    "long_wrench_5rol",
+    "long_wrench_5rol_sqrt2"
 
 ] do (
     max_t:25 ,
 
-    root_dir     : "~/maxima" $
-    sol_base_dir : concat(root_dir, "/sol") $
-    sol_dir      : sol_name $
+    root_dir     : "~/maxima" ,
+    sol_base_dir : concat(root_dir, "/sol") ,
+    sol_dir      : sol_name ,
 
     batchload("explore.mac") ,
-    load_gcp_sol_on_local(sol_name) ,
+    load_sol_on_prod(sol_name) ,
     
     sol: makelist(sol[i], i, 1, max_t*1000) ,
     
