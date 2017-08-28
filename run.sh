@@ -21,10 +21,11 @@ clean_and_run () {
     local scenario=$1
     echo "[$scenario] Starting scenario..."
     echo "[$scenario] Cleaning out dir..."
-    mv `pwd`/../sol/$scenario/out/notes.md `pwd`/../sol/$scenario/notes.md
+    mv `pwd`/../sol/$scenario/out/batches/notes.md `pwd`/../sol/$scenario/notes.md
     rm `pwd`/../sol/$scenario/out/*
-    mv `pwd`/../sol/$scenario/notes.md `pwd`/../sol/$scenario/out/notes.md 
+    mv `pwd`/../sol/$scenario/notes.md `pwd`/../sol/$scenario/out/batches/notes.md 
     echo "[$scenario] Running Maxima..."
+    # -X "--dynamic-space-size 8192"
     maxima --batch-string="\
         sol_dir: \"$scenario\" $\
         root_dir: \"`pwd`/..\" $\
