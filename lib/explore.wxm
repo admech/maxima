@@ -2,23 +2,37 @@
 /* [ Created with wxMaxima version 15.04.0 ] */
 
 /* [wxMaxima: input   start ] */
-batchload("explore.mac");
-/* [wxMaxima: input   end   ] */
+for sol_name in [
 
-/* [wxMaxima: input   start ] */
-load_sol("smoke") $
-/* [wxMaxima: input   end   ] */
+    "norol_long_self_rot",
+    "norol_long_straight",
+    "norol_long_wrench"
 
-/* [wxMaxima: input   start ] */
-show(smoke, "kin_en") $
-/* [wxMaxima: input   end   ] */
+] do (
+    max_t:25 ,
 
-/* [wxMaxima: input   start ] */
-plotter: plot@windows $
-/* [wxMaxima: input   end   ] */
+    batchload("explore.mac") ,
+    load_gcp_sol_on_local(sol_name) ,
+    
+    sol: makelist(sol[i], i, 1, max_t*1000) ,
+    
+    plotter: plot_to_files ,
+    
+    show(sol, "trajectory") ,
+    show(sol, "theta") ,
+    show(sol, "speed_of_mass_center") ,
+    show(sol, "nu3") ,
+    show(sol, "kin_en") ,
+    show(sol, "wheel_angles") ,
+    show(sol, "coords") ,
+    /*
+    for i:1 thru params@N_wheels do show(sol, concat("all_rollers_angles[", i, "]")) ,
+    for i:1 thru params@N_wheels do show(sol, concat("all_rollers_speeds[", i, "]")) ,
+    */
 
-/* [wxMaxima: input   start ] */
-show(smoke, "kin_en") $
+    kill(all)
+
+) $
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */

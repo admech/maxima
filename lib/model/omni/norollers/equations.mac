@@ -1,0 +1,36 @@
+require@omni_no_rollers_params() $
+require@omni_no_rollers_wheelutil() $
+require@omni_no_rollers_symbols() $
+require@timing() $
+
+init() := block(
+	timeit_start(),
+
+	/* dM* /dt.nu */
+	_D_M_star_dt_dot_nu: (diff(_M_star, t) where constraints) . nu,
+
+	/* { P[alpha], L* } */
+	_pois_P_L_star: transpose(pernu(
+	    poiz(_P[i], L_star) where subst_ps
+	, i)),
+
+	/* { P[alpha], nu[mu]*P[mu] } */
+	_sum_pois_P_alpha_P_mu_nu_mu: transpose(pernu(
+		sumlist(pernu(nu[mu] * poiz(_P[i], _P[mu]), mu)) where append(
+	    	subst_ps,
+	    	[ theta = 0 ] /* easiest way to make Maxima handle sin^2 + cos^2 */
+		), i)
+	),
+
+	_rhs_nu_noinvert: (-_D_M_star_dt_dot_nu - _pois_P_L_star + _sum_pois_P_alpha_P_mu_nu_mu),
+
+	_M_star_inverse: invert(_M_star),
+
+	_rhs_nu: transpose(_M_star_inverse . _rhs_nu_noinvert)[1],
+
+	_rhs_chi: perwheel((_V . nu)[3+i][1], i),
+
+	_rhs_coords: perbignu((_V . nu)[i][1], i),
+
+	timeit_show()
+) $

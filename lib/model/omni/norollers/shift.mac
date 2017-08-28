@@ -1,0 +1,13 @@
+require@logging() $
+require@omni_no_rollers_wheelutil() $
+require@omni_no_rollers_params() $
+require@omni_no_rollers_symbols() $
+
+init() := block(
+
+	shlog: get_logger("shifting", log_level_info), 
+
+	adjust(chi) := mod(chi - _chi_max_adjust, 2*_chi_max_adjust) - _chi_max_adjust,
+	adjust_chis(chis) := map(adjust, chis)
+
+) $

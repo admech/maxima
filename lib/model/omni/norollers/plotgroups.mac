@@ -1,0 +1,106 @@
+require@plot() $
+require@model() $
+require@omni_no_rollers_wheelutil() $
+require@omni_no_rollers_params() $
+
+
+init() := block(
+
+
+	defstruct(OmniPlot(
+			kin_en = 
+				new(PlotGroup(
+					"kinetic energy",
+					[
+						new(PlotVar("energy", [p] -> [ time(p), kin_en(extract_nus(coords(p)), extract_chis(coords(p))) ]))
+					],
+					no_postamble,
+					[ "t", "energy" ],
+					[l] -> l
+				)),
+			coords =
+				new(PlotGroup(
+					"coords",
+					[
+						new(PlotVar("x(t)", [p] -> [ time(p), extract_x(coords(p)) ])),
+						new(PlotVar("y(t)", [p] -> [ time(p), extract_y(coords(p)) ]))
+					],
+					no_postamble,
+					[ "t", "coord" ],
+					[l] -> l
+				)),
+			nu12 =
+				new(PlotGroup(
+					"speed x and y",
+					[
+						new(PlotVar("nu_1(t)", [p] -> [ time(p), extract_nu(1, coords(p)) ])),
+						new(PlotVar("nu_2(t)", [p] -> [ time(p), extract_nu(2, coords(p)) ]))
+					],
+					no_postamble,
+					[ "t", "nu_1, nu_2" ],
+					[l] -> l
+				)),
+			theta =
+				new(PlotGroup(
+					"self rotation", /* θ - not supported in console */
+					[
+						new(PlotVar("theta(t)", [p] -> [ time(p), extract_theta(coords(p)) ]))
+					],
+					no_postamble,
+					[ "t", "theta" ],
+					[l] -> l
+				)),
+			nu3 =
+				new(PlotGroup(
+					"velocity of self rotation",
+					[
+						new(PlotVar("nu_3(t)", [p] -> [ time(p), extract_nu(3, coords(p)) ]))
+					],
+					no_postamble,
+					[ "t", "nu_3" ],
+					[l] -> l
+				)),
+			trajectory =
+				new(PlotGroup(
+					"trajectory",
+					[
+						new(PlotVar("y(x)", [p] -> [ extract_x(coords(p)), extract_y(coords(p)) ]))
+					],
+					equal_axes,
+					[ "x", "y" ],
+					[l] -> l
+				)),
+			speed_of_mass_center =
+				new(PlotGroup(
+					"speed of center of mass",
+					[
+						new(PlotVar("speed", [p] -> [ time(p), sqrt(extract_nu(1, coords(p))^2 + extract_nu(2, coords(p))^2) ]))
+					],
+					equal_axes,
+					[ "t", "speed" ],
+					[l] -> l
+				)),
+			wheel_angles =
+				new(PlotGroup(
+					"wheel angles", /* χ - not supported in console */
+					append(
+						perwheel(
+							new(PlotVar(
+								concat("chi_", i, "(t)"),
+								[p] -> [ time(p), extract_chi(i, coords(p)) ]
+							)),
+							i
+						),
+						[
+							new(PlotVar("+ chi_{max}", [p] -> [ time(p),  _chi_max_adjust ])),
+							new(PlotVar("- chi_{max}", [p] -> [ time(p), -_chi_max_adjust ]))
+						]
+					),
+					no_postamble,
+					[ "t", "chi" ],
+					[l] -> l
+				))
+	)),
+	omni_plot: new(OmniPlot)
+
+) $

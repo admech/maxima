@@ -1,4 +1,2 @@
-sol/*/out/**
-!sol/*/out/notes.md
+sol/*/out/batches/*.lisp
 maxima_tempdir/**
-!maxima_tempdir/notes.md
