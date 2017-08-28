@@ -1,0 +1,35 @@
+for sol_name in [
+
+    "norol_long_self_rot",
+    "norol_long_straight",
+    "norol_long_wrench"
+
+] do (
+    max_t:25 ,
+
+    root_dir     : "~/maxima" $
+    sol_base_dir : concat(root_dir, "/sol") $
+    sol_dir      : sol_name $
+
+    batchload("explore.mac") ,
+    load_gcp_sol_on_local(sol_name) ,
+    
+    sol: makelist(sol[i], i, 1, max_t*1000) ,
+    
+    plotter: plot_to_files ,
+    
+    show(sol, "trajectory") ,
+    show(sol, "theta") ,
+    show(sol, "speed_of_mass_center") ,
+    show(sol, "nu3") ,
+    show(sol, "kin_en") ,
+    show(sol, "wheel_angles") ,
+    show(sol, "coords") ,
+
+    for i:1 thru params@N_wheels do show(sol, concat("all_rollers_angles[", i, "]")) ,
+    for i:1 thru params@N_wheels do show(sol, concat("all_rollers_speeds[", i, "]")) ,
+
+
+    kill(all)
+
+) $

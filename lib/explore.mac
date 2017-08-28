@@ -81,7 +81,7 @@ load_sol_on_prod(name) := block(
 
 	eval_string(concat("require@", get_global("model"), "()")),
 
-	load_sol(concat(dir_with_solution, "/sol.lisp"), sol_name_to_explore),
+	load_sol(concat(dir_with_solution, "/out/sol.lisp"), sol_name_to_explore),
 	plotter : plot@console,
 	plot_to_files : plot@files_in(concat(dir_with_solution, "/out")),
 	print(""),
