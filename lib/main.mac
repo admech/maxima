@@ -99,10 +99,10 @@ run(
 			get_global("batches"),
 			with_switcher(omni_vehicle@switcher)
 		),
-		
-		/* plot@files_in(out_dir) */
-		
+		/*
 		plot@windows
+		*/
+		plot@files_in(out_dir)
 	))
 ) $
 
