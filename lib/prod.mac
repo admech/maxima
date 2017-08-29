@@ -39,7 +39,7 @@ gnuplot_command : "gnuplot" $
 
 log@info("Loading model...") $
 load_simulation_parameters_from_file() $
-require@omni_with_rollers() $
+eval_string(concat("require@", get_global("model"), "()")) $
 log@info("Done loading model.") $
 
 log@info("Initializing model...") $
