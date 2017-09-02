@@ -1,4 +1,5 @@
 sol/*/out/batches/*.lisp
+sol/*/out/*
 maxima_tempdir/**
 *.gnuplot
 *.log
