@@ -4,16 +4,12 @@
 /* [wxMaxima: input   start ] */
 for sol_name in [
 
-    "withrol_long_self_rot",
-    "withrol_long_straight",
-    "withrol_long_wrench",
-
-    "norol_long_self_rot",
-    "norol_long_straight",
-    "norol_long_wrench"
+    "sqrt_no_5_rollers_t_100_self_rot",
+    "sqrt_no_5_rollers_t_100_straight",
+    "sqrt_no_5_rollers_t_100_wrench"
 
 ] do (
-    max_t:5 ,
+    max_t:25 ,
 
     sol_dir: sol_name,
 
@@ -31,7 +27,7 @@ for sol_name in [
     show(sol, "kin_en") ,
     show(sol, "wheel_angles") ,
     show(sol, "coords") ,
-    
+
     if not(ssearch("with", sol_name) = false) then (
         for i:1 thru params@N_wheels do show(sol, concat("all_rollers_angles[", i, "]")) ,
         for i:1 thru params@N_wheels do show(sol, concat("all_rollers_speeds[", i, "]"))
