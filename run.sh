@@ -26,7 +26,7 @@ clean_and_run () {
     rm `pwd`/../sol/$scenario/out/batches/*
     mv `pwd`/../sol/$scenario/notes.md `pwd`/../sol/$scenario/out/batches/notes.md 
     echo "[$scenario] Running Maxima..."
-    # -X "--dynamic-space-size 8192"
+    # maxima -X "--dynamic-space-size 8192" --batch-string="\
     maxima --batch-string="\
         sol_dir: \"$scenario\" $\
         root_dir: \"`pwd`/..\" $\
