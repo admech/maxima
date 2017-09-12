@@ -8,7 +8,7 @@ chi_0     = makelist( 0, i, 1, 3)
 coords_0  = [ 0, 0, 0 ]
 
 N_wheels  = 3
-n_rollers = 4
+n_rollers = 5
 r_hub     = 0.05
 M_hub     = 0.15
 m_roller  = 0.05
