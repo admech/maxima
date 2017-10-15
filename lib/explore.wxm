@@ -130,7 +130,7 @@ nu_s(s, c) := -lambda(s, c) - sin(chi[wheel_ind(s)] + kappa[roller_ind(s)]) / La
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: comment start ]
-... хрен его знает, что там, и похоже, через эфф. пот. проще будет.
+... не понятно знает, что там, и похоже, через эфф. пот. проще будет.
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: section start ]
@@ -178,22 +178,6 @@ _V_pot . _V_pot_noinvert $
 Vpot : 1/2 * c . _V_pot . transpose(c) $
 /* [wxMaxima: input   end   ] */
 
-/* [wxMaxima: input   start ] */
-dvpot1_of_chi_at_c_ones: diff(Vpot, chi[3]) where append(
-    real(params),
-    perwheel(chi[i] = chi/i, i),
-    pers(c[s] = cs3(1, perwheel(0, dontmatter))[s], s) /* nus = 0 => cs = nu3*mult */
-) $
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-tmp(chi_val) := float(dvpot1_of_chi_at_c_ones where [ chi = chi_val ]);
-/* [wxMaxima: input   end   ] */
-
-/* [wxMaxima: input   start ] */
-makelist(tmp(chi_val), chi_val, -%pi/4, %pi/4, 0.1);
-/* [wxMaxima: input   end   ] */
-
 /* [wxMaxima: comment start ]
 константы интегралов:
    [wxMaxima: comment end   ] */
@@ -210,6 +194,34 @@ cs3(nu30, chi0) := cs(append([0, 0], [ nu30 ], pers(0, s)), chi0);
 /* [wxMaxima: input   start ] */
 cs3(0, perwheel(0, i));
 cs3(1, perwheel(0, i));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+производная потенциала:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+dvpot_dchi1_at_c_for_nu3_1_chis0_0: diff(Vpot, chi[1]) where append(
+    real(params),
+    pers(c[s] = cs3(1, perwheel(0, dontmatter))[s], s) /* nus = 0 => cs = nu3*mult */
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dvpot_dchi1_at_c_for_nu3_1_chis0_0_at_chi(chi_vals) := float(dvpot_dchi1_at_c_for_nu3_1_chis0_0 where perwheel(chi[i] = chi_vals[i], i));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dvpot_dchi1_at_c_for_nu3_1_chis0_0_at_all_chis : makelist(
+    makelist(
+        makelist(
+            [ [ chi1, chi2, chi3 ], dvpot_dchi1_at_c_for_nu3_1_chis0_0_at_chi([ chi1, chi2, chi3 ]) ],
+            chi3, -%pi/4, %pi/4, 0.1
+        ),
+        chi2, -%pi/4, %pi/4, 0.1
+    ),
+    chi1, -%pi/4, %pi/4, 0.1
+) $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: comment start ]
