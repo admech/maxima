@@ -1,6 +1,10 @@
 /* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
 /* [ Created with wxMaxima version 15.04.0 ] */
 
+/* [wxMaxima: title   start ]
+Process calculated solutions
+   [wxMaxima: title   end   ] */
+
 /* [wxMaxima: input   start ] */
 for sol_name in [
 
@@ -36,6 +40,430 @@ for sol_name in [
     kill(all)
 
 ) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: title   start ]
+Explore
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: input   start ] */
+sol_dir:NONE;
+batchload("explore.mac");
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+use_default_simulation_parameters() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+use_simulation_parameters_from_dir("/Users/data/Yandex.Disk/work/aspa/zobova/maxima/gcp_sol/_ready/sqrt_with_4_rollers_t_100_self_rot") $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+require@omni_with_rollers() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+derivabbrev:true;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: title   start ]
+BELOW HERE GOETH EXPLORATION; ABOVE HERE -- NECESSARY INFRASTRUCTURE
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: title   start ]
+LOOKING FOR INVARIANT SETS
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: comment start ]
+L* - интеграл энергии
+dL*/dnu[s] - циклические интегралы (и похоже, они же - интегралы Нётер)
+
+С одной стороны, можно искать (nu, chi), доставляющие критические значения L* просто методом Лагранжа:
+W(nu, chi, lambda) = L* + (lambda, dL*/dnu[s] - c),
+
+а с другой, можно через эффективный потенциал (правда ранг матрицы K интегралов dL*/dnu[s] = K(chi)^T nu[s] зависит от chi и может не быть максимальным иногда):
+V(chi) = 0 + 1/2 c^T . (K^T . M* . K)^(-1) . c.
+
+Попробуем и так, и эдак.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Так: просто методом Лагранжа
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+Выразим lambda и nu через chi и c.
+Потом зададим осмысленные значения c.
+Потом попытаемся понять, какие chi подходят под это дело.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: subsect start ]
+util
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: input   start ] */
+wheel_ind(s) := floor((s - 1) / params@N_wheels) + 1;
+pers(wheel_ind(s), s);
+roller_ind(s) := mod((s - 1), (params@n_rollers - 1)) + 1 /*skip the one in contact*/ + 1 /*make indexing go from 1*/;
+pers(roller_ind(s), s);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: subsect start ]
+real stuff
+   [wxMaxima: subsect end   ] */
+
+/* [wxMaxima: comment start ]
+из dW/dnu[s] и вида линейных интегралов:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+lmbd(s, c) := -c[s]/B;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+nu_s(s, c) := -lambda(s, c) - sin(chi[wheel_ind(s)] + kappa[roller_ind(s)]) / Lambda * nu[3];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+поскольку линейные интегралы - интегралы, то dW/dnu = dL*/dnu
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: comment start ]
+... хрен его знает, что там, и похоже, через эфф. пот. проще будет.
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: section start ]
+Эдак: через эфф. потенциал, как будто это интегралы Нётер
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: comment start ]
+нужна матрица интегралов K(chi):
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+K : transpose(genmatrix(lambda([i,j], diff(diff(L_star, nu[i + 3]), nu[j])), len_nu - 3, len_nu));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+сам потенциал:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+c : pers(c[s], s);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_V_pot_noinvert : transpose(K) . _M_star_inverse . K $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+матрица диагональна!
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+for idxs in lreduce(append, pers(pers([i, j], j), i)) do if not(_V_pot_noinvert[idxs[1]][idxs[2]] = 0) then (print(idxs), print(""), print(_V_pot_noinvert[idxs[1]][idxs[2]]));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_V_pot : genmatrix(lambda([i,j], if _V_pot_noinvert[i][j] = 0 then 0 else 1/_V_pot_noinvert[i][j] ), len_nu - 3, len_nu - 3) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_V_pot . _V_pot_noinvert $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* don't print Vpot - Maxima may hang */
+Vpot : 1/2 * c . _V_pot . transpose(c) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dvpot1_of_chi_at_c_ones: diff(Vpot, chi[3]) where append(
+    real(params),
+    perwheel(chi[i] = chi/i, i),
+    pers(c[s] = cs3(1, perwheel(0, dontmatter))[s], s) /* nus = 0 => cs = nu3*mult */
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp(chi_val) := float(dvpot1_of_chi_at_c_ones where [ chi = chi_val ]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+makelist(tmp(chi_val), chi_val, -%pi/4, %pi/4, 0.1);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+константы интегралов:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+integrals : pers3(diff(L_star, nu[s]) where [ expand ], s);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+cs(nu0, chi0) := integrals where append(real(params), pernu(nu[i] = nu0[i], i), perwheel(chi[i] = chi0[i], i));
+cs3(nu30, chi0) := cs(append([0, 0], [ nu30 ], pers(0, s)), chi0);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+cs3(0, perwheel(0, i));
+cs3(1, perwheel(0, i));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+потенциал на уровнях:
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+VpotK(nu30, chi0) := block([consts], consts : cs3(nu30, chi0), Vpot where pers(c[s] = consts[s], s));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+VpotK_chi_eq_0_zero(nu30, chi_var) := VpotK(nu30, perwheel(0, i)) where append(
+    real(params),
+    perwheel(chi[i] = chi_var, i)
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+map(print, makelist(float(VpotK_chi_eq_0_zero(1, chee)), chee, -%pi/4, %pi/4, 0.1)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+map(print, makelist(float(VpotK_chi_eq_0_zero(2, chee)), chee, -%pi/4, %pi/4, 0.1)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: comment start ]
+псевдоскорости от chi на уровнях
+матрица у них - диагональ по s, а над ней - три строки нулей !!
+значит, скорости экипажа - нули...
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+_nus_lev_mat : _M_star_inverse . K . transpose(_V_pot_noinvert) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+for idxs in lreduce(append, pernu(pers([i, j], j), i)) do if not(_nus_lev_mat[idxs[1]][idxs[2]] = 0) then (print(idxs), print(""), print(_nus_lev_mat[idxs[1]][idxs[2]]));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+nus_lev(c) := float(_nus_lev_mat . c);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+float(_nus_lev_mat where append(
+    real(params),
+    perwheel(chi[i] = -%pi/8, i)
+));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Прочие изыскания
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+_M_star;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+L_star;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+integrals : pers3(diff(L_star, nu[s]) where [ expand ], s);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+nus_from_integrals : pers3(nu[s] = (-diff(L_star, nu[s]) where [ expand, B = 1 ]) + nu[s] + c[s]/B, s);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+lagr_mult_fun(non_growing_C2_fun, integrals_C2, multiple_symbol, const_symbol) := 
+    non_growing_C2_fun
+    + sum(
+        multiple_symbol[multiple_index] * (integrals_C2[multiple_index] - const_symbol[multiple_index]),
+        multiple_index, 1, length(integrals_C2)
+    );
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+W : lagr_mult_fun(L_star, integrals, lambda, c);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+var_and_crit_eq_pairs : append(
+    pernu([nu[i], diff(W, nu[i])], i),
+    perwheel([chi[i], diff(W, chi[i])], i),
+    pers([lambda[s], diff(W, lambda[s])], s)
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+for eq in var_and_crit_eq_pairs do (print(eq[1]), print(""), print(eq[2] = 0), print(""));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+diff(L_star, chi[2]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+nu123_eqs : [ (_M_star . nu)[1][1], (_M_star . nu)[2][1], (_M_star . nu)[3][1] ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+nu123_eqs_with_ints : nu123_eqs where nus_from_integrals;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_mu_star_123 : genmatrix(lambda([i,j], diff(nu123_eqs_with_ints[i], nu[j])), 3, 3);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_mu_star_123_inverse : invert(_mu_star_123);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+sumlist(perfree(sin(chi[i] + kappa[j])^2, i, j)) where append(
+    real(params),
+    [ trigsimp ]
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+invert(_mu_star_123 where append(
+    real(params),
+    perwheel(chi[i] = chi, i),
+    [ trigsimp, ratsimp ]
+));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+diff(_M_star, chi[2]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+diff(L_star, nu[3]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+((_M_star . nu)[3][1] - diff(L_star, nu[3])) where [ expand ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: title   start ]
+BELOW GO RANDOM INVESTIGATIONS
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: input   start ] */
+constraints;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+derivabbrev:false;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+(diff(L_star, nu[6]) = 0) where [
+    nu[3] = Lambda * diff(theta, t),
+    nu[6] = diff(phi[1,4], t),
+    expand,
+    B = 1,
+    diff(theta, t) = d(theta),
+    diff(phi[1,4], t) = d(phi[1,4])
+];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+sin(kappa[4] + chi[1])*phi[1,4] + theta = const;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+diff(sin(kappa[4] + chi[1])*phi[1,4] + theta = const, t);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+derivabbrev:true;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+makelist(poiz(_P[1], _P[i]), i, 4, len_nu);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+makelist(poiz(L_star, _P[i]), i, 4, len_nu);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+rest(_M_star . nu, 3) where real(params);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+ints(nu3, nuss, chis) := float(rest(_M_star . nu, 3) where append(
+    real(params),
+    [ nu[3] = nu3 ],
+    pers3(nu[S] = nuss[S-3], S),
+    perwheel(chi[I] = chis[I], I)
+));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+ints(1, [2,3,4,5,6,7,8,9,10], [1,2,3]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_ints(p) := block(
+    [
+        c: coords(p),
+        nu3, nuss, chis
+    ],
+    
+    nu3: extract_nu(3, c),
+    nuss: extract_free_nus(c),
+    chis: extract_chis(c),
+
+    [time(p), ints(
+        nu3, 
+        nuss,
+        chis
+    )]
+
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+load_sol("/Users/data/Yandex.Disk/work/aspa/zobova/maxima/gcp_sol/_ready/sqrt_with_4_rollers_t_100_self_rot/sol.lisp", "sol") $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+matrix_series: makelist(_ints(sol[index]), index, 1, 3000) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+vector_series: map(
+    [pair] -> [first(pair), makelist(scd, scd, transpose(second(pair))[1])],
+    matrix_series
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+time_series: makelist(
+    makelist(
+        [ pair[1], pair[2][i] ], pair, vector_series
+    ),
+    i, 1, length(vector_series[1][2])
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+maxima_tempdir: "~";
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+plot2d(
+    map([ser] -> [discrete, ser], time_series)
+);
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */
