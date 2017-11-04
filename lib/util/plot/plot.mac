@@ -232,12 +232,12 @@ init() := block(
 					post_processed_series_of_2d_points
 				),
 				log@info("Done removing absciss."),
-				log@info("Extracting time points from first series...", first(post_processed_series_of_2d_points)),
+				log@info("Extracting time points from first series..."),
 				post_processed_time_points: map(
 					first,
 					first(post_processed_series_of_2d_points)
 				),
-				log@info("Done extracting time points from first series.", post_processed_time_points),
+				log@info("Done extracting time points from first series."),
 				log@info("Zipping ordinates..."),
 				/* [ [ay1, by1, cy1, ...], [ay2, by2, cy2, ...], ... ] */
 				zipped_series_of_ordinates: makelist(
@@ -250,7 +250,7 @@ init() := block(
 					),
 					pt_idx, 1, length(first(post_processed_series_of_ordinates))
 				),
-				log@info("Done zipping ordinates.", zipped_series_of_ordinates),
+				log@info("Done zipping ordinates."),
 				names_of_ordinates : cons("t", makelist(var@name, var, group@vars)),
 				cons(names_of_ordinates, zipped_series_of_ordinates)
 			),
@@ -281,7 +281,7 @@ init() := block(
 	)),
 
 	dump_list_of_lists_to_file : buildq([log], lambda([list_of_lists, file],
-		log@info("Dumping things to file ", file, list_of_lists),
+		log@info("Dumping things to file ", file),
 		linel_bak : linel,
 		linel : 100500,
 		with_stdout(
