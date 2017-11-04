@@ -3,6 +3,8 @@
 # run this on a fresh env to get everything for sumulation
 # Maxima is being built from source with SBCL - the fast LISP.
 
+sudo apt-get --update
+
 sudo apt-get --yes install sbcl
 sudo apt-get --yes install make
 sudo apt-get --yes install autotools-dev
