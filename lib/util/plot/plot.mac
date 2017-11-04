@@ -12,7 +12,9 @@ init() := block(
 			list,
 			windows,
 			console,
-			files_in
+			files_in,
+			dumping_points_to_file_in,
+			these
 		)
 	),
 	plot : new(Plot),
@@ -119,15 +121,47 @@ init() := block(
 		)
 	)))),
 
+	/* dump points to file */
+	plot@dumping_points_to_file_in : lambda([target_dir],
+		target_file : concat(target_dir, "/sol.dat"),
+		new(Output(
+			"dumping points to a file",
+			buildq([log, target_dir],
+				lambda([sol, plot_groups],
+					dump_points_for_all_groups(
+						"Dumping points to a file...", 
+						target_file,
+						plot_groups
+					)
+				)
+			)
+		))
+	),
+
+	/* do several types of plot */
+	plot@these : lambda([types_of_plot], new(Output(
+		"doing several plots...",
+		buildq([types_of_plot],
+			lambda([sol, plot_groups],
+				for type_of_plot in types_of_plot do (
+					log@info("Plotting by", type_of_plot@name),
+					type_of_plot@show(sol, plot_groups)
+				)
+			)
+		)
+	))),
+
 	/*
 		FUNTIONS THAT DO THE ACTUAL PLOTTING
 	*/
+
+	/* one by one */
 
 	plot_groups_separately(msg, term, plot_groups) := block([teh_term],
 		log@info(msg),
 		for group in plot_groups do (
 			teh_term: term(group),
-			plot_to_terminal(
+			plot_one_group_to_terminal(
 				sol,
 				teh_term,
 				group
@@ -135,7 +169,7 @@ init() := block(
 		)
 	),
 
-	plot_to_terminal : buildq([log], lambda([sol, terminal, group],
+	plot_one_group_to_terminal : buildq([log], lambda([sol, terminal, group],
 		log@debug(terminal[2], group@vars),
 		log@info("Plotting", group@name, ":", rreduce(sconcat, rest(rreduce(append, makelist([var@name, ", "], var, group@vars)), -1))),
 		log@info("Calculating data points..."),
@@ -162,6 +196,108 @@ init() := block(
 			[ ylabel, group@xy_labels[2] ]
 		),
 		log@info("Done plotting.")
+	)),
+
+	/* all together */
+
+	dump_points_for_all_groups(msg, file, plot_groups) := block([teh_term, zipped_ordinates],
+		log@info(msg),
+		zipped_ordinates : post_process_all_groups(sol, plot_groups),
+		dump_list_of_lists_to_file(
+			zipped_ordinates,
+			file
+		)
+	),
+
+	post_process_all_groups : buildq([log], lambda([sol, groups],
+		groups : sort(groups, [a, b] -> (orderlessp(a@name, b@name))),
+		log@info("Group names: ", map([group] -> (group@name), groups)),
+		post_processed_zipped_ordinates_of_groups : map(
+			[group] -> (
+				log@info("Preparing ", group@name, ":", rreduce(sconcat, rest(rreduce(append, makelist([var@name, ", "], var, group@vars)), -1))),
+				log@info("Calculating data points..."),
+				series_of_2d_points: makelist(
+					makelist(var@get(p), p, sol),
+					var, group@vars
+				),
+				log@info("Done calculating data points."),
+				log@info("Post-processing..."),
+				/* [ [[ax1,ay1], [ax2,ay2], ...], ... ] */
+				post_processed_series_of_2d_points: group@post_process(series_of_2d_points),
+				log@info("Done post-processing."),
+				log@info("Removing absciss..."),
+				/* [ [ay1, ay2, ...], ... ] */
+				post_processed_series_of_ordinates: map(
+					[series] -> ( map(second, series) ),
+					post_processed_series_of_2d_points
+				),
+				log@info("Done removing absciss."),
+				log@info("Extracting time points from first series...", first(post_processed_series_of_2d_points)),
+				post_processed_time_points: map(
+					first,
+					first(post_processed_series_of_2d_points)
+				),
+				log@info("Done extracting time points from first series.", post_processed_time_points),
+				log@info("Zipping ordinates..."),
+				/* [ [ay1, by1, cy1, ...], [ay2, by2, cy2, ...], ... ] */
+				zipped_series_of_ordinates: makelist(
+					cons(
+						post_processed_time_points[pt_idx],
+						makelist(
+							post_processed_series_of_ordinates[series_idx][pt_idx],
+							series_idx, 1, length(post_processed_series_of_ordinates)
+						)
+					),
+					pt_idx, 1, length(first(post_processed_series_of_ordinates))
+				),
+				log@info("Done zipping ordinates.", zipped_series_of_ordinates),
+				names_of_ordinates : cons("t", makelist(var@name, var, group@vars)),
+				cons(names_of_ordinates, zipped_series_of_ordinates)
+			),
+			groups
+		),
+		log@info("Received something of sizes: ",
+			length(post_processed_zipped_ordinates_of_groups),
+			length(first(post_processed_zipped_ordinates_of_groups)),
+			length(first(first(post_processed_zipped_ordinates_of_groups)))
+		),
+		log@info("Zipping ordinates of all groups..."),
+		zipped_ordinates_of_all_groups : makelist(
+			lreduce(
+				append, 
+				makelist(
+					if group_idx = 1 then (
+						post_processed_zipped_ordinates_of_groups[group_idx][pt_idx]
+					) else (
+						rest(post_processed_zipped_ordinates_of_groups[group_idx][pt_idx], 1)
+					),
+					group_idx, 1, length(post_processed_zipped_ordinates_of_groups)
+				)
+			),
+			pt_idx, 1, length(first(post_processed_zipped_ordinates_of_groups))
+		),
+		log@info("Done zipping ordinates of all groups."),
+		zipped_ordinates_of_all_groups
+	)),
+
+	dump_list_of_lists_to_file : buildq([log], lambda([list_of_lists, file],
+		log@info("Dumping things to file ", file, list_of_lists),
+		linel_bak : linel,
+		linel : 100500,
+		with_stdout(
+			file,
+			for string_line in makelist(
+				rreduce(
+					sconcat,
+					flatten(
+						makelist([float(elem), tab], elem, line)
+					)
+				),
+				line, list_of_lists
+			) do print(string_line)
+		),
+		linel : linel_bak,
+		log@info("Done dumping.")
 	)),
 
 	/* POSTAMBLES */

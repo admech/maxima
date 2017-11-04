@@ -62,7 +62,13 @@ run(
 			get_global("batches"),
 			with_switcher(omni_vehicle@switcher)
 		),
+		/*
 		plot@files_in(out_dir)
+		*/
+		plot@these([
+			plot@dumping_points_to_file_in(out_dir),
+			plot@files_in(out_dir)
+		])
 	))
 ) $
 

@@ -56,7 +56,7 @@ use_default_simulation_parameters() $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-use_simulation_parameters_from_dir("/Users/data/Yandex.Disk/work/aspa/zobova/maxima/gcp_sol/_ready/sqrt_with_4_rollers_t_100_self_rot") $
+use_simulation_parameters_from_dir("/Users/data/Yandex.Disk/work/aspa/zobova/maxima/gcp_sol/simple_with_4_rollers_t_100_diagonal_lo_def") $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -273,6 +273,33 @@ float(_nus_lev_mat where append(
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: section start ]
+Просто явно
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+_K : submatrix(1, 2, 3, _M_star);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+free_nus_from_int : solve(transpose(_K . nu - transpose(pers(c[s], s)))[1], pers3(nu[s], s))[1];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+int_of_en : 1/2 * transpose(nu) . _M_star . nu $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+solve(diff(int_of_en where free_nus_from_int, nu[3]) where [ nu[1] = 0, nu[2] = 0 ], nu[3]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+solve(
+    perbignu(diff(int_of_en where free_nus_from_int, nu[i]), i),
+    perbignu(nu[i], i)
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
 Прочие изыскания
    [wxMaxima: section end   ] */
 
@@ -445,7 +472,7 @@ _ints(p) := block(
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-load_sol("/Users/data/Yandex.Disk/work/aspa/zobova/maxima/gcp_sol/_ready/sqrt_with_4_rollers_t_100_self_rot/sol.lisp", "sol") $
+load_sol("/Users/data/Yandex.Disk/work/aspa/zobova/maxima/gcp_sol/simple_with_4_rollers_t_100_diagonal_lo_def/sol.lisp", "sol") $
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -473,9 +500,17 @@ maxima_tempdir: "~";
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
+plotter : plot@windows $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
 plot2d(
     map([ser] -> [discrete, ser], time_series)
 );
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+show(sol, "all_rollers_speeds[1]") $
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */

@@ -29,7 +29,7 @@ init() := block( /* module declaration */
 				save_sol(sol, "sol"),
 				log@info("Done saving solution."),
 
-				log@info("Plotting..."),
+				log@info("Plotting by", P@plotter@name),
 				P@plotter@show(sol, model@plot_groups),
 				log@info("Done plotting."),
 				sol
