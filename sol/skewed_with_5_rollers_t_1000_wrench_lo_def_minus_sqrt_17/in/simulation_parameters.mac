@@ -14,3 +14,4 @@ M_hub     = 0.15
 m_roller  = 0.05
 R_platf   = 0.15
 M_platf   = 1
+how_to_switch = "apply_impact_theory"

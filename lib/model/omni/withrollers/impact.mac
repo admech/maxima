@@ -44,6 +44,7 @@ init() := block(
     , Dphis_old, Dphis_old_shifted, Dphis_old_shifted_contacting_first, Dqs_old_shifted
     , matrix_sym, matrix, nus_new, real_params_and_new_chis, __eqs
     , impact_sol, impact_result
+    , __T_old_nu, __T_old_Dq, __T_new
     ],
     imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
     imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
@@ -108,6 +109,27 @@ init() := block(
 
     imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
     imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
+    imlog@info("DELTA KIN EN"),
+    __T_old_Dq : (1/2 * Dqs_old_shifted . _M . transpose(Dqs_old_shifted)) where real_params_and_new_chis,
+    imlog@info("OLD Dq =", float(__T_old_Dq)),
+    __T_old_nu : (1/2 * nus_old . transpose(_V) . _M . _V . transpose(nus_old)) where (
+      append(
+        real(params), 
+        actual(perwheel(chi[i], i), chis_new),
+        actual([theta], [xytheta[3]])
+      )
+    ),
+    imlog@info("OLD nu =", float(__T_old_nu)),
+    __T_new : (1/2 * nus_new . transpose(_V) . _M . _V . transpose(nus_new)) where real_params_and_new_chis,
+    imlog@info("NEW =", float(__T_new)),
+    imlog@info("NEW - OLD Dq =", float(__T_new - __T_old_Dq)),
+    imlog@info("NEW - OLD nu =", float(__T_new - __T_old_nu)),
+    imlog@info("KIN EN LOST NUS =",
+      float((1/2 * (nus_new - nus_old) . transpose(_V) . _M . _V . transpose((nus_new - nus_old))) where real_params_and_new_chis)
+    ),
+    imlog@info("KIN EN LOST Dqs =",
+      float((1/2 * ((_V . nus_new) - Dqs_old_shifted) . _M . transpose(((_V . nus_new) - Dqs_old_shifted))) where real_params_and_new_chis)
+    ),
     imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
     imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
     impact_result

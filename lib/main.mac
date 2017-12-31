@@ -7,7 +7,7 @@ print("______________________________") $
 print("______________________________") $
 print("") $
 
-sol_dir : "impact" $
+sol_dir : "smoke" $
 
 batchload("util/lang/extensions.mac") $
 batchload("util/infra/env.mac") $
@@ -61,7 +61,7 @@ DEFAULT_SIMULATION_PARAMETERS : [
 	*/
 	[ " how_to_switch ", " \"apply_impact_theory\"         " ],
 
-	[ " batches       ", " makelist(0.1*i, i, 1, 100)      " ],
+	[ " batches       ", " makelist(0.1*i, i, 1, 2)        " ],
 	[ " step          ", " 0.01                            " ],
 
 	[ " nu_0          ", " [ 1, 0, 1 ]                     " ],
@@ -79,9 +79,9 @@ DEFAULT_SIMULATION_PARAMETERS : [
 
 log@info("Loading model...") $
 /*
-load_simulation_parameters_from_file() $
-*/
 use_default_simulation_parameters() $
+*/
+load_simulation_parameters_from_file() $
 eval_string(concat("require@", get_global("model"), "()")) $
 log@info("Done loading model.") $
 
