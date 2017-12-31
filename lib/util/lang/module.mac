@@ -53,6 +53,7 @@ defstruct(
 		omni_with_rollers_equations  = ([] -> load_with(import,    "model/omni/withrollers/equations.mac"  )),
 		omni_with_rollers_cases      = ([] -> load_with(import,    "model/omni/withrollers/cases.mac"      )),
 		omni_with_rollers_shift      = ([] -> load_with(import,    "model/omni/withrollers/shift.mac"      )),
+		omni_with_rollers_impact     = ([] -> load_with(import,    "model/omni/withrollers/impact.mac"     )),
 		omni_with_rollers_plotgroups = ([] -> load_with(import,    "model/omni/withrollers/plotgroups.mac" )),
 		omni_with_rollers_wheelutil  = ([] -> load_with(batchload, "model/omni/withrollers/wheelutil.mac"  )),
 

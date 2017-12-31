@@ -1,0 +1,98 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: input   start ] */
+kill(all) ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+n : 4 ;
+
+chi_max_geom : %pi/n ;
+chi_max : %pi/(n + 1) ;
+l : 1 ;
+r : l*cos(chi_max_geom) ;
+
+M : 100 ;
+J : 100 ;
+I : 100/2 ;
+
+m : 0.1 ;
+B : (0.1*(l - r)^2)/2 ;
+A : 2*B ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+chi : chi_max ;
+nu10 : 1 ;
+nu20 : 0 ;
+nu30 : 0 ;
+Dphi0 : 10 ;
+Dphi0_old : nu20/rho, numer ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dchi0 : -nu10/l , numer;
+rho : l*cos(chi) - r, numer ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+a : M + m $
+b1 : a * nu10 $
+h : -m*r*sin(chi) $
+b2 : a * nu20 + h*nu30 $
+bbb : B + m*r^2 $
+c : bbb/rho*sin(chi) $
+d : I + bbb*sin(chi)^2 + A*cos(chi)^2 $
+b3 : d*nu30 + c*Dphi0 $
+e : -(J + A + m*r^2)/l $
+b4 : e*nu10 $
+f : B/rho $
+g : (I + bbb)*sin(chi) $
+b5 : g*nu30 + f*Dphi0 $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_A : float(matrix(
+    [ a, 0, 0, 1, 0    ],
+    [ 0, a, h, 0, 1    ],
+    [ 0, c, d, 0, 0    ],
+    [ e, 0, 0, l, 0    ],
+    [ 0, f, g, 0, -rho ]
+));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_b : float([ b1, b2, b3, b4, b5 ]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp : float(invert(_A) . _b) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+nu1 : tmp[1][1];
+nu2 : tmp[2][1];
+nu3 : tmp[3][1];
+Dchi : -nu1/l, numer ;
+Dphi : nu2/rho, numer ;
+Dphi0 ;
+Dphi0_old ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+T0 : float(1/2*M*(nu10^2 + nu20^2) + 1/2*J*Dchi0^2 + 1/2*I*nu30^2 + 1/2*m*((r*Dchi0*cos(chi) + nu10)^2 + 
+(r*Dchi0*sin(chi))^2 + (nu20 - r*nu30*sin(chi))^2) + 1/2*(A*Dchi0^2 + B*(nu30*sin(chi) + Dphi0)^2 + A*(nu30*cos(chi))^2));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+T : float(1/2*M*(nu1^2 + nu2^2) + 1/2*J*Dchi^2 + 1/2*I*nu3^2 + 1/2*m*((r*Dchi*cos(chi) + nu1)^2 + 
+(r*Dchi*sin(chi))^2 + (nu2 - r*nu3*sin(chi))^2) + 1/2*(A*Dchi^2 + B*(nu3*sin(chi) + Dphi)^2 + A*(nu3*cos(chi))^2));
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

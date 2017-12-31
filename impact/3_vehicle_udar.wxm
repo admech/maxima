@@ -1,0 +1,281 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: input   start ] */
+kill(all);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+NUM : true;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+if NUM then (
+    kappa : [ 0, %pi/4, %pi/2, 3*%pi/4 ],
+    alpha : [ 0, 2*%pi/3, 4*%pi/3 ],
+    
+    M : 1,
+    I_S : 1,
+    J : 0.3,
+    B : 0.05,
+    Lambda : 1,
+    R : 1,
+    l : 0.3,
+    r : 0.3 * cos(%pi/3),
+    
+    chi1 : %pi/4,
+    chi2 : %pi/4,
+    chi3 : %pi/4,
+    theta : %pi/6,
+    
+    Dq1230 : [ 1, 0, 1 ],
+
+    Dchi0 :
+        [ R/l * [ sin(alpha[1]), -cos(alpha[1]), -1/Lambda ] . Dq1230
+        , R/l * [ sin(alpha[2]), -cos(alpha[2]), -1/Lambda ] . Dq1230
+        , R/l * [ sin(alpha[3]), -cos(alpha[3]), -1/Lambda ] . Dq1230
+        ],
+
+    Dphi0 :
+        [ R/(l*cos(chi1) - r) * [ cos(alpha[1]), sin(alpha[1]), 0 ] . Dq1230
+        , R/(l*cos(chi2) - r) * [ cos(alpha[2]), sin(alpha[2]), 0 ] . Dq1230
+        , R/(l*cos(chi3) - r) * [ cos(alpha[3]), sin(alpha[3]), 0 ] . Dq1230
+        ],
+   
+    Dq0 : append
+        ( Dq1230
+        , Dchi0
+        , [ 0, Dphi0[2], Dphi0[3] ]
+        , [ if Dchi0[1] > 0 then Dphi0[1] else 0, 0, if Dchi0[1] < 0 then Dphi0[1] else 0
+          , if Dchi0[2] > 0 then Dphi0[2] else 0, 0, if Dchi0[2] < 0 then Dphi0[2] else 0
+          , if Dchi0[3] > 0 then Dphi0[3] else 0, 0, if Dchi0[3] < 0 then Dphi0[3] else 0
+          ]
+        )
+) $
+float(Dq0);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+q : [
+    x, y, theta,
+    chi1, chi2, chi3,
+    phi1, phi2, phi3,
+
+    phis1, phis2, phis3,
+    phis4, phis5, phis6,
+    phis7, phis8, phis9
+];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+q123 : [ x, y, theta ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dq123 : [ Dx, Dy, Dtheta ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dchi : [ Dchi1,  Dchi2,  Dchi3 ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dphi : [ Dphi1,  Dphi2,  Dphi3 ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dq : append
+    ( Dq123
+    , Dchi
+    , Dphi
+    , [ Dphis1, Dphis2, Dphis3
+      , Dphis4, Dphis5, Dphis6
+      , Dphis7, Dphis8, Dphis9
+      ]
+    );
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+chi(i) := [ chi1, chi2, chi3 ][i];
+rho(i) := l*cos(chi(i)) - r;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+the_row : B * append(
+    [ sin(chi1), sin(chi2), sin(chi3) ],
+    [ sin(chi1 + kappa[2]), sin(chi1 + kappa[3]), sin(chi1 + kappa[4])
+    , sin(chi2 + kappa[2]), sin(chi2 + kappa[3]), sin(chi2 + kappa[4])
+    , sin(chi3 + kappa[2]), sin(chi3 + kappa[3]), sin(chi3 + kappa[4])
+    ]
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_M : genmatrix(lambda([i, j],
+    if i = j then
+        if i < 3 then M
+        else if i = 3 then I_S
+        else if i < 3 + 3 + 1 then J
+        else B
+    else if (i = 3 and j > 3 + 3) or (j = 3 and i > 3 + 3) then the_row[max(i, j) - 6]
+    else 0
+), length(q), length(q));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_V_nu123 : matrix(
+    [ R*cos(theta), -R*sin(theta), 0        ],
+    [ R*sin(theta), R*cos(theta),  0        ],
+    [ 0,            0,             1/Lambda ]
+) ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_V_chi : R * matrix(
+    1/l * [ sin(alpha[1]), -cos(alpha[1]), -1/Lambda ],
+    1/l * [ sin(alpha[2]), -cos(alpha[2]), -1/Lambda ],
+    1/l * [ sin(alpha[3]), -cos(alpha[3]), -1/Lambda ]
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_V_phi : R * matrix(
+    1/rho(1) * [ cos(alpha[1]), sin(alpha[1]), 0 ],
+    1/rho(2) * [ cos(alpha[2]), sin(alpha[2]), 0 ],
+    1/rho(3) * [ cos(alpha[3]), sin(alpha[3]), 0 ]
+) ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+theta(i) := theta + alpha[i];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Q1 : F1x + F2x + F3x;
+Q2 : F1y + F2y + F3y;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Q3 : R *
+    ( -sin(theta(1))*F1x + cos(theta(1))*F1y
+    + -sin(theta(2))*F2x + cos(theta(2))*F2y
+    + -sin(theta(3))*F3x + cos(theta(3))*F3y
+    );
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Qchi : l *
+    [ -sin(theta(1))*F1x + cos(theta(1))*F1y
+    , -sin(theta(2))*F2x + cos(theta(2))*F2y
+    , -sin(theta(3))*F3x + cos(theta(3))*F3y
+    ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Qphi : -
+    [ rho(1)*cos(theta(1))*F1x + rho(1)*sin(theta(1))*F1y
+    , rho(2)*cos(theta(2))*F2x + rho(2)*sin(theta(2))*F2y
+    , rho(3)*cos(theta(3))*F3x + rho(3)*sin(theta(3))*F3y
+    ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Q : append
+    ( [ Q1, Q2, Q3 ]
+    , Qchi
+    , Qphi
+    , makelist(0, i, 1, 3 * (4 - 1))
+    );
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+eqs : append(
+    transpose( _M . (Dq - Dq0) - transpose(Q) )[1],
+    transpose( transpose(Dchi) - _V_chi . invert(_V_nu123) . Dq123 )[1],
+    transpose( transpose(Dphi) - _V_phi . invert(_V_nu123) . Dq123 )[1]
+) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+eqs;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+F : [ F1x, F1y, F2x, F2y, F3x, F3y ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+u : append(Dq, F);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+if NUM then ratprint : false;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+if NUM then sol : solve(eqs, u)[1] ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dq_val : float(map(second, makelist(sol[i], i, 1, 3 + 3 * (4 + 1))));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+T : float(1/2 * Dq_val . _M . transpose(Dq_val));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+T0 : float(1/2 * Dq0 . _M . transpose(Dq0));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+T - T0;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dq_delta : float(Dq_val - Dq0);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+T_lost : -float(1/2 * Dq_delta . _M . transpose(Dq_delta));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_V : float(apply(matrix, append(
+    makelist(append(_V_nu123[i], makelist(0, j, 1, 3*(4-1))), i, 1, length(_V_nu123)),
+    makelist(append(_V_chi[i], makelist(0, j, 1, 3*(4-1))), i, 1, length(_V_chi)),
+    makelist(append(_V_phi[i], makelist(0, j, 1, 3*(4-1))), i, 1, length(_V_phi)),
+    makelist(append([0, 0, 0], makelist(if i = j then 1 else 0, j, 1, 3*(4-1))), i, 1, 3*(4-1))
+)));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+float(Dq0);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+norm(vec) := sqrt(sum(vec[i]^2, i, 1, length(vec))) $
+dot(a, b) := a.b / norm(a) / norm(b) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp : transpose(_V) $
+nu : transpose(makelist(
+    float(dot(Dq0, tmp[i])),
+    i, 1, length(tmp)
+)) $
+kill(tmp) $
+Dq1_proj : _V . nu $
+print(nu, float(transpose(Dq0)), transpose(Dq_val), Dq1_proj) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dot(Dq_delta, Dq_val);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+float(Dq_delta . _M . Dq_val);
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

@@ -7,6 +7,7 @@ require@omni_with_rollers_symbols() $
 require@omni_with_rollers_equations() $
 require@omni_with_rollers_cases() $
 require@omni_with_rollers_shift() $
+require@omni_with_rollers_impact() $
 require@omni_with_rollers_plotgroups() $
 
 init() := block(
@@ -34,7 +35,7 @@ init() := block(
 	),
 
 	renumber_rollers(coords) := block(
-		vlog@info("switching"),
+		vlog@info("switching by renumbering rollers and complying with constraints for free"),
 		append(
 			extract_big_nus(coords),
 			extract_free_nus(coords) where [ shift_vars(rollers(), coords) ],
@@ -44,9 +45,14 @@ init() := block(
 		)
 	),
 
+	how_to_switch_function(how_to_switch) :=
+		if how_to_switch = "apply_impact_theory" then apply_impact_theory
+		else if how_to_switch = "renumber_rollers" then renumber_rollers
+		else error("unsupported way to switch rollers, use apply_impact_theory or renumber_rollers", how_to_switch),
+
 	/* DECLARING THE MODEL: RHSS, REAL PARAMS AND PLOT VARS */
 
-	OmniVehicle(params, initials, domain) := new(SwitchingModel(
+	OmniVehicle(params, initials, domain, how_to_switch) := new(SwitchingModel(
 		sconcat("Omni vehicle with rollers (params: ", params, ", initials: ", initials, ", domain: ", domain),
 		new(RKAdapter(
 			append( _rhs_nu,      _rhs_chi_switching,   _rhs_phi,                          _rhs_coords     ) where append( real(params), solvable_vars() ),
@@ -55,7 +61,7 @@ init() := block(
 			domain
 		)),
 		new(Switcher(
-			renumber_rollers,
+			how_to_switch_function(how_to_switch),
 			append( _rhs_nu,      _rhs_chi,             _rhs_phi,                          _rhs_coords     ) where append( real(params), solvable_vars() )
 		)),
 		append(

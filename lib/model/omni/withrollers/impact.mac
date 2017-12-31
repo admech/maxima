@@ -1,0 +1,119 @@
+require@logging() $
+require@omni_with_rollers_wheelutil() $
+require@omni_with_rollers_params() $
+require@omni_with_rollers_symbols() $
+
+init() := block(
+
+  imlog : get_logger("impact", log_level_info),
+
+  /* Q = _K . F */
+  F : concatlists(perwheel([ Fx[i], Fy[i] ], i)),
+  _K : apply(matrix, append(
+      map(concatlists,
+        [     perwheel([ 1,                       0                     ], i)
+        ,     perwheel([ 0,                       1                     ], i)
+        , R * perwheel([ -sin(theta + alpha[i]),  cos(theta + alpha[i]) ], i)
+        ]
+      )
+      , l * perwheel(makelist(
+          /* [ -sin, cos, 0,    0,   0,    0   ] */
+          /* [ 0,    0,   -sin, cos, 0,    0   ] */
+          /* [ 0,    0,   0,    0,   -sin, cos ] */
+          if      j = 2*i - 1 then -sin(theta + alpha[i])
+          else if j = 2*i     then  cos(theta + alpha[i])
+          else 0,
+        j, 1, length(F)), i)
+      , l * perwheel(makelist(
+          -rho(i) * (
+            if      j = 2*i - 1 then cos(theta + alpha[i])
+            else if j = 2*i     then sin(theta + alpha[i])
+            else 0
+          ),
+        j, 1, length(F)), i)
+      , pers(makelist(0, i, 1, length(F)), s)
+    )
+  ),
+
+  apply_impact_theory(coords) := block(
+    [ nus_old : extract_nus(coords)
+    , chis_old : extract_chis(coords)
+    , phis_old : extract_phis(coords)
+    , xytheta : extract_coords(coords)
+    , chis_new, renumber_phis, phis_new, Dqs_old, actual
+    , Dphis_old, Dphis_old_shifted, Dphis_old_shifted_contacting_first, Dqs_old_shifted
+    , matrix_sym, matrix, nus_new, real_params_and_new_chis, __eqs
+    , impact_sol, impact_result
+    ],
+    imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
+    imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
+    imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
+    imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
+    imlog@info("switching by renumbering rollers and recalculating speeds as per impact theory"),
+    imlog@info("nus_old", nus_old),
+    imlog@info("chis_old", chis_old),
+    imlog@info("phis_old", phis_old),
+    imlog@info("xytheta", xytheta),
+    chis_new : adjust_chis(chis_old),
+    imlog@info("chis_new", chis_new),
+    actual : [ vars, vals ] -> ( makelist(vars[i] = vals[i], i, 1, length(vars)) ),
+    real_params_and_new_chis : append(
+      real(params), 
+      actual(perwheel(chi[i], i), chis_new),
+      actual([theta], [xytheta[3]])
+    ),
+    imlog@info("real_params_and_new_chis", real_params_and_new_chis),
+    Dqs_old : float(transpose(
+      (_V where real_params_and_new_chis) . nus_old
+    )[1]),
+    imlog@info("Dqs_old", Dqs_old),
+
+    renumber_phis : shift_vars(phis(), coords),
+    Dphis_old : extract_Dphis(Dqs_old),
+    imlog@info("Dphis_old", Dphis_old),
+    Dphis_old_shifted : renumber_phis(Dphis_old),
+    imlog@info("Dphis_old_shifted", Dphis_old_shifted),
+    Dphis_old_shifted_contacting_first : extract_and_put_contacting_first(Dphis_old_shifted),
+    imlog@info("Dphis_old_shifted_contacting_first", Dphis_old_shifted),
+    phis_new : renumber_phis(phis_old),
+    imlog@info("phis_new", phis_new),
+    Dqs_old_shifted : append(
+      extract_all_but_Dphis(Dqs_old),
+      Dphis_old_shifted_contacting_first
+    ),
+    imlog@info("Dqs_old_shifted", Dqs_old_shifted),
+
+    nus_new : pernu(nu_new[i], i),
+    matrix_sym : _M . _V . transpose(nus_new) - _K . transpose(F) - _M . transpose(Dqs_old_shifted),
+    matrix : matrix_sym where real_params_and_new_chis,
+    
+    imlog@info("matrix_sym", matrix_sym),
+    imlog@info("matrix", matrix),
+
+    __eqs : transpose(matrix)[1],
+    imlog@info("__eqs", __eqs),
+
+    impact_sol : float(bfloat(map(second, 
+      solve(__eqs, append(nus_new, F))[1]
+    ))),
+    imlog@info("impact_sol", impact_sol),
+
+    /* side effects suck */
+    just_to_remember_how_to_restore_the_shift : shift_vars(rollers(), coords)(Dphis_old),
+
+    nus_new : pernu(impact_sol[i], i),
+    imlog@info("nus_new", nus_new),
+    impact_result : append( nus_new, chis_new, phis_new, xytheta ),
+    imlog@info("impact_result", impact_result),
+
+    imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
+    imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
+    imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
+    imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
+    impact_result
+  )
+
+) $
+
+
+

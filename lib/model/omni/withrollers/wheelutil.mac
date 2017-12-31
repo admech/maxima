@@ -99,6 +99,24 @@ split_to_wheels(free_vars) := perwheel(extract_free_vars_for_wheel(free_vars, i)
 extract_all_vars_for_wheel(all_vars, i) := perroller(all_vars[index_of_roller(i, j)], j) $
 split_all_to_wheels(all_vars) := perwheel(extract_all_vars_for_wheel(all_vars, i), i) $
 
+/* Dqs = _V . nu = D( x, y, theta, chi_i, phi_i, phi_s ) */
+extract_Dphi_contact(i, Dqs) := Dqs[3 + params@N_wheels + i] $
+extract_Dphi_free(i, j, Dqs) := Dqs[3 + params@N_wheels + index_of_free_roller(i, j)] $
+extract_Dphis(Dqs) := concatlists(perwheel(
+  cons(
+    extract_Dphi_contact(i, Dqs),
+    per_free_roller(extract_Dphi_free(i, j, Dqs), j)
+  ), i
+)) $
+extract_all_but_Dphis(Dqs) := makelist(Dqs[i], i, 1, 3 + params@N_wheels) $
+extract_and_put_contacting_first(Dphis) := block(
+  [ Dphis_per_wheel, contacting_Dphis, free_Dphis ],
+  Dphis_per_wheel : split_all_to_wheels(Dphis),
+  contacting_Dphis : map(first, Dphis_per_wheel),
+  free_Dphis : map(lambda([lst], rest(lst, 1)), Dphis_per_wheel),
+  append(contacting_Dphis, concatlists(free_Dphis))
+) $
+
 defstruct(OmniPoint(
 	time_point,
 	big_nus,

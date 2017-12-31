@@ -1,0 +1,121 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: input   start ] */
+derivabbrev : true;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+n_rollers : 4;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+q : [ x, chi, phi1, phi2 ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+for var in q do depends(var, t);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dq : [ u, Omega, omega_1, omega_2 ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+for var in Dq do depends(var, t);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+u : diff(x, t);
+Omega : -diff(chi, t);
+omega(i) := diff(phi[i], t);
+*/
+print("did not denote derivs");
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+phi : [ phi1, phi2 ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+T() := T_wh() + T_rol(1) + T_rol(2);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+T_wh() := 1/2 * (M * u^2 + J * Omega^2);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+T_rol(i) := 1/2 * (m*v_c_sq(i) + B*omega(i)^2 + A*Omega^2);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+omega(i) := if i = 1 then omega_1 else omega_2;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+v_c_sq(i) := (u - R*cos(chi + kappa(i)) * (Omega))^2 + (R * sin(chi + kappa(i)) * (Omega))^2;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+kappa(i) := (i - 1) * 2 * %pi * (1 - 1 / n_rollers);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+trigsimp(ratsimp(T()));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+kin_en: 1/2*((M + 2*m)*u^2 + (2*(m*R^2 + A) + J)*Omega^2 - 2*m*R*(sin(chi) + cos(chi))*u*Omega + B*omega_1^2 + B*omega_2^2);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+trigsimp(expand(T() - kin_en));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_M : trigsimp(genmatrix(lambda([i, j], diff(diff(T(), Dq[i]), Dq[j])), 4, 4));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+  vk_x : signum(u + l*Omega);  Ftr_mult : mu*N;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Q : [    -Ftr_mult*vk_x,    Ftr_mult*vk_x*l,    Ftr_mult*rho*(cos(chi)^2)*signum(omega_1*rho),    0  ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* returns Lagrangial eqs resolved wrt second derivs + rhss for first derivs and the list of vars for solving */
+lagrange(q, Dq, _M, Q) := block(
+    [ lhs, rhs, T ],
+
+    T : 1/2 * (Dq . _M . transpose(Dq)),
+    print(T),
+    
+    lhs : makelist(
+        diff(diff(T, Dq[i]), t) - diff(T, q[i]) - Q[i],
+        i, 1, length(q)
+    ),
+    print(lhs),
+
+    rhs : expand(solve(lhs, makelist(diff(var, t), var, Dq)))[1],
+    print(rhs),
+    
+    [ append(map(second, rhs), Dq), append(Dq, q) ]
+
+) $
+depends(myQ1, t) $
+depends(myQ2, t) $
+depends(myDQ1, t) $
+depends(myDQ2, t) $
+lagrange([myQ1, myQ2], [myDQ1, myDQ2], matrix([1, 0], [0, 1]), [myQQ1, myQQ2]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+lagrange(q, Dq, _M, Q);
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

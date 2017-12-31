@@ -7,7 +7,7 @@ print("______________________________") $
 print("______________________________") $
 print("") $
 
-sol_dir : "smoke" $
+sol_dir : "impact" $
 
 batchload("util/lang/extensions.mac") $
 batchload("util/infra/env.mac") $
@@ -55,34 +55,38 @@ run(
 
 
 DEFAULT_SIMULATION_PARAMETERS : [
-	[ " model     ", " omni_with_rollers_reduced       " ],
+	[ " model         ", " omni_with_rollers               " ],
+	/*
+	[ " how_to_switch ", " \"renumber_rollers\"            " ],
+	*/
+	[ " how_to_switch ", " \"apply_impact_theory\"         " ],
 
-	[ " batches   ", " makelist(0.1*i, i, 1, 10)       " ],
-	[ " step      ", " 0.01                            " ],
+	[ " batches       ", " makelist(0.1*i, i, 1, 100)      " ],
+	[ " step          ", " 0.01                            " ],
 
-	[ " nu_0      ", " [ 0, 0, 1 ]                     " ],
-	[ " chi_0     ", " makelist( %pi/4 - 0.1, i, 1, 3) " ],
-	[ " coords_0  ", " [ 0, 0, 0 ]                     " ],
+	[ " nu_0          ", " [ 1, 0, 1 ]                     " ],
+	[ " chi_0         ", " makelist( -%pi/4+0.1, i, 1, 3)  " ],
+	[ " coords_0      ", " [ 0, 0, 0 ]                     " ],
 
-	[ " N_wheels  ", " 3                               " ],
-	[ " n_rollers ", " 4                               " ],
-	[ " r_hub     ", " 0.05                            " ],
-	[ " M_hub     ", " 0.15                            " ],
-	[ " m_roller  ", " 0.05                            " ],
-	[ " R_platf   ", " 0.15                            " ],
-	[ " M_platf   ", " 1                               " ]
+	[ " N_wheels      ", " 3                               " ],
+	[ " n_rollers     ", " 4                               " ],
+	[ " r_hub         ", " 0.05                            " ],
+	[ " M_hub         ", " 0.15                            " ],
+	[ " m_roller      ", " 0.05                            " ],
+	[ " R_platf       ", " 0.15                            " ],
+	[ " M_platf       ", " 1                               " ]
 ] $
 
 log@info("Loading model...") $
 /*
-use_default_simulation_parameters() $
-*/
 load_simulation_parameters_from_file() $
+*/
+use_default_simulation_parameters() $
 eval_string(concat("require@", get_global("model"), "()")) $
 log@info("Done loading model.") $
 
 
-log@info("Initializing model...") $
+log@info("Initializing model...", B where real(params)) $
 omni_vehicle: OmniVehicle(
 	params,
 	new(OmniInitials(
@@ -90,7 +94,8 @@ omni_vehicle: OmniVehicle(
 		get_global("chi_0"),
 		get_global("coords_0")
 	)),
-	new(Domain( 0, 0.2, get_global("step") ))
+	new(Domain( 0, 0.2, get_global("step") )),
+	get_global("how_to_switch")
 ) $
 log@info("Done initializing model.") $
 
@@ -113,7 +118,26 @@ run(
 	))
 ) $
 
-
+/*
+log@info("GONNA IMPACT") $
+test : extract_and_put_contacting_first([
+	11, 12, 13, 14,
+	21, 22, 23, 24,
+	31, 32, 33, 34,
+	41, 42, 43, 44
+]) $
+log@info("AYAYAYYAYAA TEEEST", test) $
+tmp : apply_impact_theory(
+	append(
+		[ nu[1], nu[2], nu[3] ],
+		pers3(nu[s], s),
+		perwheel(0, i),
+		perall(freephi(i, j), i, j),
+		[ x, y, theta ]
+	)
+) $
+log@info("IMPACT DONE", float(tmp)) $
+*/
 
 /*
 shift_restore_functions: [ [lshift], [[l] -> l], [rshift] ] $

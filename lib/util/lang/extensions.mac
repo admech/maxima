@@ -43,3 +43,4 @@ pois(F, G, z) := if oddp(length(z)) then error(sconcat("LENGTH OF Z SHOULD BE EV
 	Lists
 */
 sumlist(lst) := lreduce(lambda([a,b], a+b), lst) $
+concatlists(lists) := lreduce(append, lists) $

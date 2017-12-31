@@ -1,0 +1,239 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: input   start ] */
+kill(all) ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+derivabbrev : true;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*	sugar for substitutions:		(a + b^c) where [ c = 3, b = log(epsilon) + 19, expand ]*/kill("where") $where(expr, equalities) := block([substequality, apply_fun_to_ex, process, proxy, is_fun],    substequality(ex, equality) := subst(second(equality), first(equality), ex),    apply_fun_to_ex(ex, fun) := fun(ex),    is_fun(item) := atom(item) or not is(op(item) = "="),    process(ex, item) := if is_fun(item) then apply_fun_to_ex(ex, item) else substequality(ex, item),    lreduce(process, append([expr], equalities))) $infix("where") $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+depends(chi, t);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+for nu in [ nu1, nu2, nu3, Dchi, Dphi ] do depends(nu, t);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dchi : diff(chi, t);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+nus : [ nu1, nu2, nu3, Dchi, Dphi ] ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+T : 1/2*M*(nu1^2 + nu2^2) + 1/2*J*Dchi^2 + 1/2*I*nu3^2 + 1/2*m*((r*Dchi*cos(chi) + nu1)^2 + 
+(r*Dchi*sin(chi))^2 + (nu2 - r*nu3*sin(chi))^2) + 1/2*(A*Dchi^2 + B*(nu3*sin(chi) + Dphi)^2 + A*(nu3*cos(chi))^2);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+DT_nu : expand(transpose(makelist(
+    diff(T, nu)
+    , nu, nus
+)));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+DT_nu_t : diff(DT_nu, t);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+diff(nus, t);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+DT_nu_t_Dnu : transpose(apply(matrix, map(first, map(transpose, makelist(
+    diff(DT_nu_t, diff(nu, t))
+    , nu, nus
+)))));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+rho : l*cos(chi) - r ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Q : [ -Rxi, -Rn, 0, -l*Rxi, rho*Rn ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+news : [ nu1, nu2, nu3, -nu1/l, nu2/rho ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+olds : [ nu10, nu20, nu30, Dchi0, Dphi0 ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+u : [ nu1, nu2, nu3, Rxi, Rn ];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+sys : makelist(eq = 0, eq, transpose(DT_nu_t_Dnu . transpose(news - olds) - transpose(Q))[1]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+sol : map(second, solve(sys, u)[1]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+verbose : false;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+check(
+    __nu10, __nu20, __nu30,
+    __Dphi0,
+    __M, __m
+) := (
+
+if verbose then print("params"),
+n : 4,
+
+chi_max_geom : %pi/n,
+chi_max : %pi/(n + 1) ,
+
+params : reverse([
+    l = 1 ,
+    r = l*cos(chi_max_geom) ,
+
+    M = __M ,
+    J = M ,
+    I = J/2 ,
+
+    m = __m,
+    B = (m*(l - r)^2)/2 ,
+    A = 2*B
+]),
+
+if verbose then print("initials") ,
+initials : [
+    chi = chi_max ,
+    Dchi0 = -nu10/l,
+    nu10 = __nu10 ,
+    nu20 = __nu20 ,
+    nu30 = __nu30 ,
+    Dphi0 = __Dphi0
+],
+
+if verbose then print("sol_num") ,
+sol_num : transpose(float(sol where append(initials, params))),
+
+if verbose then print("T_old") ,
+T_old : float(T where append([
+    nu1 = __nu10,
+    nu2 = __nu20,
+    nu3 = __nu30,
+    Dchi = Dchi0,
+    Dphi = __Dphi0
+], initials, params)),
+
+if verbose then print("T_new") ,
+T_new : float(T where append([
+    Dchi = -nu1/l,
+    Dphi = nu2/rho,
+    nu1 = sol_num[1][1],
+    nu2 = sol_num[2][1],
+    nu3 = sol_num[3][1]
+], initials, params)),
+
+if verbose then print("T_new - T_old") ,
+T_delta : T_new - T_old ,
+
+if verbose then print("T_delta / T_old") ,
+if not(abs(T_old) < 1e-8) then T_delta / T_old else (
+    print("T_old = 0, T_new =", T_new)
+    -100500
+)
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+check(1,1,1,1,1,1);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+check(0,0,0,0,1,1);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/*
+    __nu10, __nu20, __nu30,
+    __Dphi0,
+    __M, __m
+*/
+print("") $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+for ____M in [ 1 ] do
+for ____m in [ 0.1 ] do
+for ____nu10 in [ -100 ] do
+for ____nu20 in [ -100 ] do
+for ____nu30 in [ -100 ] do
+for ____Dphi0 in [ -100 ] do
+(
+    print(
+        ____nu10, ____nu20, ____nu30,
+        ____Dphi0,
+        ____M, ____m,
+        " >>>>>>>>>>>>> ",
+        check(
+            ____nu10, ____nu20, ____nu30,
+            ____Dphi0,
+            ____M, ____m
+        )
+    )
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+for ____M in [ 1, 10, 100 ] do
+for ____m in [ 0.1, 1, 10 ] do
+for ____nu10 in [ -100, -10, -5, -1, 0, 1, 5, 10, 100 ] do
+for ____nu20 in [ -100, -10, -5, -1, 0, 1, 5, 10, 100 ] do
+for ____nu30 in [ -100, -10, -5, -1, 0, 1, 5, 10, 100 ] do
+for ____Dphi0 in [ -100, -10, -5, -1, 0, 1, 5, 10, 100 ] do
+(
+    tmp_delta : check(
+        ____nu10, ____nu20, ____nu30,
+        ____Dphi0,
+        ____M, ____m
+    ),
+    if verbose then
+        print(
+            ____nu10, ____nu20, ____nu30,
+            ____Dphi0,
+            ____M, ____m,
+            " >>>>>>>>>>>>> ",
+            check(
+                ____nu10, ____nu20, ____nu30,
+                ____Dphi0,
+                ____M, ____m
+            )
+        )
+    else if tmp_delta > 0 then
+        print(
+            ____nu10, ____nu20, ____nu30,
+            ____Dphi0,
+            ____M, ____m,
+            " >>>>>>>>>>>>> ",
+            check(
+                ____nu10, ____nu20, ____nu30,
+                ____Dphi0,
+                ____M, ____m
+            )
+        )
+);
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$
