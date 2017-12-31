@@ -46,72 +46,72 @@ init() := block(
     , impact_sol, impact_result
     , __T_old_nu, __T_old_Dq, __T_new
     ],
-    imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
-    imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
-    imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
-    imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
-    imlog@info("switching by renumbering rollers and recalculating speeds as per impact theory"),
-    imlog@info("nus_old", nus_old),
-    imlog@info("chis_old", chis_old),
-    imlog@info("phis_old", phis_old),
-    imlog@info("xytheta", xytheta),
+    /* imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"), */
+    /* imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"), */
+    /* imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"), */
+    /* imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"), */
+    /* imlog@info("switching by renumbering rollers and recalculating speeds as per impact theory"), */
+    /* imlog@info("nus_old", nus_old), */
+    /* imlog@info("chis_old", chis_old), */
+    /* imlog@info("phis_old", phis_old), */
+    /* imlog@info("xytheta", xytheta), */
     chis_new : adjust_chis(chis_old),
-    imlog@info("chis_new", chis_new),
+    /* imlog@info("chis_new", chis_new), */
     actual : [ vars, vals ] -> ( makelist(vars[i] = vals[i], i, 1, length(vars)) ),
     real_params_and_new_chis : append(
       real(params), 
       actual(perwheel(chi[i], i), chis_new),
       actual([theta], [xytheta[3]])
     ),
-    imlog@info("real_params_and_new_chis", real_params_and_new_chis),
-    Dqs_old : float(transpose(
+    /* imlog@info("real_params_and_new_chis", real_params_and_new_chis), */
+    Dqs_old : float(bfloat(transpose(
       (_V where real_params_and_new_chis) . nus_old
-    )[1]),
-    imlog@info("Dqs_old", Dqs_old),
+    )[1])),
+    /* imlog@info("Dqs_old", Dqs_old), */
 
     renumber_phis : shift_vars(phis(), coords),
     Dphis_old : extract_Dphis(Dqs_old),
-    imlog@info("Dphis_old", Dphis_old),
+    /* imlog@info("Dphis_old", Dphis_old), */
     Dphis_old_shifted : renumber_phis(Dphis_old),
-    imlog@info("Dphis_old_shifted", Dphis_old_shifted),
+    /* imlog@info("Dphis_old_shifted", Dphis_old_shifted), */
     Dphis_old_shifted_contacting_first : extract_and_put_contacting_first(Dphis_old_shifted),
-    imlog@info("Dphis_old_shifted_contacting_first", Dphis_old_shifted),
+    /* imlog@info("Dphis_old_shifted_contacting_first", Dphis_old_shifted), */
     phis_new : renumber_phis(phis_old),
-    imlog@info("phis_new", phis_new),
+    /* imlog@info("phis_new", phis_new), */
     Dqs_old_shifted : append(
       extract_all_but_Dphis(Dqs_old),
       Dphis_old_shifted_contacting_first
     ),
-    imlog@info("Dqs_old_shifted", Dqs_old_shifted),
+    /* imlog@info("Dqs_old_shifted", Dqs_old_shifted), */
 
     nus_new : pernu(nu_new[i], i),
     matrix_sym : _M . _V . transpose(nus_new) - _K . transpose(F) - _M . transpose(Dqs_old_shifted),
     matrix : matrix_sym where real_params_and_new_chis,
     
-    imlog@info("matrix_sym", matrix_sym),
-    imlog@info("matrix", matrix),
+    /* imlog@info("matrix_sym", matrix_sym), */
+    /* imlog@info("matrix", matrix), */
 
     __eqs : transpose(matrix)[1],
-    imlog@info("__eqs", __eqs),
+    /* imlog@info("__eqs", __eqs), */
 
     impact_sol : float(bfloat(map(second, 
       solve(__eqs, append(nus_new, F))[1]
     ))),
-    imlog@info("impact_sol", impact_sol),
+    /* imlog@info("impact_sol", impact_sol), */
 
     /* side effects suck */
     just_to_remember_how_to_restore_the_shift : shift_vars(rollers(), coords)(Dphis_old),
 
     nus_new : pernu(impact_sol[i], i),
-    imlog@info("nus_new", nus_new),
+    /* imlog@info("nus_new", nus_new), */
     impact_result : append( nus_new, chis_new, phis_new, xytheta ),
-    imlog@info("impact_result", impact_result),
+    /* imlog@info("impact_result", impact_result), */
 
     imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
     imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
     imlog@info("DELTA KIN EN"),
     __T_old_Dq : (1/2 * Dqs_old_shifted . _M . transpose(Dqs_old_shifted)) where real_params_and_new_chis,
-    imlog@info("OLD Dq =", float(__T_old_Dq)),
+    imlog@info("OLD Dq =", bfloat(__T_old_Dq)),
     __T_old_nu : (1/2 * nus_old . transpose(_V) . _M . _V . transpose(nus_old)) where (
       append(
         real(params), 
@@ -119,16 +119,16 @@ init() := block(
         actual([theta], [xytheta[3]])
       )
     ),
-    imlog@info("OLD nu =", float(__T_old_nu)),
+    imlog@info("OLD nu =", bfloat(__T_old_nu)),
     __T_new : (1/2 * nus_new . transpose(_V) . _M . _V . transpose(nus_new)) where real_params_and_new_chis,
-    imlog@info("NEW =", float(__T_new)),
-    imlog@info("NEW - OLD Dq =", float(__T_new - __T_old_Dq)),
-    imlog@info("NEW - OLD nu =", float(__T_new - __T_old_nu)),
+    imlog@info("NEW =", bfloat(__T_new)),
+    imlog@info("NEW - OLD Dq =", bfloat(__T_new - __T_old_Dq)),
+    imlog@info("NEW - OLD nu =", bfloat(__T_new - __T_old_nu)),
     imlog@info("KIN EN LOST NUS =",
-      float((1/2 * (nus_new - nus_old) . transpose(_V) . _M . _V . transpose((nus_new - nus_old))) where real_params_and_new_chis)
+      bfloat((1/2 * (nus_new - nus_old) . transpose(_V) . _M . _V . transpose((nus_new - nus_old))) where real_params_and_new_chis)
     ),
     imlog@info("KIN EN LOST Dqs =",
-      float((1/2 * ((_V . nus_new) - Dqs_old_shifted) . _M . transpose(((_V . nus_new) - Dqs_old_shifted))) where real_params_and_new_chis)
+      bfloat((1/2 * ((_V . nus_new) - Dqs_old_shifted) . _M . transpose(((_V . nus_new) - Dqs_old_shifted))) where real_params_and_new_chis)
     ),
     imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
     imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
