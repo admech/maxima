@@ -64,6 +64,7 @@ init() := block(
       actual([theta], [xytheta[3]])
     ),
     /* imlog@info("real_params_and_new_chis", real_params_and_new_chis), */
+    imlog@info("getting old Dqs..."),
     Dqs_old : float(bfloat(transpose(
       (_V where real_params_and_new_chis) . nus_old
     )[1])),
@@ -94,6 +95,7 @@ init() := block(
     __eqs : transpose(matrix)[1],
     /* imlog@info("__eqs", __eqs), */
 
+    imlog@info("solving the system..."),
     impact_sol : float(bfloat(map(second, 
       solve(__eqs, append(nus_new, F))[1]
     ))),
