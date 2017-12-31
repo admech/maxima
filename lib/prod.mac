@@ -50,7 +50,8 @@ omni_vehicle: OmniVehicle(
 		get_global("chi_0"),
 		get_global("coords_0")
 	)),
-	new(Domain( 0, 0.2, get_global("step") ))
+	new(Domain( 0, 0.2, get_global("step") )),
+        get_global("how_to_switch")
 ) $
 log@info("Done initializing model.") $
 

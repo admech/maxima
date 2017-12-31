@@ -20,11 +20,13 @@ cd lib
 clean_and_run () {
     local scenario=$1
     echo "[$scenario] Starting scenario..."
+    [ -d `pwd`/../sol/$scenario/out ] || echo "Creating out dir..." && mkdir `pwd`/../sol/$scenario/out && mkdir `pwd`/../sol/$scenario/out/batches && touch `pwd`/../sol/$scenario/out/batches/notes.md
     echo "[$scenario] Cleaning out dir..."
-    mv `pwd`/../sol/$scenario/out/batches/notes.md `pwd`/../sol/$scenario/notes.md
-    rm `pwd`/../sol/$scenario/out/*
-    rm `pwd`/../sol/$scenario/out/batches/*
-    mv `pwd`/../sol/$scenario/notes.md `pwd`/../sol/$scenario/out/batches/notes.md 
+    [ -f ../sol/$scenario/out/batches/notes.md ] && mv `pwd`/../sol/$scenario/out/batches/notes.md `pwd`/../sol/$scenario/notes.md
+    rm -r `pwd`/../sol/$scenario/out
+    mkdir `pwd`/../sol/$scenario/out
+    mkdir `pwd`/../sol/$scenario/out/batches
+    [ -f `pwd`/../sol/$scenario/notes.md ] && mv `pwd`/../sol/$scenario/notes.md `pwd`/../sol/$scenario/out/batches/notes.md || touch `pwd`/../sol/$scenario/out/batches/notes.md
     echo "[$scenario] Running Maxima..."
     # maxima --batch-string="\
     maxima -X "--dynamic-space-size 8192" --batch-string="\
