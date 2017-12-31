@@ -50,7 +50,7 @@ init() := block(
     /* imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"), */
     /* imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"), */
     /* imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"), */
-    /* imlog@info("switching by renumbering rollers and recalculating speeds as per impact theory"), */
+    imlog@info("switching by renumbering rollers and recalculating speeds as per impact theory"),
     /* imlog@info("nus_old", nus_old), */
     /* imlog@info("chis_old", chis_old), */
     /* imlog@info("phis_old", phis_old), */
