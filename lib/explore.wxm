@@ -75,6 +75,8 @@ BELOW HERE GOETH EXPLORATION; ABOVE HERE -- NECESSARY INFRASTRUCTURE
 LOOKING FOR INVARIANT SETS
    [wxMaxima: title   end   ] */
 
+/* [wxMaxima: fold    start ] */
+
 /* [wxMaxima: comment start ]
 L* - интеграл энергии
 dL*/dnu[s] - циклические интегралы (и похоже, они же - интегралы Нётер)
@@ -391,9 +393,13 @@ diff(L_star, nu[3]);
 ((_M_star . nu)[3][1] - diff(L_star, nu[3])) where [ expand ];
 /* [wxMaxima: input   end   ] */
 
+/* [wxMaxima: fold    end   ] */
+
 /* [wxMaxima: title   start ]
 BELOW GO RANDOM INVESTIGATIONS
    [wxMaxima: title   end   ] */
+
+/* [wxMaxima: fold    start ] */
 
 /* [wxMaxima: input   start ] */
 constraints;
@@ -511,6 +517,243 @@ plot2d(
 
 /* [wxMaxima: input   start ] */
 show(sol, "all_rollers_speeds[1]") $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: fold    end   ] */
+
+/* [wxMaxima: title   start ]
+IMPACT -- CHECKING MAKING LOST ENERGY EQUAL TO ENERGY OF LOST VELOCITIES
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: comment start ]
+And the result of this investigation is:
+
+     DELTA T = T DELTA ONLY WHEN CALCULATED VIA DQS BECAUSE
+    IN THAT CASE THE PERMUTATION HAPPENS BEFORE COMPARISON:
+    WE FIRST PERMUTE DQS, AND ONLY AFTER THAT DO WE CALCULATE OLD T,
+    WHEREAS WITH NUS WE CAN'T JUST PERMUTE THEM,
+    BUT HAVE TO REORDER ROWS OF _V AS WELL, WHICH IS NOT DONE IN THIS CODE,
+    HENCE DELTA T(NU) INCLUDES THE (NON-EXISTENT) "LOSS" FROM NU PERMUTATION
+   [wxMaxima: comment end   ] */
+
+/* [wxMaxima: input   start ] */
+nus_old : [0.9810781267190002,-0.1882641507640758,0.9995744010121401,0.0179691493540535,-0.1398784180979328,-0.0179691493540535,0.005459878868930965,0.07633482064743378,-0.005459878868930965,0.1674513405004151,-0.3994093699553674,-0.1674513405004151] $
+chis_old : [-0.2521674414987675,0.1365839467338339,-0.792959329852356] $
+phis_old : [1.099307629950698,0.002369228784500104,-0.02701106783209523,-0.002369228784500104,-0.6290994700043099,7.121679445691041e-4,0.01476124541932105,-7.121679445691041e-4,-0.5798325794413886,0.02025159073786547,-0.07529509385722494,-0.02025159073786547] $
+xytheta : [0.05398466055359005,3.662810145103408e-4,0.2018984054705089] $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+coords_before : append
+    ( nus_old
+    , chis_old
+    , phis_old
+    , xytheta
+    );
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+apply_impact_theory(coords_before);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+chis_new : adjust_chis(chis_old);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+actual : [ vars, vals ] -> ( makelist(vars[i] = vals[i], i, 1, length(vars)) );
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+real_params_and_new_chis : append(      real(params),       actual(perwheel(chi[i], i), chis_new),      actual([theta], [xytheta[3]])    );
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+rly : [it] -> float(it where real_params_and_new_chis);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+coords_before;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dqs_old : transpose(
+    rly(_V) . nus_old
+)[1];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+coords : coords_before;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+renumber_phis : shift_vars(phis(), coords) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_sym_dqs_old : [ __Dx, __Dy, __Dtheta
+    , __Dchi1, __Dchi2, __Dchi3
+    , __Dphi1, __Dphi2, __Dphi3
+    , __Dphi12, __Dphi13, __Dphi14
+    , __Dphi22, __Dphi23, __Dphi24
+    , __Dphi32, __Dphi33, __Dphi34
+    ] ;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_sym_dhpis : extract_Dphis(_sym_dqs_old);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+extract_all_but_Dphis(_sym_dqs_old);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dphis_old : extract_Dphis(Dqs_old);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_sym_renum_dphis : renumber_phis(_sym_dhpis);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dphis_old_shifted : renumber_phis(Dphis_old);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_sym_cf_phis : extract_and_put_contacting_first(_sym_renum_dphis);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dphis_old_shifted_contacting_first : extract_and_put_contacting_first(Dphis_old_shifted);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+phis_new : renumber_phis(phis_old);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dqs_old_shifted : float(append(      extract_all_but_Dphis(Dqs_old),      Dphis_old_shifted_contacting_first    ));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+nus_new : pernu(nu_new[i], i);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+F : concatlists(perwheel([ Fx[i], Fy[i] ], i));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_K_xytheta : map(concatlists,
+        [     perwheel([ 1,                       0                     ], i)
+        ,     perwheel([ 0,                       1                     ], i)
+        , R * perwheel([ -sin(theta + alpha[i]),  cos(theta + alpha[i]) ], i)
+        ]
+      );
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_K_chi : l * perwheel(makelist(
+          /* [ -sin, cos, 0,    0,   0,    0   ] */
+          /* [ 0,    0,   -sin, cos, 0,    0   ] */
+          /* [ 0,    0,   0,    0,   -sin, cos ] */
+          if      j = 2*i - 1 then -sin(theta + alpha[i])
+          else if j = 2*i     then  cos(theta + alpha[i])
+          else 0,
+        j, 1, length(F)), i);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_K_phi : perwheel(makelist(
+          -rho(i) * (
+            if      j = 2*i - 1 then cos(theta + alpha[i])
+            else if j = 2*i     then sin(theta + alpha[i])
+            else 0
+          ),
+        j, 1, length(F)), i)
+;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_K_rows : append(
+       _K_xytheta      
+      , _K_chi
+      , _K_phi
+      , pers(makelist(0, i, 1, length(F)), s)
+    );
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_K : apply(matrix, _K_rows);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_K . F;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+__eqs_matrix : rly(_M) . rly(_V) . transpose(nus_new) - rly(_K) . transpose(F) - rly(_M) . transpose(Dqs_old_shifted);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+__eqs : transpose(__eqs_matrix)[1];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+append(Dqs_new, F);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+impact_sol : float(map(second, solve(__eqs, append(nus_new, F))[1]));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    nus_new : pernu(impact_sol[i], i);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+    __kin_en : [v_list] -> (      /* imlog@info("v_list =", rly(v_list)), */      rly(1/2 * rly(v_list) . rly(_M) . transpose(rly(v_list)))    );
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+__T_old_Dq : __kin_en(Dqs_old_shifted);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+__T_old_nu : __kin_en((nus_old . transpose(_V))[1]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+__T_new : __kin_en((nus_new . transpose(_V))[1]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+__T_new - __T_old_Dq;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+-__kin_en(transpose(rly(_V) . nus_new)[1] - Dqs_old_shifted);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+__T_new - __T_old_nu;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+-__kin_en(transpose(rly(_V) . (nus_new - nus_old))[1]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dqs_old_shifted;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dqs_old_via_nus : (rly(nus_old . transpose(_V)))[1];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dqs_old_via_nus - Dqs_old_shifted;
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */

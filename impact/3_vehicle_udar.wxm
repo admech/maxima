@@ -23,7 +23,7 @@ if NUM then (
     l : 0.3,
     r : 0.3 * cos(%pi/3),
     
-    /*
+    
     chi1 : %pi/4,
     chi2 : %pi/4,
     chi3 : %pi/4,
@@ -42,36 +42,7 @@ if NUM then (
         , R/(l*cos(chi2) - r) * [ cos(alpha[2]), sin(alpha[2]), 0 ] . Dq1230
         , R/(l*cos(chi3) - r) * [ cos(alpha[3]), sin(alpha[3]), 0 ] . Dq1230
         ],
-    */
-
-    /*
-nus_old [7.528998394961677e-4,-0.001185581639489035,0.9999248652983435,0.001036683013346733,-0.7553928336374655,-0.04296755790472498,-0.03699182838449332,-0.7933871732095942,0.03699182838449332,-0.03860599591293357,-0.8336832736393481,-0.003324878978444975]
-chis_old [-0.7870370751657554,-0.7869939900433642,-0.7927813086614683]
-phis_old [0.01101270038718583,-0.2045360023893695,-0.6735258576221428,0.1235709843252921,-0.006481200417454149,-0.2756242850871596,-0.7440530517849778,0.2730700030699595,0.002198981460336166,-0.2821848466774439,-0.8181363734644465,0.201219828613366]
-xytheta [3.984144114388268e-4,2.920204506398615e-5,1.116223747569541]
-
-chis_new [%pi/2-0.7870370751657554,%pi/2-0.7869939900433642,%pi/2-0.7927813086614683]
-    */
-
-    chi1 : %pi/2-0.7870370751657554,
-    chi2 : %pi/2-0.7869939900433642,
-    chi3 : %pi/2-0.7927813086614683,
-    theta : 1.116223747569541,
     
-    Dq1230 : [ 2.093649584545532e-4,2.338180908265225e-5,0.5608237817716124 ],
-
-    Dchi0 : [ -0.8394573001981849,-0.8411468133057718,-0.8431029044682985 ],
-
-    Dphi0 :
-        [ R/(l*cos(chi1) - r) * [ cos(alpha[1]), sin(alpha[1]), 0 ] . Dq1230
-        , R/(l*cos(chi2) - r) * [ cos(alpha[2]), sin(alpha[2]), 0 ] . Dq1230
-        , R/(l*cos(chi3) - r) * [ cos(alpha[3]), sin(alpha[3]), 0 ] . Dq1230
-        ],
-   
-Dqs_old_shifted [
-0.001036683013346733,-0.7553928336374655,-0.04296755790472498,0.005422664854029171,
--0.03699182838449332,-0.7933871732095942,0.03699182838449332,-0.01010779974766813,
--0.03860599591293357,-0.8336832736393481,-0.003324878978444975,0.004594458213528281]
 
     Dq0 : append
         ( Dq1230
@@ -82,6 +53,8 @@ Dqs_old_shifted [
           , if Dchi0[3] > 0 then Dphi0[3] else 0, 0, if Dchi0[3] < 0 then Dphi0[3] else 0
           ]
         )
+    
+    , Dq0 : [0.1498353981091831,0.00184426143040638,0.56062721829651,-0.5585446012986508,0.2923189307360327,-2.256596811771676,3.141970870608047,-1.997956114301127,0.1674513405004151,0.0179691493540535,-0.1398784180979328,-0.0179691493540535,0.005459878868930965,0.07633482064743378,-0.005459878868930965,-0.3994093699553674,-0.1674513405004151,-2.312475599115212]
 ) $
 float(Dq0);
 /* [wxMaxima: input   end   ] */
@@ -236,6 +209,26 @@ F : [ F1x, F1y, F2x, F2y, F3x, F3y ];
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
+_K : transpose(apply(matrix, makelist(diff(makelist(Q[i], i, 1, 9), var), var, F)));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_V_tmp : mat_fullunblocker(matrix([_V_nu123], [_V_chi], [_V_phi]));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_sub_M : apply(submatrix, append(makelist(i, i, 10, 18), [_M], makelist(i, i, 10, 18)));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_megamat : transpose(_K) . _sub_M . _V_tmp;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+float(_megamat);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
 u : append(Dq, F);
 /* [wxMaxima: input   end   ] */
 
@@ -306,6 +299,22 @@ dot(Dq_delta, Dq_val);
 
 /* [wxMaxima: input   start ] */
 float(Dq_delta . _M . Dq_val);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+float(sol);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_teh_nus123 : float(invert(_V_nu123) . transpose(map(second, [sol[1], sol[2], sol[3]])));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_teh_Fs : float(map(second, makelist(sol[i], i, 19, 24)));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_teh_Fs . float(_megamat) . _teh_nus123;
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */

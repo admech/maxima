@@ -7,7 +7,7 @@ print("______________________________") $
 print("______________________________") $
 print("") $
 
-sol_dir : "smoke" $
+sol_dir : "simple_with_4_rollers_t_1000_wrench_lo_def" $
 
 batchload("util/lang/extensions.mac") $
 batchload("util/infra/env.mac") $
