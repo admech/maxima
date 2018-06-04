@@ -1,4 +1,27 @@
 /*
+impact_simple_with_4_rollers_t_1000_self_rot_lo_def
+impact_simple_with_4_rollers_t_1000_straight_lo_def
+impact_simple_with_4_rollers_t_1000_wrench_lo_def
+impact_simple_with_4_rollers_t_25_self_rot
+impact_simple_with_5_rollers_t_1000_self_rot_lo_def
+impact_simple_with_5_rollers_t_1000_straight_lo_def
+impact_simple_with_5_rollers_t_1000_wrench_lo_def
+impact_simple_with_5_rollers_t_100_straight
+impact_simple_with_5_rollers_t_100_wrench
+impact_simple_with_5_rollers_t_25_self_rot
+
+for sol in `ls ../gcp_sol/_ready/ | grep impact`; do echo $sol; maxima --batch-string="sol_name_to_explore=$sol; batchload(\"reactions.mac\") quit();"; done;
+
+*/
+
+/*
+sol_name_to_explore : "impact_simple_with_4_rollers_t_25_self_rot" $
+*/
+
+dir_with_solutions_on_local_machine: "/Users/data/Yandex.Disk/work/aspa/zobova/maxima/gcp_sol/_ready" $
+dir_with_solution: concat(dir_with_solutions_on_local_machine, "/", sol_name_to_explore) $
+
+/*
   Modules are needed to isolate namespaces and to manage dependencies.
   (note: dependencies of module.mac are loaded with batchload).
 */
@@ -7,7 +30,10 @@ print("______________________________") $
 print("______________________________") $
 print("") $
 
+/*
 sol_dir : "smoke" $
+*/
+sol_dir : dir_with_solution $
 
 batchload("util/lang/extensions.mac") $
 batchload("util/infra/env.mac") $
@@ -45,9 +71,18 @@ DEFAULT_SIMULATION_PARAMETERS : [
   [ " M_platf       ", " 1                               " ]
 ] $
 
-log@info("Loading model...") $
+log@info("Loading model...", sol_name_to_explore) $
 
+/*
 use_default_simulation_parameters() $
+*/
+
+use_simulation_parameters_from_dir(absolute_dir) := load_params_from_file(
+  concat(absolute_dir, "/", "simulation_parameters.mac")
+) $
+use_simulation_parameters_from_dir(dir_with_solution) $
+
+
 eval_string(concat("require@", get_global("model"), "()")) $
 
 require@omni_with_rollers_recalculator() $

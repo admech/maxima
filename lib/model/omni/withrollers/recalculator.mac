@@ -1,4 +1,5 @@
 require@logging() $
+require@plot() $
 require@omni_with_rollers_wheelutil() $
 require@omni_with_rollers_params() $
 require@omni_with_rollers_symbols() $
@@ -9,9 +10,9 @@ init() := block(
   relog : get_logger("recalc", log_level_info),
 
   recalculate_impacts() := block(
-    [ sol_dat_file : concat(out_dir, "/sol.dat")
-    , sol_lisp_file : concat(out_dir, "/sol.lisp")
-    , sol_dat_switches_dat_file : concat(concat(out_dir, "/sol.dat"), ".switches.dat")
+    [ sol_dat_file : concat(sol_dir, "/sol.dat")
+    , sol_lisp_file : concat(sol_dir, "/sol.lisp")
+    , sol_dat_switches_dat_file : concat(concat(sol_dir, "/sol.dat"), ".switches.dat")
     ],
     relog@info("mesa here!"),
 
@@ -56,12 +57,37 @@ init() := block(
     previous_pt : first(sol),
     previous_chi_signs : map(signum, extract_chis(coords(previous_pt))),
     the_epsilon : 1e-2,
+    all_reactions_at_switch_instants : [],
     for pt in sol do (
       the_t : time(pt),
       the_coords : coords(pt),
       the_chis : extract_chis(the_coords),
+      previous_chis : extract_chis(coords(previous_pt)),
       current_chi_signs : map(signum, the_chis),
-      changed : not((current_chi_signs + previous_chi_signs) / 2 = current_chi_signs),
+      /* changed : not((current_chi_signs + previous_chi_signs) / 2 = current_chi_signs), */
+      changed : member(
+        true,
+        makelist(
+          (
+            /*
+            relog@info(
+              i,
+              "-------",
+              signum(previous_chis[i]),
+              signum(the_chis[i]),
+              not(signum(previous_chis[i]) = signum(the_chis[i])),
+              abs(previous_chis[i]),
+              float(_chi_max_adjust),
+              float(abs(abs(previous_chis[i]) - _chi_max_adjust)),
+              float(abs(abs(previous_chis[i]) - _chi_max_adjust)) < 0.1,
+              not(signum(previous_chis[i]) = signum(the_chis[i])) and abs(abs(previous_chis[i]) - _chi_max_adjust) < 0.1
+            ),
+            */
+            not(signum(previous_chis[i]) = signum(the_chis[i])) and abs(abs(previous_chis[i]) - _chi_max_adjust) < 0.1
+          ),
+          i, 1, length(the_chis)
+        )
+      ),
       if changed then (
         one_step_further: step_over_switch(omni_vehicle, omni_vehicle@switcher@stepover_rhss, previous_pt),
         stepover_coords : coords(one_step_further),
@@ -70,19 +96,27 @@ init() := block(
         new_coords : impact_sol[1],
         reactions  : impact_sol[2],
         relog@info("changed at", the_t),
-        relog@info("normal   chis", extract_chis(coords(previous_pt))),
+        relog@info("previous chis", previous_chis),
         relog@info("stepover chis", extract_chis(stepover_coords)),
         relog@info("next     chis", the_chis),
         relog@info("from     ", stepover_coords),
         relog@info("to       ", new_coords),
         relog@info("expected ", the_coords),
-        relog@info("with reactions", reactions)
+        relog@info("with reactions", reactions),
+        all_reactions_at_switch_instants : cons(cons(the_t, reactions), all_reactions_at_switch_instants)
       ),
       previous_chi_signs : current_chi_signs,
       previous_pt : pt
     ),
 
-    relog@info("kinda done...")
+    relog@info("kinda done calculating... now dumping to file."),
+
+    dump_list_of_lists_to_file(
+      reverse(all_reactions_at_switch_instants),
+      sol_dat_switches_dat_file
+    ),
+
+    relog@info("all done!")
   )
 
 ) $
