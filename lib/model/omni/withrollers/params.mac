@@ -22,7 +22,7 @@ init() := block(
 
 	len_q  : 3 + params@N_wheels * (params@n_rollers + 1),
 	len_nu : 3 + params@N_wheels * (params@n_rollers - 1),
-    _chi_max_adjust: %pi/params@n_rollers, /* value of chi on which rollers switch - i.e. border of cut roller */
+  _chi_max_adjust: %pi/params@n_rollers, /* value of chi on which rollers switch - i.e. border of cut roller */
 
 
 	real(params) := block([
