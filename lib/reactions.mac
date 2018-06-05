@@ -10,7 +10,7 @@ impact_simple_with_5_rollers_t_100_straight
 impact_simple_with_5_rollers_t_100_wrench
 impact_simple_with_5_rollers_t_25_self_rot
 
-for sol in `ls ../gcp_sol/_ready/ | grep impact`; do echo $sol; maxima --batch-string="sol_name_to_explore=$sol; batchload(\"reactions.mac\") quit();"; done;
+for sol in `ls ../gcp_sol/_ready/ | grep impact`; do echo $sol; maxima --batch-string="sol_name_to_explore=$sol; batchload(\"reactions.mac\"); quit();" > mega_run_$sol.log; done;
 
 */
 
