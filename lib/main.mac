@@ -55,28 +55,28 @@ run(
 
 
 DEFAULT_SIMULATION_PARAMETERS : [
-	[ " model         ", " omni_with_rollers               " ],
+	[ " model         ", " omni_with_rollers                                             " ],
 	/*
-	[ " how_to_switch ", " \"renumber_rollers\"            " ],
+	[ " how_to_switch ", " \"renumber_rollers\"                                          " ],
 	*/
-	[ " how_to_switch ", " \"apply_impact_theory\"         " ],
-	[ " calc_and_log_delta_T ", " false                    " ],
+	[ " how_to_switch ", " \"apply_impact_theory\"                                       " ],
+	[ " calc_and_log_delta_T ", " false                                                  " ],
 
-	[ " batches       ", " makelist(0.1*i, i, 1, 1)        " ],
-	[ " step          ", " 0.01                            " ],
+	[ " batches       ", " makelist(0.1*i, i, 1, 1)                                      " ],
+	[ " step          ", " 0.01                                                          " ],
 
-	[ " N_wheels      ", " 3                               " ],
-	[ " n_rollers     ", " 4                               " ],
-	[ " r_hub         ", " 0.05                            " ],
-	[ " M_hub         ", " 0.15                            " ],
-	[ " m_roller      ", " 0.05                            " ],
-	[ " R_platf       ", " 0.15                            " ],
-	[ " M_platf       ", " 1                               " ],
+	[ " N_wheels      ", " 3                                                             " ],
+	[ " n_rollers     ", " 4                                                             " ],
+	[ " r_hub         ", " 0.05                                                          " ],
+	[ " M_hub         ", " 0.15                                                          " ],
+	[ " m_roller      ", " 0.05                                                          " ],
+	[ " R_platf       ", " 0.15                                                          " ],
+	[ " M_platf       ", " 1                                                             " ],
 
-	[ " nu_0          ", " [ 0, 0, 1 ]                     " ],
-	[ " nu_s_0        ", " makelist(0, i, gg(\"N_wheels\") * (gg(\"n_rollers\") - 1)) " ],
-	[ " chi_0         ", " makelist( -%pi/4+0.1, i, 1, gg(\"N_wheels\")) " ],
-	[ " coords_0      ", " [ 0, 0, 0 ]                     " ]
+	[ " nu_0          ", " [ 0, 0, 1 ]                                                   " ],
+	[ " nu_s_0        ", " makelist(0, i, 1, gg(\"N_wheels\") * (gg(\"n_rollers\") - 1)) " ],
+	[ " chi_0         ", " makelist( -%pi/4+0.1, i, 1, gg(\"N_wheels\"))                 " ],
+	[ " coords_0      ", " [ 0, 0, 0 ]                                                   " ]
 ] $
 
 log@info("Loading model...") $
