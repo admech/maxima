@@ -10,6 +10,27 @@ NUM : true;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
+/*	lambdas are just too verbose in Maxima:
+		[a1,a2,a3] -> (a1 + a2 + a3)
+*/
+"->" (args, expr) ::= buildq([args, expr], lambda(args, expr)) $
+infix("->") $
+
+/*	sugar for substitutions:
+		(a + b^c) where [ c = 3, b = log(epsilon) + 19, expand ]
+*/
+kill("where") $
+where(expr, equalities) := block([substequality, apply_fun_to_ex, process, proxy, is_fun],
+    substequality(ex, equality) := subst(second(equality), first(equality), ex),
+    apply_fun_to_ex(ex, fun) := fun(ex),
+    is_fun(item) := atom(item) or not is(op(item) = "="),
+    process(ex, item) := if is_fun(item) then apply_fun_to_ex(ex, item) else substequality(ex, item),
+    lreduce(process, append([expr], equalities))
+) $
+infix("where") $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
 if NUM then (
     kappa : [ 0, %pi/4, %pi/2, 3*%pi/4 ],
     alpha : [ 0, 2*%pi/3, 4*%pi/3 ],
@@ -23,10 +44,14 @@ if NUM then (
     l : 0.3,
     r : 0.3 * cos(%pi/3),
     
-    
+    /*
     chi1 : %pi/4,
     chi2 : %pi/4,
     chi3 : %pi/4,
+    */
+    chi1 : %pi/4,
+    chi2 : 0,
+    chi3 : 0,
     theta : %pi/6,
     
     Dq1230 : [ 1, 0, 1 ],
@@ -53,8 +78,11 @@ if NUM then (
           , if Dchi0[3] > 0 then Dphi0[3] else 0, 0, if Dchi0[3] < 0 then Dphi0[3] else 0
           ]
         )
-    
+    /*    
     , Dq0 : [0.1498353981091831,0.00184426143040638,0.56062721829651,-0.5585446012986508,0.2923189307360327,-2.256596811771676,3.141970870608047,-1.997956114301127,0.1674513405004151,0.0179691493540535,-0.1398784180979328,-0.0179691493540535,0.005459878868930965,0.07633482064743378,-0.005459878868930965,-0.3994093699553674,-0.1674513405004151,-2.312475599115212]
+    */
+    , Dq0 : [ 0, 0, 1,    0, 0, 0,    0, 0, 0,    0,0,0, 0,0,0, 0,1,0 ]
+
 ) $
 float(Dq0);
 /* [wxMaxima: input   end   ] */
@@ -193,6 +221,10 @@ Q : append
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
+transpose(Q);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
 eqs : append(
     transpose( _M . (Dq - Dq0) - transpose(Q) )[1],
     transpose( transpose(Dchi) - _V_chi . invert(_V_nu123) . Dq123 )[1],
@@ -315,6 +347,108 @@ _teh_Fs : float(map(second, makelist(sol[i], i, 19, 24)));
 
 /* [wxMaxima: input   start ] */
 _teh_Fs . float(_megamat) . _teh_nus123;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: title   start ]
+NOW WHAT ?
+   [wxMaxima: title   end   ] */
+
+/* [wxMaxima: input   start ] */
+display(_M, _V, _K);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_M . _V;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+transpose(_V) . _M;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+transpose(_V) . _M . _V;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+%o65 where [
+    chi1 = %pi/4,
+    chi2 = %pi/4,
+    chi3 = %pi/4,
+    kappa[1] = 0,
+    kappa[2] = %pi/2,
+    kappa[3] = %pi,
+    kappa[4] = 3 * %pi /2,
+    r = l*cos(%pi/4),
+    l = 1
+];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* invert(%o67), numer; */
+print() $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_PR : float(invert(transpose(_V) . _M . _V) . transpose(_V) . _M);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp : _M . _V $
+_MVK : float(genmatrix(lambda([i, j],
+    if j <= 12 then 
+        tmp[i,j] 
+    else if i < 10 then 
+        _K[i,j-12] 
+    else 0
+), 18, 18));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp1 : float(invert(_MVK) . _M);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+tmp2 : submatrix(13, 14, 15, 16, 17, 18, tmp1);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_PR;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+float(tmp2 - _PR);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+super_q : transpose([0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0]) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_PR . super_q;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+lin_int(Dq_vec, wheel_num, roller_num) := Dq_vec[9 + (wheel_num - 1)*3 + roller_num - 1 ] + 1/Lambda * sin([chi1, chi2, chi3][wheel_num] + kappa[roller_num]) * Dq_vec[3];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dq_val[17] + 1/Lambda * sin(chi3 + kappa[3]) * Dq_val[3];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+Dq0[17] + 1/Lambda * sin(chi3 + kappa[3]) * Dq0[3];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+float(makelist(makelist(lin_int(Dq0, j, i), i, 1, 4), j, 1, 3));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+float(makelist(makelist(lin_int(Dq_val, j, i), i, 1, 4), j, 1, 3));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+makelist(makelist([9 + (i - 1)*3 + j - 1, i, j], i, 1, 3), j, 1, 4);
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */

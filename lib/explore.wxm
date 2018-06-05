@@ -529,11 +529,16 @@ IMPACT -- CHECKING MAKING LOST ENERGY EQUAL TO ENERGY OF LOST VELOCITIES
 And the result of this investigation is:
 
      DELTA T = T DELTA ONLY WHEN CALCULATED VIA DQS BECAUSE
-    IN THAT CASE THE PERMUTATION HAPPENS BEFORE COMPARISON:
-    WE FIRST PERMUTE DQS, AND ONLY AFTER THAT DO WE CALCULATE OLD T,
-    WHEREAS WITH NUS WE CAN'T JUST PERMUTE THEM,
-    BUT HAVE TO REORDER ROWS OF _V AS WELL, WHICH IS NOT DONE IN THIS CODE,
-    HENCE DELTA T(NU) INCLUDES THE (NON-EXISTENT) "LOSS" FROM NU PERMUTATION
+
+    IN THAT CASE THE PERMUTATION HAPPENS BEFORE COMPARISON:
+
+    WE FIRST PERMUTE DQS, AND ONLY AFTER THAT DO WE CALCULATE OLD T,
+
+    WHEREAS WITH NUS WE CAN'T JUST PERMUTE THEM,
+
+    BUT HAVE TO REORDER ROWS OF _V AS WELL, WHICH IS NOT DONE IN THIS CODE,
+
+    HENCE DELTA T(NU) INCLUDES THE (NON-EXISTENT) "LOSS" FROM NU PERMUTATION
    [wxMaxima: comment end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -565,7 +570,11 @@ actual : [ vars, vals ] -> ( makelist(vars[i] = vals[i], i, 1, length(vars)) );
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-real_params_and_new_chis : append(      real(params),       actual(perwheel(chi[i], i), chis_new),      actual([theta], [xytheta[3]])    );
+real_params_and_new_chis : append(
+      real(params), 
+      actual(perwheel(chi[i], i), chis_new),
+      actual([theta], [xytheta[3]])
+    );
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -633,7 +642,10 @@ phis_new : renumber_phis(phis_old);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-Dqs_old_shifted : float(append(      extract_all_but_Dphis(Dqs_old),      Dphis_old_shifted_contacting_first    ));
+Dqs_old_shifted : float(append(
+      extract_all_but_Dphis(Dqs_old),
+      Dphis_old_shifted_contacting_first
+    ));
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -646,46 +658,73 @@ F : concatlists(perwheel([ Fx[i], Fy[i] ], i));
 
 /* [wxMaxima: input   start ] */
 _K_xytheta : map(concatlists,
-        [     perwheel([ 1,                       0                     ], i)
-        ,     perwheel([ 0,                       1                     ], i)
-        , R * perwheel([ -sin(theta + alpha[i]),  cos(theta + alpha[i]) ], i)
-        ]
-      );
+
+        [     perwheel([ 1,                       0                     ], i)
+
+        ,     perwheel([ 0,                       1                     ], i)
+
+        , R * perwheel([ -sin(theta + alpha[i]),  cos(theta + alpha[i]) ], i)
+
+        ]
+
+      );
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
 _K_chi : l * perwheel(makelist(
-          /* [ -sin, cos, 0,    0,   0,    0   ] */
-          /* [ 0,    0,   -sin, cos, 0,    0   ] */
-          /* [ 0,    0,   0,    0,   -sin, cos ] */
-          if      j = 2*i - 1 then -sin(theta + alpha[i])
-          else if j = 2*i     then  cos(theta + alpha[i])
-          else 0,
-        j, 1, length(F)), i);
+
+          /* [ -sin, cos, 0,    0,   0,    0   ] */
+
+          /* [ 0,    0,   -sin, cos, 0,    0   ] */
+
+          /* [ 0,    0,   0,    0,   -sin, cos ] */
+
+          if      j = 2*i - 1 then -sin(theta + alpha[i])
+
+          else if j = 2*i     then  cos(theta + alpha[i])
+
+          else 0,
+
+        j, 1, length(F)), i);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
 _K_phi : perwheel(makelist(
-          -rho(i) * (
-            if      j = 2*i - 1 then cos(theta + alpha[i])
-            else if j = 2*i     then sin(theta + alpha[i])
-            else 0
-          ),
-        j, 1, length(F)), i)
+
+          -rho(i) * (
+
+            if      j = 2*i - 1 then cos(theta + alpha[i])
+
+            else if j = 2*i     then sin(theta + alpha[i])
+
+            else 0
+
+          ),
+
+        j, 1, length(F)), i)
 ;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
 _K_rows : append(
-       _K_xytheta      
-      , _K_chi
-      , _K_phi
-      , pers(makelist(0, i, 1, length(F)), s)
-    );
+       _K_xytheta
+      
+
+      , _K_chi
+
+      , _K_phi
+
+      , pers(makelist(0, i, 1, length(F)), s)
+
+    );
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-_K : apply(matrix, _K_rows);
+_V;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+_K : apply¦¦¦¦(matrix, _K_rows);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -701,7 +740,7 @@ __eqs : transpose(__eqs_matrix)[1];
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-append(Dqs_new, F);
+append(nus_new, F);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -713,7 +752,10 @@ impact_sol : float(map(second, solve(__eqs, append(nus_new, F))[1]));
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-    __kin_en : [v_list] -> (      /* imlog@info("v_list =", rly(v_list)), */      rly(1/2 * rly(v_list) . rly(_M) . transpose(rly(v_list)))    );
+    __kin_en : [v_list] -> (
+      /* imlog@info("v_list =", rly(v_list)), */
+      rly(1/2 * rly(v_list) . rly(_M) . transpose(rly(v_list)))
+    );
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
@@ -754,6 +796,42 @@ Dqs_old_via_nus : (rly(nus_old . transpose(_V)))[1];
 
 /* [wxMaxima: input   start ] */
 Dqs_old_via_nus - Dqs_old_shifted;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+sdot(metric_matrix) := buildq([metric_matrix], lambda([a_list, b_list], a_list . metric_matrix . transpose(b_list)));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+mdot : sdot(rly(_M)) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+mdot(rly(_V) . transpose(nus_new), rly(_V) . transpose(nus_new) - Dqs_old_shifted);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: section start ]
+Obtain nus_new by projecting Dq- onto the subspace based on _V orthogonally in kinetic metric (wrt M)
+   [wxMaxima: section end   ] */
+
+/* [wxMaxima: input   start ] */
+get_col(idx, mat) := apply(submatrix, cons(mat, append(makelist(i, i, 1, idx - 1), makelist(i, i, idx + 1, length(mat[1]))))) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+sqmnorm(vec) := mdot(vec, vec) $
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+nus_new;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+nus_ort : transpose(invert(transpose(rly(_V)) . rly(_M) . rly(_V)) . (transpose(rly(_V)) . rly(_M) . transpose(Dqs_old_shifted)))[1];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+sqrt((nus_ort - nus_new) . transpose(nus_ort - nus_new));
 /* [wxMaxima: input   end   ] */
 
 /* Maxima can't load/batch files which end with a comment! */

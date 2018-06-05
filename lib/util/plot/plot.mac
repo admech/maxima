@@ -206,6 +206,10 @@ init() := block(
 		dump_list_of_lists_to_file(
 			zipped_ordinates,
 			file
+		),
+		dump_list_of_lists_to_file(
+			reverse(SWITCHING_EXTRAS),
+			concat(file, ".switches.dat")
 		)
 	),
 
