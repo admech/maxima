@@ -36,13 +36,16 @@ init() := block(
 
 	renumber_rollers(coords) := block(
 		vlog@info("switching by renumbering rollers and complying with constraints for free"),
-		append(
-			extract_big_nus(coords),
-			extract_free_nus(coords) where [ shift_vars(rollers(), coords) ],
-			extract_chis(coords) where [ adjust_chis ],
-			extract_phis(coords) where [ shift_vars(phis(), coords) ],
-			extract_coords(coords)
-		)
+		[
+			append(
+				extract_big_nus(coords),
+				extract_free_nus(coords) where [ shift_vars(rollers(), coords) ],
+				extract_chis(coords) where [ adjust_chis ],
+				extract_phis(coords) where [ shift_vars(phis(), coords) ],
+				extract_coords(coords)
+			),
+			[ /* impact reactions would go here */ ]
+		]
 	),
 
 	how_to_switch_function(how_to_switch) :=

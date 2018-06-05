@@ -105,6 +105,8 @@ init() := block(
     just_to_remember_how_to_restore_the_shift : shift_vars(rollers(), coords)(Dphis_old),
 
     nus_new : pernu(impact_sol[i], i),
+    F_sol : lreduce(append, perwheel([ impact_sol[length(nus_new) + 2*i - 1], impact_sol[length(nus_new) + 2*i] ], i)),
+
     /*
     nus_new : append(
       transpose(invert(rly(_V_123)) . transpose([ impact_sol[1], impact_sol[2], impact_sol[3] ]))[1],
@@ -118,6 +120,8 @@ init() := block(
     impact_result : append( nus_new, chis_new, phis_new, xytheta ),
     /* imlog@info("impact_result", impact_result), */
 
+    imlog@info("Impact reactions: ", float(bfloat(F_sol))),
+
     imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
     imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
 
@@ -130,42 +134,45 @@ init() := block(
     HENCE DELTA T(NU) INCLUDES THE (NON-EXISTENT) "LOSS" FROM NU PERMUTATION
     */
 
-    __kin_en : [v_list] -> (
-      /* imlog@info("v_list =", rly(v_list)), */
-      rly(1/2 * rly(v_list) . rly(_M) . transpose(rly(v_list)))
-    ),
-    imlog@info("DELTA KIN EN"),
-    __T_old_Dq : __kin_en(Dqs_old_shifted),
-    __T_old_nu : __kin_en(nus_old . transpose(_V)),
-    __T_new : __kin_en(nus_new . transpose(_V)),
-    imlog@info("NEW =", bfloat(__T_new)),
+    if get_global("calc_and_log_delta_T") then (
+      __kin_en : [v_list] -> (
+        /* imlog@info("v_list =", rly(v_list)), */
+        rly(1/2 * rly(v_list) . rly(_M) . transpose(rly(v_list)))
+      ),
+      imlog@info("DELTA KIN EN"),
+      __T_old_Dq : __kin_en(Dqs_old_shifted),
+      __T_old_nu : __kin_en(nus_old . transpose(_V)),
+      __T_new : __kin_en(nus_new . transpose(_V)),
+      imlog@info("NEW =", bfloat(__T_new)),
 
-    imlog@info("OLD Dq =", bfloat(__T_old_Dq)),
-    imlog@info("NEW - OLD Dq =", bfloat(__T_new - __T_old_Dq)),
-    imlog@info("KIN EN LOST Dqs =", bfloat(-__kin_en(transpose(rly(_V) . nus_new)[1] - Dqs_old_shifted))),
+      imlog@info("OLD Dq =", bfloat(__T_old_Dq)),
+      imlog@info("NEW - OLD Dq =", bfloat(__T_new - __T_old_Dq)),
+      imlog@info("KIN EN LOST Dqs =", bfloat(-__kin_en(transpose(rly(_V) . nus_new)[1] - Dqs_old_shifted))),
 
-    imlog@info("(delta, _M . Dq_new) =", bfloat(
-      (transpose(rly(_V) . nus_new)[1] - Dqs_old_shifted)
-      . rly(_M) .
-      (rly(_V) . nus_new)
-    )),
-    imlog@info("DELTA T - T LOST Dqs - (...) =", bfloat(
-      __T_new - __T_old_Dq
-      - bfloat(-__kin_en(transpose(rly(_V) . nus_new)[1] - Dqs_old_shifted))
-      - bfloat(
+      imlog@info("(delta, _M . Dq_new) =", bfloat(
         (transpose(rly(_V) . nus_new)[1] - Dqs_old_shifted)
         . rly(_M) .
         (rly(_V) . nus_new)
-      )
-    )),
+      )),
+      imlog@info("DELTA T - T LOST Dqs - (...) =", bfloat(
+        __T_new - __T_old_Dq
+        - bfloat(-__kin_en(transpose(rly(_V) . nus_new)[1] - Dqs_old_shifted))
+        - bfloat(
+          (transpose(rly(_V) . nus_new)[1] - Dqs_old_shifted)
+          . rly(_M) .
+          (rly(_V) . nus_new)
+        )
+      )),
 
-    imlog@info("OLD nu =", bfloat(__T_old_nu)),
-    imlog@info("NEW - OLD nu =", bfloat(__T_new - __T_old_nu)),
-    imlog@info("KIN EN LOST NUS =", bfloat(-__kin_en(transpose(rly(_V) . (nus_new - nus_old))[1]))),
+      imlog@info("OLD nu =", bfloat(__T_old_nu)),
+      imlog@info("NEW - OLD nu =", bfloat(__T_new - __T_old_nu)),
+      imlog@info("KIN EN LOST NUS =", bfloat(-__kin_en(transpose(rly(_V) . (nus_new - nus_old))[1]))),
 
-    imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
-    imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
-    float(bfloat(impact_result))
+      imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"),
+      imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
+    ) else imlog@info("Did not calc delta T. Set calc_and_log_delta_T=true if you want that."),
+
+    float(bfloat([ impact_result, F_sol ]))
   )
 
 ) $

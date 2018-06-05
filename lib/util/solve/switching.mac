@@ -3,6 +3,7 @@ require@model() $
 
 init() := block(
 	slog : get_logger("switching", log_level_info),
+	SWITCHING_EXTRAS : [],
 
 	/* ALLOWING RIGHT-HAND SIDES OF EQUATIONS TO NOTIFY SOLVER */
 
@@ -113,12 +114,17 @@ init() := block(
 			/* we would not need stepover if we could dump variables, but alas, rk may produce unpredictable results, not to speak of the variables not being available at the point of dumping */
 			switch_dump: DONE,
 			one_step_further: step_over_switch(model, switcher@stepover_rhss, last(sol)),
+			new_initials_and_extras: switcher@transition(coords(one_step_further)),
+			new_initials: new_initials_and_extras[1],
+			extras: new_initials_and_extras[2],
+			current_time: time(one_step_further),
+			SWITCHING_EXTRAS: cons(cons(current_time, extras), SWITCHING_EXTRAS),
 			iterate(
 				solver, switcher, iter_num + 1, full_sol,
 				from_t_with_initials(
 					model,
-					time(one_step_further),
-					switcher@transition(coords(one_step_further))
+					current_time,
+					new_initials
 				)
 			)
 		)
