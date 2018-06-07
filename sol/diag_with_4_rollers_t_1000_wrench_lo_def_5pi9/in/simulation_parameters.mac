@@ -1,0 +1,23 @@
+model     = omni_with_rollers
+
+batches   = makelist(i, i, 1, 1000)
+step      = 0.01
+
+initial_dir = 5*%pi/9
+
+N_wheels  = 3
+n_rollers = 4
+r_hub     = 0.05
+M_hub     = 0.15
+m_roller  = 0.05
+R_platf   = 0.15
+M_platf   = 1
+
+how_to_switch        = "apply_impact_theory"
+calc_and_log_delta_T = false
+
+nu_0      = [ cos(gg("initial_dir")), sin(gg("initial_dir")), 1 ]
+nu_s_0    = makelist(0, i, 1, gg("N_wheels") * (gg("n_rollers") - 1))
+chi_0     = makelist(0, i, 1, gg("N_wheels"))
+coords_0  = [ 0, 0, 0 ]
+
