@@ -3,6 +3,9 @@ print("______________________________") $
 print("______________________________") $
 print("") $
 
+/*
+sol_dir : "/Users/data/Yandex.Disk/work/aspa/zobova/maxima/gcp_sol/_ready/impact_simple_with_5_rollers_t_25_self_rot" $
+*/
 batchload("util/lang/extensions.mac") $
 batchload("util/infra/env.mac") $
 batchload("util/lang/module.mac") $
@@ -145,4 +148,11 @@ print("    load_gcp_sol_on_local(\"sol_name\") $") $
 print("    load_sol_on_prod(\"sol_name\") $") $
 print("") $
 log_program_finish() $
+
+/*
+use_simulation_parameters_from_dir(sol_dir) $ 
+require@omni_with_rollers() $ 
+print(float([Lambda, perroller(kappa[i], i)] where real(params))) $
+*/
+
 

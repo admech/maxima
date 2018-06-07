@@ -1,0 +1,97 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 15.04.0 ] */
+
+/* [wxMaxima: input   start ] */
+load("/Users/data/Yandex.Disk/work/aspa/zobova/maxima/lib/util/lang/extensions.mac");
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+OS_XYZ : transpose([ x,                        y,                 l                        ]);
+SP_xeZ : transpose([ R*cos(alpha[0]),          R*sin(alpha[0]),   0                        ]);
+PK_nnn : transpose([ 0,                        0,                 -r                       ]);
+KC_ene : transpose([ rho(chi[0])*cos(phi[0]),  l*sin(chi[0]),     -rho(chi[0])*sin(phi[0]) ]);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+AK : matrix(
+    [ cos(phi),   0,  sin(phi) ],
+    [ 0,          1,  0        ],
+    [ -sin(phi),  0,  cos(phi) ]
+);
+AP : matrix(
+    [ cos(alpha[0]),  -cos(chi)*sin(alpha[0]),  sin(chi)*sin(alpha[0])  ],
+    [ sin(alpha[0]),  cos(chi)*cos(alpha[0]), -sin(chi)*cos(alpha[0]) ],
+    [ 0,              sin(chi),                 cos(chi)                ]
+);
+AS : matrix(
+    [ cos(theta),  -sin(theta), 0 ],
+    [ sin(theta),  cos(theta),  0 ],
+    [ 0,           0,           1 ]
+);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+OC_XYZ_tmp : OS_XYZ + AS . SP_xeZ + AS . AP . PK_nnn + AS . AP . AK . KC_ene;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+OC_XYZ : expand(OC_XYZ_tmp);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+X : OC_XYZ[1][1];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+diff(X, x);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+diff(X, y);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+q_star : [
+    chi[0] = -chi,
+    phi[0] = -phi + %pi/2
+];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+subst_rho : [
+    rho(-chi) = rho(chi),
+    l*cos(chi) - r = rho(chi)
+];
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dX_tmp : trigsimp(diff(X, theta) where q_star);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dX_tmp1 : -sin(theta + alpha[0])*R
+        + (-sin(alpha[0])*sin(chi)*(l*cos(chi) - r) - cos(alpha[0])*rho(-chi))*sin(theta)
+        + (cos(alpha[0])*sin(chi)*(-r+cos(chi)*l)-sin(alpha[0])*rho(-chi))*cos(theta);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+expand(trigexpand(dX_tmp1) - dX_tmp);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dX_tmp2 : expand(dX_tmp1 where subst_rho);
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+dX_tmp3 : -sin(theta+alpha[0])*R
+          +rho(chi)*sin(chi) * cos(theta + alpha[0])
+          -rho(chi)*sin(theta + alpha[0])
+;
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+expand(trigexpand(expand(trigexpand(dX_tmp3) - dX_tmp2)));
+/* [wxMaxima: input   end   ] */
+
+/* Maxima can't load/batch files which end with a comment! */
+"Created with wxMaxima"$

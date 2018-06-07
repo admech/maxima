@@ -172,7 +172,7 @@ init() := block(
       imlog@info(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
     ) else imlog@info("Did not calc delta T. Set calc_and_log_delta_T=true if you want that."),
 
-    float(bfloat([ impact_result, F_sol ]))
+    float(bfloat([ impact_result, append([nus_new[1], nus_new[2], xytheta[3]], F_sol) ]))
   )
 
 ) $

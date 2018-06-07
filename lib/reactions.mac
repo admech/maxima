@@ -14,9 +14,7 @@ for sol in `ls ../gcp_sol/_ready/ | grep impact`; do echo $sol; maxima --batch-s
 
 */
 
-/*
-sol_name_to_explore : "impact_simple_with_4_rollers_t_25_self_rot" $
-*/
+sol_name_to_explore : "impact_simple_with_5_rollers_t_1000_wrench_lo_def" $
 
 dir_with_solutions_on_local_machine: "/Users/data/Yandex.Disk/work/aspa/zobova/maxima/gcp_sol/_ready" $
 dir_with_solution: concat(dir_with_solutions_on_local_machine, "/", sol_name_to_explore) $

@@ -6,26 +6,35 @@ kill(all);
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-NUM : true;
+NUM : false;
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
-/*	lambdas are just too verbose in Maxima:
-		[a1,a2,a3] -> (a1 + a2 + a3)
+/*
+	lambdas are just too verbose in Maxima:
+
+		[a1,a2,a3] -> (a1 + a2 + a3)
 */
 "->" (args, expr) ::= buildq([args, expr], lambda(args, expr)) $
 infix("->") $
 
-/*	sugar for substitutions:
-		(a + b^c) where [ c = 3, b = log(epsilon) + 19, expand ]
+/*
+	sugar for substitutions:
+
+		(a + b^c) where [ c = 3, b = log(epsilon) + 19, expand ]
 */
 kill("where") $
 where(expr, equalities) := block([substequality, apply_fun_to_ex, process, proxy, is_fun],
-    substequality(ex, equality) := subst(second(equality), first(equality), ex),
-    apply_fun_to_ex(ex, fun) := fun(ex),
-    is_fun(item) := atom(item) or not is(op(item) = "="),
-    process(ex, item) := if is_fun(item) then apply_fun_to_ex(ex, item) else substequality(ex, item),
-    lreduce(process, append([expr], equalities))
+
+    substequality(ex, equality) := subst(second(equality), first(equality), ex),
+
+    apply_fun_to_ex(ex, fun) := fun(ex),
+
+    is_fun(item) := atom(item) or not is(op(item) = "="),
+
+    process(ex, item) := if is_fun(item) then apply_fun_to_ex(ex, item) else substequality(ex, item),
+
+    lreduce(process, append([expr], equalities))
 ) $
 infix("where") $
 /* [wxMaxima: input   end   ] */
@@ -246,6 +255,11 @@ _K : transpose(apply(matrix, makelist(diff(makelist(Q[i], i, 1, 9), var), var, F
 
 /* [wxMaxima: input   start ] */
 _V_tmp : mat_fullunblocker(matrix([_V_nu123], [_V_chi], [_V_phi]));
+/* [wxMaxima: input   end   ] */
+
+/* [wxMaxima: input   start ] */
+/* THEY ARE ORTHOGONAL !!! */
+trigsimp(expand(trigexpand(transpose(_V_tmp) . _K)));
 /* [wxMaxima: input   end   ] */
 
 /* [wxMaxima: input   start ] */
